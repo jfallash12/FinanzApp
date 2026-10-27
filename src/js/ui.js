@@ -976,19 +976,22 @@
     ];
   }
 
-  function BackupCard() { // REQ-097, REQ-098
+  function BackupCard() { // REQ-097, REQ-098, REQ-103
     return card('Respaldo de datos', 'backup',
       el('p', { class: 'muted', text: 'Sus datos viven solo en este navegador. Descargue un respaldo de vez en cuando y guárdelo en un lugar seguro.' }),
       el('div', { class: 'backup-actions' },
         el('button', { type: 'button', class: 'btn btn-primary', 'data-action': 'EXPORT_DATA', text: '⬇ Exportar datos' }),
         el('label', { class: 'btn btn-ghost file-btn', for: 'f-import' }, '⬆ Importar datos',
           el('input', { type: 'file', id: 'f-import', accept: '.json,application/json', 'data-import': true, class: 'visually-hidden' }))),
-      el('p', { class: 'muted small', text: 'Importar reemplaza todos los datos actuales por los del archivo. Siempre se pide confirmación.' }));
+      el('p', { class: 'muted small', text: 'Importar reemplaza todos los datos actuales por los del archivo. Siempre se pide confirmación.' }),
+      el('div', { class: 'backup-danger' }, // REQ-103
+        el('button', { type: 'button', class: 'btn btn-danger-ghost', 'data-action': 'RESET_STATE', text: '🗑 Borrar todos los datos' }),
+        el('span', { class: 'muted small', text: 'Deja la app como nueva. Exporte antes si quiere conservar sus datos.' })));
   }
 
   function AccountsView() {
     if (U.selectedAccountId && calc.getAccount(S, U.selectedAccountId)) { return AccountDetail(); }
-    return [el('div', { class: 'grid-form' }, el('div', { class: 'acc-col' }, AccountForm(), BackupCard()), AccountCards())];
+    return [el('div', { class: 'grid-form' }, el('div', { class: 'acc-col col-static' }, AccountForm(), BackupCard()), AccountCards())];
   }
 
   /* ====================================================================== */

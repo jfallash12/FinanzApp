@@ -436,6 +436,34 @@
         processSchedules(); // REQ-082: auto-débitos vencidos del respaldo
       }
     },
+    RESET_STATE: { // REQ-103: deja el estado inicial guardado, solo tras confirmar (D43)
+      form: null,
+      validate: function () {
+        return JSON.stringify(state) === JSON.stringify(storage.emptyState()) ? { _form: 'No hay datos para borrar.' } : {};
+      },
+      confirm: function () {
+        function n(count, one, many) { return count + ' ' + (count === 1 ? one : many); }
+        return {
+          title: 'Borrar todos los datos', danger: true, confirmLabel: 'Borrar todo',
+          text: 'Se eliminarán todos los datos de este navegador y la app quedará como nueva, con las categorías predeterminadas. ' +
+            'Esta acción no se puede deshacer: si quiere conservarlos, cancele y use primero «Exportar datos». Se borrarán:',
+          items: [n(state.accounts.length, 'cuenta', 'cuentas'), n(state.transactions.length, 'movimiento', 'movimientos'),
+            n(state.schedules.length, 'programación', 'programaciones')]
+        };
+      },
+      reduce: function (s) {
+        var fresh = storage.emptyState();
+        Object.keys(s).forEach(function (k) { delete s[k]; });
+        Object.keys(fresh).forEach(function (k) { s[k] = fresh[k]; });
+      },
+      after: function () {
+        FORMS.forEach(resetForm);
+        ui.filters = { accountId: '', categoryId: '', text: '' };
+        ui.selectedAccountId = null; ui.quickOpen = false; ui.upcomingFrom = null;
+        ui.activeTab = 'resumen'; ui.month = calc.currentMonth();
+        toast('ok', 'Se borraron todos los datos. La app quedó como nueva.');
+      }
+    },
     PROCESS_SCHEDULES: { // REQ-082: auto-débito de ocurrencias con fecha ≤ hoy
       form: null,
       validate: function () { return {}; },

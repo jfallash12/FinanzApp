@@ -11,10 +11,10 @@ Proyecto Final del curso **Programación Intencional con IA Generativa** (Greenf
 ├── .cursorrules             # Reglas de contexto para la IA (remite a CLAUDE.md)
 ├── CLAUDE.md                # Rol de la IA, lenguaje ubicuo, invariantes y reglas de código
 ├── docs/
-│   ├── requirements.md      # Requerimientos EARS (REQ-001..REQ-102)
+│   ├── requirements.md      # Requerimientos EARS (REQ-001..REQ-103)
 │   ├── data-contract.json   # Contrato de datos: JSON Schema (PersonalFinanceState)
 │   ├── design.md            # Arquitectura, reglas de negocio, componentes y mapeo REQ → código
-│   ├── decisiones.md        # Decisiones técnicas D1–D39
+│   ├── decisiones.md        # Decisiones técnicas D1–D43
 │   ├── wireframe.md         # Interfaz por componentes
 │   ├── wireframe.excalidraw # Wireframe editable (excalidraw.com)
 │   ├── wireframe.png        # Wireframe exportado
@@ -62,11 +62,11 @@ Los datos se guardan en el `localStorage` del navegador (clave `finanzapp.state`
 localStorage.setItem('finanzapp.state', JSON.stringify(<ejemplo>));
 ```
 
-Para empezar de cero: `localStorage.removeItem('finanzapp.state')` y F5.
+Para empezar de cero: *Cuentas → Borrar todos los datos*.
 
 **Pruebas:** abra `tests/pruebas.html` con doble clic → 154 pruebas en verde.
 
-**Respaldo:** en la pestaña *Cuentas*, **Exportar datos** descarga un archivo `.json` con todo; **Importar datos** lo carga en otro navegador o computadora (pide confirmación porque reemplaza los datos actuales).
+**Respaldo:** en la pestaña *Cuentas*, **Exportar datos** descarga un archivo `.json` con todo; **Importar datos** lo carga en otro navegador o computadora (pide confirmación porque reemplaza los datos actuales). **Borrar todos los datos** deja la app como nueva, también con confirmación.
 
 **En línea (GitHub Pages):** con *Settings → Pages* activado, la app también se abre en `https://jfallash12.github.io/FinanzApp/src/`. Los datos siguen guardándose solo en el navegador de cada persona.
 
@@ -84,7 +84,7 @@ Con los datos de prueba (mes Octubre 2026):
 8. **Pagos fijos:** en *Gastos e ingresos* marque **🗓 Programar**: *Hipoteca* ₡450,000 cada mes desde el 31 con auto-débito, y *Gasolina* ₡40,000 quincenal con confirmación ("≈ ₡80,000 al mes"). Pase a **noviembre** con ▶: ya aparecen y cuentan en el resumen y en los presupuestos. El día que vencen, la hipoteca se registra sola al abrir la app y la gasolina queda en *Pendientes de confirmar* (✓ Confirmar · ✎ Ajustar · ⏭ Omitir).
 9. **Búsqueda:** en *Gastos e ingresos* escriba "bus" en **Buscar** → solo aparece *Bus*.
 10. **Ayudas del Resumen:** octubre muestra "▲ 2824 % más que septiembre 2026" bajo los gastos y la tarjeta **¿En qué se va la plata?** (Vivienda 57 %, Alimentación 23 %, Servicios 9 %).
-11. **Respaldo:** *Cuentas → Exportar datos*; luego `localStorage.removeItem('finanzapp.state')` y F5 → aparece **Primeros pasos**; *Cuentas → Importar datos* con el archivo descargado → todo vuelve (Patrimonio ₡606,400).
+11. **Respaldo:** *Cuentas → Exportar datos*; luego **Borrar todos los datos** y confirmar → aparece **Primeros pasos**; *Cuentas → Importar datos* con el archivo descargado → todo vuelve (Patrimonio ₡606,400).
 
 ## Cumplimiento del Proyecto Final
 
@@ -120,7 +120,7 @@ Con los datos de prueba (mes Octubre 2026):
 | Presupuestos (pestaña propia y total mensual) | REQ-069 – REQ-072 |
 | Programaciones: pagos e ingresos fijos | REQ-079 – REQ-091 |
 | Ahorro en el presupuesto, metas y próximos programados | REQ-092 – REQ-096 |
-| Respaldo, búsqueda y ayudas del Resumen | REQ-097 – REQ-102 |
+| Respaldo, búsqueda y ayudas del Resumen | REQ-097 – REQ-103 |
 
 ## Reglas de negocio clave
 

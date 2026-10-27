@@ -6,7 +6,7 @@
 > [`docs/decisiones.md`](docs/decisiones.md) · [`docs/data-contract.json`](docs/data-contract.json) ·
 > [`docs/wireframe.md`](docs/wireframe.md) · reglas en [`CLAUDE.md`](CLAUDE.md) y [`.cursorrules`](.cursorrules).
 
-**Estado:** Fases 0–13 completadas; Fase 14 en curso · Leyenda: `[ ]` pendiente · `[x]` hecha.
+**Estado:** ✅ todas las tareas completadas · Leyenda: `[ ]` pendiente · `[x]` hecha.
 Los números de tarea se conservan porque los commits los citan.
 
 ---
@@ -234,7 +234,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 ## Fase 14 — Borrar todos los datos
 
 - [x] **T-59 Especificación.** REQ-103 y REQ-048 ampliado; D43; `RESET_STATE` en `design.md`.
-- [ ] **T-60 Botón «Borrar todos los datos».** `DOMAIN.RESET_STATE` en `app.js` y botón en `BackupCard`.
+- [x] **T-60 Botón «Borrar todos los datos».** `DOMAIN.RESET_STATE` en `app.js` y botón en `BackupCard`.
   *Aceptación:* con los datos de prueba, el diálogo dice "5 cuentas, 13 movimientos y 2 programaciones" y recomienda exportar; Cancelar no cambia nada; Confirmar deja 0 cuentas, las 9 categorías predeterminadas y la tarjeta Primeros pasos, y sigue así tras F5; con la app ya vacía avisa "No hay datos para borrar"; exportar → borrar → importar devuelve el Patrimonio ₡606,400.
 
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)
