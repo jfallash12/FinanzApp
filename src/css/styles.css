@@ -484,3 +484,7 @@ button, input, select { font: inherit; color: inherit; }
 /* ---------- Búsqueda (REQ-099) ---------- */
 .filter-search { flex: 1 1 200px; }
 .filter-search input { width: 100%; }
+
+/* ---------- Categorías con más gasto (REQ-101) ---------- */
+.top-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 12px; }
+.top-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }

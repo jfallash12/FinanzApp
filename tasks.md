@@ -213,8 +213,8 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
   *Aceptación:* en octubre, buscar "bus" muestra solo «Bus» (₡4,500); "PAN" encuentra «Panadería» en septiembre; combinado con la cuenta Visa y "cine" muestra «Cine y cena».
 - [x] **T-51 Comparación con el mes anterior.** REQ-100, D38: `calc.monthComparison`; texto bajo «Gastos del mes».
   *Aceptación:* octubre (₡438,600) frente a septiembre (₡15,000) → "▲ 2824 % más que septiembre 2026"; septiembre → "Sin gastos en agosto 2026".
-- [ ] **T-52 Categorías con más gasto.** REQ-101, D38: `calc.topCategories`, `TopCategories`.
-  *Aceptación:* octubre → Vivienda ₡250,000 (57 %), Alimentación ₡99,700 (23 %), Servicios ₡38,900 (9 %); noviembre sin gastos → "Aún no hay gastos en noviembre 2026".
+- [x] **T-52 Categorías con más gasto.** REQ-101, D38: `calc.topCategories`, `TopCategories`.
+  *Aceptación:* octubre → Vivienda ₡250,000 (57 %), Alimentación ₡99,700 (23 %), Servicios ₡38,900 (9 %); agosto sin gastos → "Aún no hay gastos en agosto 2026".
 - [ ] **T-53 Primeros pasos.** REQ-102, D39: `calc.firstSteps`, `FirstSteps` en lugar del mensaje "Bienvenido…" del Resumen.
   *Aceptación:* app vacía → 3 pasos pendientes y botón «Ir a Cuentas»; con una cuenta → paso 1 ✓ y botón a «Gastos e ingresos»; con los datos de prueba la tarjeta no aparece.
 

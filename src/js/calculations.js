@@ -552,6 +552,22 @@
       scheduledIncome: sum('ingreso', true), scheduledExpense: sum('gasto', true) };
   }
 
+  /**
+   * REQ-101 / D38: hasta n categorías de gasto con más gasto del mes (incluye programados),
+   * de mayor a menor y, si empatan, por nombre. percent = % del total de gastos del mes.
+   */
+  function topCategories(state, ym, n, today) {
+    var total = monthSummary(state, ym, today).expense;
+    if (total <= 0) { return []; }
+    return state.categories
+      .filter(function (c) { return c.kind === 'gasto'; })
+      .map(function (c) { return { category: c, spent: categorySpent(state, c.id, ym) }; })
+      .filter(function (x) { return x.spent > 0; })
+      .sort(function (a, b) { return (toCents(b.spent) - toCents(a.spent)) || a.category.name.localeCompare(b.category.name, 'es'); })
+      .slice(0, n)
+      .map(function (x) { x.percent = (x.spent / total) * 100; return x; });
+  }
+
   /** REQ-100 / D38: gastos del mes frente al mes anterior (misma base que monthSummary). */
   function monthComparison(state, ym, today) {
     var prevMonth = addMonths(ym, -1);
@@ -732,6 +748,7 @@
     projectionAlerts: projectionAlerts,
     monthItems: monthItems,
     monthComparison: monthComparison,
+    topCategories: topCategories,
     remainingDays: remainingDays,
     monthLabel: monthLabel,
     toCents: toCents,

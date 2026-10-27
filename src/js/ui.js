@@ -433,6 +433,20 @@
     return el('span', { class: 'stat-sub stat-compare', text: text });
   }
 
+  function TopCategories() { // REQ-101
+    var list = calc.topCategories(S, U.month, 3, TODAY);
+    return card('¿En qué se va la plata?', 'top-cats',
+      list.length === 0
+        ? el('p', { class: 'muted', text: 'Aún no hay gastos en ' + calc.monthLabel(U.month).toLowerCase() + '.' })
+        : el('ol', { class: 'top-list' }, list.map(function (x) {
+          return el('li', { class: 'top-row' },
+            el('div', { class: 'top-head' },
+              el('strong', { text: x.category.name }),
+              el('span', { class: 'muted', text: money(x.spent) + ' · ' + calc.formatPercent(x.percent) + ' de los gastos' })),
+            bar(x.percent, null));
+        })));
+  }
+
   function SummaryCards() { // REQ-039, REQ-040, REQ-046
     var m = calc.monthSummary(S, U.month, TODAY);
     var neg = m.net < 0;
@@ -524,7 +538,7 @@
 
   function SummaryView() {
     if (!calc.activeAccounts(S).length) { return [MonthSelector(), NoAccounts('Bienvenido a FinanzApp. Para empezar, cree su primera cuenta (efectivo, débito, ahorros o tarjeta de crédito).')]; }
-    return [MonthSelector(), PaymentAlerts(), ProjectionAlerts(), PendingOccurrences(), SummaryCards(), UpcomingScheduled(), el('div', { class: 'grid-2' }, AccountsOverview(), TotalBudgetCard())];
+    return [MonthSelector(), PaymentAlerts(), ProjectionAlerts(), PendingOccurrences(), SummaryCards(), TopCategories(), UpcomingScheduled(), el('div', { class: 'grid-2' }, AccountsOverview(), TotalBudgetCard())];
   }
 
   /* ====================================================================== */

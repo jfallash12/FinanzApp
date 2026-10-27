@@ -389,6 +389,19 @@
     var c = calc.monthComparison(s, '2026-10', TODAY); return eq(c.direction + ',' + calc.formatPercent(Math.abs(c.percent)), 'down,15 %');
   });
 
+  /* ---------- Categorías con más gasto (REQ-101) ---------- */
+  test('REQ-101 top 3 de octubre', function () {
+    return eq(calc.topCategories(DATA, '2026-10', 3, TODAY).map(function (x) { return x.category.name + ' ' + calc.formatPercent(x.percent); }).join(', '),
+      'Vivienda 57 %, Alimentación 23 %, Servicios 9 %');
+  });
+  test('REQ-101 mes sin gastos → lista vacía', function () { return eq(calc.topCategories(DATA, '2026-08', 3, TODAY).length, 0); });
+  test('REQ-101 empate se ordena por nombre', function () {
+    var s = clone(DATA); s.transactions = s.transactions.filter(function (t) { return t.date < '2026-10-01'; });
+    s.transactions.push({ id: 'mov-e1', type: 'gasto', accountId: 'acc-efectivo', categoryId: 'cat-salud', amount: 1000, date: '2026-09-29', description: 'a', createdAt: '2026-09-29T10:00:00.000Z' });
+    s.transactions.push({ id: 'mov-e2', type: 'gasto', accountId: 'acc-efectivo', categoryId: 'cat-entretenimiento', amount: 1000, date: '2026-09-29', description: 'b', createdAt: '2026-09-29T10:01:00.000Z' });
+    return eq(calc.topCategories(s, '2026-09', 3, TODAY).map(function (x) { return x.category.name; }).join(','), 'Alimentación,Entretenimiento,Salud');
+  });
+
   /* ---------- Reporte ---------- */
   var passed = results.filter(function (r) { return r.ok; }).length;
   var out = document.getElementById('out');
