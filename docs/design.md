@@ -338,6 +338,7 @@ sequenceDiagram
 | D24 *(v4)* | El auto-débito corre al abrir la app, al volver a ella y al programar; las ocurrencias que fallaron no se reintentan en la misma sesión | La app es offline y no tiene servidor que corra en segundo plano; evita avisos repetidos |
 | D25 *(v4)* | Eliminar un movimiento creado por una programación marca la ocurrencia como omitida | Si no, el auto-débito la volvería a crear al abrir (REQ-086) |
 | D26 *(v4)* | Eliminar una programación desenlaza (no borra) sus movimientos | REQ-048: sin borrados colaterales |
+| D28 *(v5.1)* | Los ingresos programados siempre son automáticos (`mode = 'auto'`); la interfaz no muestra "Al llegar la fecha" y los rotula "Automático" en vez de "Auto-débito" | Pedido del estudiante: un salario no es un gasto que se confirma o se debita. Los datos guardados antes con ingreso manual se tratan como automáticos sin migración (se resuelve al calcular la ocurrencia) |
 | D27 *(v5)* | La primera fecha puede estar hasta un año atrás; las ocurrencias anteriores a hoy se resuelven **al guardar** (registrar con su fecha u omitir), nunca quedan como "pendientes" ni las aplica el auto-débito | Quien empieza a usar la app a mitad de mes ya pagó algunos fijos; así no se duplican ni se pierden (REQ-091) |
 | D15 | Formato de dinero `₡12,500.00` (coma de miles y punto decimal), igual al formato en que el usuario escribe los montos | Coherencia entre lo que se escribe y lo que se ve |
 

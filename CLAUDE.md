@@ -25,10 +25,10 @@ auto-débito o confirmación manual, proyectadas en cada mes.
 | Documento | Contenido |
 |---|---|
 | [`docs/requirements.md`](docs/requirements.md) | Especificación EARS v5: 85 requerimientos vigentes (REQ-001..REQ-091, sin REQ-073..REQ-078) — fuente de verdad del comportamiento |
-| [`docs/design.md`](docs/design.md) | Reglas de negocio RN-01..RN-12, decisiones D1–D27, entrevista Q1–Q11, arquitectura |
+| [`docs/design.md`](docs/design.md) | Reglas de negocio RN-01..RN-12, decisiones D1–D28, entrevista Q1–Q11, arquitectura |
 | [`docs/data-contract.json`](docs/data-contract.json) | JSON Schema 2020-12 del estado `PersonalFinanceState` (schemaVersion 3, con migración desde 1 y 2) — contrato estricto |
 | [`docs/wireframe.md`](docs/wireframe.md) | Diseño de interfaz por componentes (+ `wireframe.excalidraw` editable y `wireframe.png`) |
-| [`tasks.md`](tasks.md) | Plan de implementación por fases (T-00..T-41) con criterios de aceptación y pruebas de regresión |
+| [`tasks.md`](tasks.md) | Plan de implementación por fases (T-00..T-42) con criterios de aceptación y pruebas de regresión |
 | [`retrospective.md`](retrospective.md) | Historial de correcciones y reflexiones |
 
 Si algún artefacto contradice otro, mandan los requerimientos (REQ) y luego las reglas (RN).
@@ -73,7 +73,7 @@ Si algún artefacto contradice otro, mandan los requerimientos (REQ) y luego las
 | **Mes seleccionado** | `'YYYY-MM'` de la interfaz (no se persiste). Al abrir = mes actual |
 | **Neto del día** | `Σ ingresos − Σ gastos` de una fecha. Las transferencias no cuentan (RN-07) |
 | **Duplicado** | Mismo tipo, cuenta, monto, fecha y descripción normalizada → pedir confirmación (RN-08) |
-| **Programación** | Pago o ingreso fijo marcado con "🗓 Programar": frecuencia `once` / `monthly` / `biweekly` (15 y último), modo `auto` (auto-débito) o `manual` (confirmar) (REQ-079) |
+| **Programación** | Pago o ingreso fijo marcado con "🗓 Programar": frecuencia `once` / `monthly` / `biweekly` (15 y último), modo `auto` (auto-débito) o `manual` (confirmar) solo en gastos y transferencias; los **ingresos** programados son siempre automáticos (REQ-079, D28) |
 | **Ocurrencia** | Cada fecha de una programación. **Programada** (fecha > hoy), **pendiente** (fecha ≤ hoy sin aplicar), **aplicada** (hay movimiento con `scheduleId` + `occurrenceDate`) u **omitida** (`skippedDates`) |
 | **Auto-débito** | La ocurrencia se registra sola al abrir la app en su fecha o después, si cumple RN-03; si no, queda pendiente (REQ-082) |
 | **Proyectado a fin de mes** | Saldo real + ocurrencias abiertas hasta el último día del mes actual (REQ-088) |

@@ -424,6 +424,8 @@ button, input, select { font: inherit; color: inherit; }
 .past-box { margin-top: 10px; padding: 10px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
 .past-title { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
 
+.income-auto { align-self: end; margin: 0 0 12px; padding: 8px 10px; border-radius: 8px; background: var(--surface); color: var(--income); font-weight: 500; }
+
 /* ---------- Responsive y accesibilidad ---------- */
 
 @media (max-width: 900px) {

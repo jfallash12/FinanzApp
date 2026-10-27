@@ -17,7 +17,7 @@ Proyecto Final del curso **Programación Intencional con IA Generativa** (Greenf
 │   ├── wireframe.excalidraw # Wireframe editable (abrir en excalidraw.com)
 │   ├── wireframe.png        # Wireframe exportado (visible en GitHub)
 │   └── design.md            # Diseño y arquitectura (RN-01..RN-12, módulos, dispatch, mapeo REQ → función)
-├── tasks.md                 # Plan de implementación por fases (T-00..T-41)
+├── tasks.md                 # Plan de implementación por fases (T-00..T-42)
 ├── src/                     # Código fuente de la aplicación
 │   ├── index.html           # Punto de entrada (abrir con doble clic)
 │   ├── css/styles.css       # CSS puro
@@ -59,7 +59,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(<ejemplo>));
 
 Para empezar de cero: `localStorage.removeItem('finanzapp.state')` y F5.
 
-**Pruebas:** abra `tests/pruebas.html` con doble clic → 116 pruebas en verde.
+**Pruebas:** abra `tests/pruebas.html` con doble clic → 118 pruebas en verde.
 
 ## Demostración (auditoría del cliente)
 

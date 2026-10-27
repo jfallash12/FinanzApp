@@ -244,6 +244,14 @@
   test('REQ-080 "hasta" corta las ocurrencias', function () {
     return eq(calc.scheduleOccurrences({ frequency: 'monthly', startDate: '2026-11-01', endDate: '2027-01-10' }, '2026-11-01', '2027-12-31').length, 3);
   });
+  test('REQ-079 (v5.1) ingreso programado no pide modo y queda automático', function () {
+    var d = sch({ type: 'ingreso', accountId: 'acc-bac', categoryId: 'cat-salario', amount: '1000000', description: 'Pago Planilla', date: '2026-10-30', mode: 'manual' });
+    var e = v.validateSchedule(Object.assign({}, d, { mode: '' }), DATA, null, TODAY);
+    return eq(v.hasErrors(e) + ',' + v.draftToSchedule(d, { id: 'prg-x', createdAt: '', skippedDates: [] }).mode, 'false,auto');
+  });
+  test('D28 ingreso guardado como manual se trata como automático', function () {
+    var s = clone(DATA); s.schedules[0].mode = 'manual'; return eq(calc.dueOccurrences(s, '2026-11-01')[0].mode, 'auto');
+  });
   test('REQ-080 equivalente mensual quincenal', function () { return eq(calc.monthlyEquivalent(GAS), 40000); });
   test('REQ-081 noviembre incluye los programados', function () {
     var m = calc.monthSummary(DATA, '2026-11', TODAY); return eq([m.income, m.expense, m.scheduledIncome, m.scheduledExpense].join(','), '650000,40000,650000,40000');

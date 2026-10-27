@@ -238,7 +238,7 @@
   /** Movimiento virtual (no guardado) que representa una ocurrencia. */
   function occurrenceToTx(sch, date) {
     var t = { id: 'occ-' + sch.id + '-' + date, type: sch.type, accountId: sch.accountId, amount: sch.amount, date: date,
-      description: sch.description, createdAt: sch.createdAt, scheduleId: sch.id, occurrenceDate: date, virtual: true, mode: sch.mode };
+      description: sch.description, createdAt: sch.createdAt, scheduleId: sch.id, occurrenceDate: date, virtual: true, mode: sch.type === 'ingreso' ? 'auto' : sch.mode };
     if (sch.type === 'transferencia') { t.toAccountId = sch.toAccountId; } else { t.categoryId = sch.categoryId; }
     return t;
   }

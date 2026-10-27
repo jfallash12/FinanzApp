@@ -268,6 +268,8 @@
 
   var FREQ_LABEL = { once: 'Una vez', monthly: 'Cada mes', biweekly: 'Quincenal' };
   var MODE_LABEL = { auto: 'Auto-débito', manual: 'Manual' };
+  /** D28: un ingreso programado se rotula "Automático" (no es un débito). */
+  function modeLabel(x) { return x.type === 'ingreso' ? 'Automático' : MODE_LABEL[x.mode]; }
 
   function inDays(date) {
     var n = calc.daysBetween(TODAY, date);
@@ -278,7 +280,7 @@
   function scheduledBadge(t) {
     if (!t.virtual) { return t.scheduleId ? el('span', { class: 'badge is-from-schedule', text: '🔁 Programado' }) : null; }
     if (t.status === 'pending') { return el('span', { class: 'badge is-pending', text: '⏳ Pendiente de confirmar' }); }
-    return el('span', { class: 'badge is-scheduled', text: '🗓 Programado · ' + MODE_LABEL[t.mode] + ' · ' + inDays(t.date) });
+    return el('span', { class: 'badge is-scheduled', text: '🗓 Programado · ' + modeLabel(t) + ' · ' + inDays(t.date) });
   }
 
   /** Acciones de una ocurrencia virtual: confirmar (si vence), ajustar, editar la programación y omitir. */
@@ -321,7 +323,7 @@
       el('span', { class: 'tx-icon', 'aria-hidden': 'true', text: t.status === 'pending' ? '⏳' : '🗓' }),
       el('div', { class: 'grow' },
         el('strong', { class: 'tx-desc', text: t.description }),
-        el('span', { class: 'muted', text: dateLabel(t.date) + ' (' + inDays(t.date) + ') · ' + MODE_LABEL[t.mode] + ' · ' + txMeta(t) })),
+        el('span', { class: 'muted', text: dateLabel(t.date) + ' (' + inDays(t.date) + ') · ' + modeLabel(t) + ' · ' + txMeta(t) })),
       el('span', { class: 'tx-amount', text: sign + money(t.amount) }),
       occurrenceActions(t));
   }
@@ -543,9 +545,11 @@
           { value: 'once', label: 'Una vez' }, { value: 'monthly', label: 'Cada mes' }, { value: 'biweekly', label: 'Quincenal' }]),
           { wide: true, hint: d.frequency === 'biweekly' ? 'Quincenal = días 15 y último de cada mes. El monto es por quincena.' : null }),
         d.frequency !== 'once' ? field(form, 'endDate', 'Hasta (opcional)', input(form, 'endDate', { type: 'date', rerender: true }), {}) : null,
-        field(form, 'mode', 'Al llegar la fecha', segmented(form, 'mode', [
-          { value: 'auto', label: '⚡ Auto-débito' }, { value: 'manual', label: '✋ Confirmar' }]),
-          { wide: d.frequency === 'once', hint: d.mode === 'auto' ? 'Se registra solo desde la cuenta elegida si hay fondos.' : 'Queda pendiente para que usted lo confirme, ajuste u omita.' })),
+        d.type === 'ingreso' // D28: los ingresos no piden modo
+          ? el('p', { class: 'field-hint income-auto' + (d.frequency === 'once' ? ' field-wide' : ''), text: '💰 Los ingresos programados se registran solos en su fecha, en la cuenta que recibe.' })
+          : field(form, 'mode', 'Al llegar la fecha', segmented(form, 'mode', [
+            { value: 'auto', label: '⚡ Auto-débito' }, { value: 'manual', label: '✋ Confirmar' }]),
+            { wide: d.frequency === 'once', hint: d.mode === 'auto' ? 'Se registra solo desde la cuenta elegida si hay fondos.' : 'Queda pendiente para que usted lo confirme, ajuste u omita.' })),
       el('p', { class: 'field-hint schedule-preview', 'data-preview': form, text: preview }),
       PastOccurrences(form));
   }
@@ -660,7 +664,7 @@
       el('ul', { class: 'list' }, list.map(function (sch) {
         var next = calc.nextOccurrence(S, sch, TODAY);
         var sign = sch.type === 'ingreso' ? '+' : (sch.type === 'gasto' ? '−' : '');
-        var meta = FREQ_LABEL[sch.frequency] + ' · ' + MODE_LABEL[sch.mode] + ' · ' + txMeta(sch) +
+        var meta = FREQ_LABEL[sch.frequency] + ' · ' + modeLabel(sch) + ' · ' + txMeta(sch) +
           (sch.frequency === 'biweekly' ? ' · ≈ ' + money(calc.monthlyEquivalent(sch)) + ' al mes' : '') +
           (sch.endDate ? ' · hasta ' + sch.endDate : '');
         return el('li', { class: 'list-row' + (U.forms.transaction.editingScheduleId === sch.id ? ' is-editing' : '') },

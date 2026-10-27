@@ -32,6 +32,7 @@
 | 23 | **Error encontrado por las pruebas:** "Ajustar" una ocurrencia pendiente guardaba el movimiento sin enlazarlo, así que la ocurrencia seguía pendiente | Se corrigió en el reducer de `ADD_TRANSACTION` (el resultado de `linkTx` no se asignaba). Ejemplo de por qué las pruebas de punta a punta son parte del entregable |
 | 24 | Eliminar una categoría también reasigna las programaciones que la usan (REQ-017 ampliado) | Sin esto, el contrato rechazaba el cambio porque la programación quedaba con una categoría inexistente |
 | 25 | **Versión 5 — el cliente empieza a usar la app a mitad de mes.** El estudiante no podía programar los servicios desde el 6 porque REQ-079 exigía una primera fecha ≥ hoy, y lo intentó poniendo el 6 en "Hasta" | REQ-079 asumía un usuario que arranca con la app desde cero. Se modificó (hasta un año atrás) y se agregó REQ-091: los pagos ya vencidos se **registran** con su fecha o se marcan como **ya registrados**, decisión explícita del usuario para no duplicar ni perder pagos (D27) |
+| 26 | **Ajuste v5.1:** al programar un salario, la app preguntaba "Al llegar la fecha: Auto-débito o Confirmar" | REQ-079 trataba igual ingresos y gastos. Para un ingreso, "débito" no tiene sentido: se corrigió la especificación (los ingresos programados siempre se registran solos, D28) y luego la interfaz |
 
 ## 2. Reflexión sobre la especificación intencional
 

@@ -363,7 +363,7 @@
     var sch = {
       id: base.id, type: d.type, accountId: d.accountId,
       amount: Number(str(d.amount).trim()), description: str(d.description).trim(),
-      frequency: d.frequency, startDate: str(d.date).trim(), mode: d.mode,
+      frequency: d.frequency, startDate: str(d.date).trim(), mode: d.type === 'ingreso' ? 'auto' : d.mode, // D28: ingresos siempre automáticos
       skippedDates: base.skippedDates || [], createdAt: base.createdAt
     };
     if (d.type === 'transferencia') { sch.toAccountId = d.toAccountId; } else { sch.categoryId = d.categoryId; }
@@ -381,7 +381,7 @@
     var errors = validateMovementFields(d, state, original);
     if (errors._form || errors.type) { return errors; }
     if (FREQUENCIES.indexOf(d.frequency) === -1) { errors.frequency = 'Elija la frecuencia.'; }
-    if (MODES.indexOf(d.mode) === -1) { errors.mode = 'Elija si se debita automáticamente o se confirma.'; }
+    if (d.type !== 'ingreso' && MODES.indexOf(d.mode) === -1) { errors.mode = 'Elija si se debita automáticamente o se confirma.'; }
     var start = str(d.date).trim();
     var keepStart = original && original.startDate === start; // editar sin mover la primera fecha
     if (start === '') { errors.date = 'La primera fecha es obligatoria.'; }

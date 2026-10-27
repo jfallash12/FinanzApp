@@ -9,7 +9,7 @@
 > [`docs/wireframe.md`](docs/wireframe.md) + [`docs/wireframe.png`](docs/wireframe.png) ·
 > reglas en [`CLAUDE.md`](CLAUDE.md) y [`.cursorrules`](.cursorrules).
 
-**Estado:** ✅ Fases 0–11 completadas (T-00..T-41; Fase 9 = v2, Fase 10 = v3, Fase 11 = v4 y v5) · Leyenda: `[ ]` pendiente · `[x]` hecha
+**Estado:** ✅ Fases 0–11 completadas (T-00..T-42; Fase 9 = v2, Fase 10 = v3, Fase 11 = v4 y v5) · Leyenda: `[ ]` pendiente · `[x]` hecha
 
 ---
 
@@ -209,6 +209,8 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
 - [x] **T-41 (v5) Programaciones que empezaron antes de usar la app.** Pedido del estudiante: "pagué los servicios el 6 pero los registro hoy". REQ-079 modificado (primera fecha hasta un año atrás) y REQ-091: `validate.pastOccurrences`, `resolvePast`, `PastOccurrences` (✅ Registrarlos ahora · ↪ Ya los registré), fondos revisados al registrar.
   *Aceptación:* editar "Internet, Luz, Agua y Gas" (mensual, ₡70,000) y cambiar la primera fecha al 6 de octubre → se registra el pago del 6 de octubre con su fecha y la próxima ocurrencia es el 6 de noviembre.
 
+- [x] **T-42 (v5.1) Ingresos programados sin "Al llegar la fecha".** Pedido del estudiante: un salario no se confirma ni se "debita". REQ-079 ajustado, D28: `draftToSchedule` fija `mode = 'auto'` en ingresos, `occurrenceToTx` trata ingresos guardados como automáticos, `ScheduleFields` reemplaza el selector por "💰 Los ingresos programados se registran solos en su fecha" y las listas dicen "Automático".
+
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)
 
 | # | Prueba | Desde |
@@ -273,3 +275,4 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
 | 2026-10-26 | T-34..T-36 | Versión 3 (programados): `tests/pruebas.html` 102/102 y recorrido de punta a punta 127/127
 | 2026-10-26 | T-37..T-40 | Versión 4 (programaciones): `tests/pruebas.html` 112/112 y recorrido de punta a punta 145/145. El recorrido detectó un error real (el ajuste de una ocurrencia no quedaba enlazado) que se corrigió antes de entregar
 | 2026-10-26 | T-41 | Versión 5: `tests/pruebas.html` 116/116 y recorrido de punta a punta 149/149
+| 2026-10-26 | T-42 | v5.1: `tests/pruebas.html` 118/118 y recorrido de punta a punta 151/151
