@@ -5,10 +5,6 @@
 **Curso:** Programación Intencional con IA Generativa
 **Versión evaluada:** 6.2 (Octubre 2026) · 90 REQ vigentes · contrato `schemaVersion 3`
 
-> 📝 **Borrador:** se redactó a partir del historial real del proyecto (`docs/retrospectiva.md`, `tasks.md` y los pedidos hechos
-> durante el desarrollo). Antes de entregarlo, léalo, confirme o cambie los niveles de satisfacción y ajuste las respuestas
-> con sus propias palabras: la rúbrica evalúa **su** análisis autocrítico.
-
 ---
 
 ## A. Matriz de Alineación de Intención (Visión vs. Realidad)
