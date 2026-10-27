@@ -23,3 +23,6 @@ build/
 # Capturas de pruebas
 /*.png
 src/**/*.png
+
+# Salidas de herramientas de IA (no son parte del proyecto)
+Claude outputs/
