@@ -424,11 +424,30 @@ El contrato define la **forma** de cada entidad. Estas reglas entre campos no se
 
 ## 8. Diseño visual (CSS)
 
-- **Paleta en `:root`** con tema claro y oscuro automático (`prefers-color-scheme`): verde azulado como color de marca, ámbar dorado de acento (el logo 💰) y estados `--ok`, `--warning`, `--exceeded`.
-- **Tarjetas** con borde suave y sombra ligera; cifras con `font-variant-numeric: tabular-nums` para que los montos se alineen.
-- **Estados:** las clases `is-ok` / `is-warning` / `is-exceeded` colorean barras y etiquetas, y **siempre** van con texto ("En orden", "Precaución", "Excedido") (REQ-057).
-- **Efectos discretos:** aparición de la vista, barras que se llenan, campo con error que tiembla, aviso que se desliza. Todos se desactivan con `prefers-reduced-motion`.
-- **Layout:** formulario a la izquierda (fijo al hacer scroll) y lista a la derecha en escritorio; una columna en móvil (sin scroll horizontal a 375 px).
+**Paleta violeta** (variables en `:root`, con tema claro y oscuro automático por `prefers-color-scheme`):
+
+| Variable | Claro | Oscuro | Uso |
+|---|---|---|---|
+| `--brand` | `#6D4AFF` | `#A893FF` | Marca: pestaña activa, botones principales, enlaces, foco |
+| `--brand-strong` | `#5B3FD6` | `#5B3FD6` | Inicio del degradado del encabezado y del botón «+ Registrar» |
+| `--brand-soft` | `#ECE6FF` | `#2B2350` | Fondos suaves: encabezados de día, fila en edición, íconos de título |
+| `--bg` | `#F6F4FF` | `#14111F` | Fondo de la página (lavanda muy suave) |
+| `--accent` | `#A16207` | `#F5C451` | Ahorro (dorado) |
+| `--ok` / `--warning` / `--exceeded` | verde / ámbar / rojo | versiones claras | **Solo** estados de presupuesto, alertas y errores (REQ-057) |
+
+**Componentes:**
+
+1. **Encabezado** con degradado violeta, logo y Patrimonio en blanco, y dos círculos decorativos translúcidos.
+2. **Pestaña activa** con fondo `--brand` y texto blanco.
+3. **Tarjetas del Resumen** (Ingresos, Gastos, Balance, Tasa de ahorro) con una línea superior de color y un ícono en un círculo: verde, naranja, azul y dorado.
+4. **Color por categoría:** paleta de 8 colores sin verde, ámbar ni rojo (reservados para los estados). Se ve como un punto junto a la categoría en movimientos, presupuestos y la pestaña Categorías, y como color de la barra en «¿En qué se va la plata?» (D41).
+5. **Efecto al pasar el mouse:** las tarjetas del Resumen, las de cuenta y las tarjetas de estadística suben 2 px y aumentan su sombra (solo en dispositivos con mouse).
+6. **Barras** de 10 px con esquinas redondeadas y un degradado leve del color de su estado o categoría.
+7. **Encabezados de día** con fondo `--brand-soft` y el «Neto del día» como etiqueta.
+8. **Estados vacíos** con un ícono grande y fondo suave.
+9. **Títulos de tarjeta** con su ícono en un círculo `--brand-soft` (mapa `CARD_ICONS` en `ui.js`).
+
+**Reglas que no cambian:** las cifras usan `font-variant-numeric: tabular-nums`; todo color de estado va con texto (REQ-057); las animaciones se desactivan con `prefers-reduced-motion`; formulario a la izquierda y lista a la derecha en escritorio, una columna en móvil sin scroll horizontal a 375 px; sin fuentes externas ni librerías (REQ-047).
 
 ## 9. Puesta en producción ("app viva")
 

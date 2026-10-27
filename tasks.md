@@ -6,7 +6,7 @@
 > [`docs/decisiones.md`](docs/decisiones.md) · [`docs/data-contract.json`](docs/data-contract.json) ·
 > [`docs/wireframe.md`](docs/wireframe.md) · reglas en [`CLAUDE.md`](CLAUDE.md) y [`.cursorrules`](.cursorrules).
 
-**Estado:** ✅ todas las tareas completadas · Leyenda: `[ ]` pendiente · `[x]` hecha.
+**Estado:** Fases 0–12 completadas; Fase 13 en curso · Leyenda: `[ ]` pendiente · `[x]` hecha.
 Los números de tarea se conservan porque los commits los citan.
 
 ---
@@ -217,6 +217,19 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
   *Aceptación:* octubre → Vivienda ₡250,000 (57 %), Alimentación ₡99,700 (23 %), Servicios ₡38,900 (9 %); agosto sin gastos → "Aún no hay gastos en agosto 2026".
 - [x] **T-53 Primeros pasos.** REQ-102, D39: `calc.firstSteps`, `FirstSteps` en lugar del mensaje "Bienvenido…" del Resumen.
   *Aceptación:* app vacía → 3 pasos pendientes y botón «Ir a Cuentas»; con una cuenta → paso 1 ✓ y botón a «Gastos e ingresos»; con los datos de prueba la tarjeta no aparece.
+
+## Fase 13 — Diseño visual violeta
+
+> Solo cambia la apariencia (`styles.css` y marcado mínimo en `ui.js`). Unchanged Behavior: cálculos, validaciones, persistencia, textos de estado y las 154 pruebas siguen iguales.
+
+- [x] **T-54 Especificación visual.** `design.md` §8 (paleta violeta y 9 componentes), D40–D42.
+- [ ] **T-55 Paleta, encabezado y pestañas.** Variables violeta claro/oscuro, encabezado con degradado, pestaña activa de color, botones y «+ Registrar» violeta, tarjeta de crédito grafito.
+  *Aceptación:* contraste de texto ≥ 4.5:1 en claro y oscuro; sin scroll horizontal a 375 px.
+- [ ] **T-56 Tarjetas del Resumen e íconos de título.** Línea de color e ícono en Ingresos, Gastos, Balance y Tasa de ahorro; `CARD_ICONS` en los títulos de tarjeta.
+- [ ] **T-57 Color por categoría.** `catColor` en `ui.js` (D41); punto de color en movimientos, presupuestos y Categorías; barras de «¿En qué se va la plata?» con el color de la categoría.
+  *Aceptación:* las 7 categorías de gasto predeterminadas tienen colores distintos; ningún color de categoría es verde, ámbar ni rojo.
+- [ ] **T-58 Efectos.** Elevación al pasar el mouse, barras con degradado, encabezados de día y estados vacíos.
+  *Aceptación:* con `prefers-reduced-motion: reduce` no hay transiciones; 154/154 pruebas.
 
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)
 

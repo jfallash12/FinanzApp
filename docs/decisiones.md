@@ -70,3 +70,11 @@ El código y las pruebas las citan por su número (D1, D2…), por eso los núme
 | D37 | El texto de búsqueda es estado de interfaz (`ui.filters.text`), no se guarda, y al teclear se conserva la posición del cursor | Igual que los otros filtros (REQ-036) |
 | D38 | La comparación y las categorías con más gasto usan la misma base que el Resumen: movimientos reales + ocurrencias abiertas del mes | Los números del Resumen cuadran entre sí |
 | D39 | Los primeros pasos se derivan del estado (`calc.firstSteps`) y no hay opción de ocultarlos | Evita un campo nuevo en el contrato; la tarjeta desaparece sola al completar los pasos |
+
+## Diseño visual
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D40 | Color de marca violeta (`#6D4AFF`); verde, ámbar y rojo quedan reservados para los estados de presupuesto, alertas y errores | Da identidad a la app sin quitarles significado a los colores de estado (REQ-057) |
+| D41 | El color de una categoría se deriva de su posición entre las categorías de su mismo tipo (8 colores que se repiten); no se guarda | No cambia el contrato de datos. Las categorías predeterminadas quedan con colores distintos; si se elimina una, las siguientes pueden cambiar de color |
+| D42 | La tarjeta de crédito usa un degradado grafito en lugar de morado | Evita confundirla con el color de marca |
