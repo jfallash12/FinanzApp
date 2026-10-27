@@ -539,3 +539,7 @@ button, input, select { font: inherit; color: inherit; }
 .step-mark { width: 24px; text-align: center; font-weight: 700; color: var(--brand); }
 .badge.is-todo { background: var(--surface-2); color: var(--muted); }
 .steps-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- Color por categoría (design.md §8 punto 4, D41) ---------- */
+.cat-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; background: var(--cat); vertical-align: 0; flex: none; }
+.bar.is-cat .bar-fill { background: var(--cat); }

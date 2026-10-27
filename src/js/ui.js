@@ -32,6 +32,8 @@
     'total-budget': '🎯', 'first-steps': '👋', budgets: '🏷️', 'tx-list': '🧾', schedules: '🔁',
     'account-list': '💳', 'archived-list': '🗄️', 'detail-list': '📒', backup: '💾', 'cat-list': '🏷️'
   };
+  /* D41: 8 colores de categoría, sin verde, ámbar ni rojo (reservados para los estados) */
+  var CAT_COLORS = ['#7c5cff', '#2563eb', '#0891b2', '#db2777', '#a21caf', '#4338ca', '#64748b', '#38bdf8'];
   var MONTHS_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
   var root = null;
@@ -70,6 +72,18 @@
 
   function money(n, opts) { return calc.formatMoney(n, opts); }
 
+  /** D41: color de una categoría según su posición entre las de su mismo tipo (no se guarda). */
+  function catColor(categoryId) {
+    var cat = calc.getCategory(S, categoryId);
+    if (!cat) { return CAT_COLORS[CAT_COLORS.length - 1]; }
+    var same = S.categories.filter(function (c) { return c.kind === cat.kind; });
+    return CAT_COLORS[same.indexOf(cat) % CAT_COLORS.length];
+  }
+
+  function catDot(categoryId) {
+    return el('span', { class: 'cat-dot', 'aria-hidden': 'true', style: { '--cat': catColor(categoryId) } });
+  }
+
   function dateLabel(iso) {
     var t = calc.parseISODate(iso);
     var d = new Date(t);
@@ -80,6 +94,14 @@
     var w = Math.max(0, Math.min(100, percent));
     return el('div', { class: 'bar' + (status ? ' is-' + status : ''), role: 'presentation' },
       el('div', { class: 'bar-fill', style: { width: w + '%' } }));
+  }
+
+  /** D41: barra con el color de la categoría (sin significado de estado). */
+  function catBar(percent, categoryId) {
+    var b = bar(percent, null);
+    b.className += ' is-cat';
+    b.style.setProperty('--cat', catColor(categoryId));
+    return b;
   }
 
   /** REQ-092: barra de dos tramos (gastos + apartado a ahorros). */
@@ -384,7 +406,7 @@
       el('span', { class: 'tx-icon', 'aria-hidden': 'true', text: t.status === 'pending' ? '⏳' : '🗓' }),
       el('div', { class: 'grow' },
         el('strong', { class: 'tx-desc', text: t.description }),
-        el('span', { class: 'muted', text: dateLabel(t.date) + ' (' + inDays(t.date) + ') · ' + modeLabel(t) + ' · ' + txMeta(t) })),
+        el('span', { class: 'muted' }, t.categoryId ? catDot(t.categoryId) : null, dateLabel(t.date) + ' (' + inDays(t.date) + ') · ' + modeLabel(t) + ' · ' + txMeta(t))),
       el('span', { class: 'tx-amount', text: sign + money(t.amount) }),
       occurrenceActions(t));
   }
@@ -450,9 +472,9 @@
         : el('ol', { class: 'top-list' }, list.map(function (x) {
           return el('li', { class: 'top-row' },
             el('div', { class: 'top-head' },
-              el('strong', { text: x.category.name }),
+              el('strong', null, catDot(x.category.id), x.category.name),
               el('span', { class: 'muted', text: money(x.spent) + ' · ' + calc.formatPercent(x.percent) + ' de los gastos' })),
-            bar(x.percent, null));
+            catBar(x.percent, x.category.id));
         })));
   }
 
@@ -599,13 +621,13 @@
     var b = calc.budgetStatus(S, c.id, U.month);
     if (b.budget === null) {
       return el('li', { class: 'budget-row is-none' },
-        el('div', { class: 'budget-head' }, el('strong', { text: c.name }), el('span', { class: 'muted', text: 'Sin presupuesto' })),
+        el('div', { class: 'budget-head' }, el('strong', null, catDot(c.id), c.name), el('span', { class: 'muted', text: 'Sin presupuesto' })),
         el('span', { class: 'muted', text: 'Gastado en el mes: ' + money(b.spent) }));
     }
     var rest = b.remaining >= 0 ? 'Quedan ' + money(b.remaining) : 'Excedido por ' + money(-b.remaining);
     return el('li', { class: 'budget-row is-' + b.status },
       el('div', { class: 'budget-head' },
-        el('strong', { text: c.name }),
+        el('strong', null, catDot(c.id), c.name),
         el('span', { class: 'badge is-' + b.status, text: calc.formatPercent(b.percent) + ' · ' + STATUS_TEXT[b.status] })),
       bar(b.percent, b.status),
       el('div', { class: 'budget-foot' },
@@ -774,7 +796,7 @@
       el('span', { class: 'tx-icon', 'aria-hidden': 'true', text: TX_ICONS[t.type] }),
       el('div', { class: 'grow' },
         el('strong', { class: 'tx-desc' }, t.description, scheduledBadge(t)),
-        el('span', { class: 'muted', text: TX_TYPES[t.type] + ' · ' + txMeta(t) })),
+        el('span', { class: 'muted' }, t.categoryId ? catDot(t.categoryId) : null, TX_TYPES[t.type] + ' · ' + txMeta(t))),
       el('span', { class: 'tx-amount', text: sign + money(t.amount) }),
       rowActions(t));
   }
@@ -999,7 +1021,7 @@
         var n = calc.categoryMovementCount(S, c.id);
         return el('li', { class: 'list-row' + (U.forms.category.editingId === c.id ? ' is-editing' : '') },
           el('div', { class: 'grow' },
-            el('strong', null, c.name, c.system ? el('span', { class: 'badge is-system', text: 'Sistema' }) : null),
+            el('strong', null, catDot(c.id), c.name, c.system ? el('span', { class: 'badge is-system', text: 'Sistema' }) : null),
             el('span', { class: 'muted', text: n + (n === 1 ? ' movimiento' : ' movimientos') +
               (kind === 'gasto' ? ' · ' + (c.monthlyBudget ? 'presupuesto ' + money(c.monthlyBudget) + '/mes' : 'sin presupuesto') : '') })),
           el('div', { class: 'row-actions' },
