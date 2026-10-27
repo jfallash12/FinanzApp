@@ -4,7 +4,7 @@
 > Patrón general: `WHEN <disparador>, IF <condición>, THEN the system SHALL <respuesta>`.
 > El comportamiento esperado se expresa con `SHALL` (obligatorio) y el comportamiento que **no debe cambiar** se expresa con `SHALL NOT`.
 >
-> **Versión 5.** Los identificadores REQ son estables: si un requerimiento se elimina conserva su número marcado como *Eliminado*, y los nuevos se agregan al final. Vigentes: 85 (REQ-001..REQ-091, sin REQ-073..REQ-078). La v2 agregó el registro rápido, cuentas de ahorros, cuentas archivadas, fechas de tarjeta, detalle de cuenta, la pestaña Presupuestos y el presupuesto total mensual (§8–§10). La v3 permitió movimientos con fecha futura (§11, reemplazada). La v4 introduce **programaciones** (una vez, mensual o quincenal) con **auto-débito** o confirmación manual y su proyección en cada mes (§12). La v5 permite programaciones que **empezaron antes** de usar la app (REQ-079 modificado, REQ-091). Ajuste v5.1: los **ingresos** programados no piden modo; se registran solos en su fecha (REQ-079). Ajuste v5.2: una programación repetitiva **se repite sin fin por defecto**; la fecha final solo se pide si el usuario elige «Hasta una fecha» (REQ-079).
+> **Versión 6.** Los identificadores REQ son estables: si un requerimiento se elimina conserva su número marcado como *Eliminado*, y los nuevos se agregan al final. Vigentes: 89 (REQ-001..REQ-095, sin REQ-073..REQ-078). La v2 agregó el registro rápido, cuentas de ahorros, cuentas archivadas, fechas de tarjeta, detalle de cuenta, la pestaña Presupuestos y el presupuesto total mensual (§8–§10). La v3 permitió movimientos con fecha futura (§11, reemplazada). La v4 introduce **programaciones** (una vez, mensual o quincenal) con **auto-débito** o confirmación manual y su proyección en cada mes (§12). La v5 permite programaciones que **empezaron antes** de usar la app (REQ-079 modificado, REQ-091). Ajuste v5.1: los **ingresos** programados no piden modo; se registran solos en su fecha (REQ-079). Ajuste v5.2: una programación repetitiva **se repite sin fin por defecto**; la fecha final solo se pide si el usuario elige «Hasta una fecha» (REQ-079). La v6 hace que el dinero **apartado a ahorros** consuma el presupuesto total (REQ-070 modificado, REQ-092) y agrega **metas de ahorro** con razón en las cuentas de ahorros (§13, REQ-093..REQ-095).
 > **Contrato de datos:** [`data-contract.json`](./data-contract.json) (schemaVersion 2). **Reglas de negocio:** RN-01..RN-11 en [`design.md`](./design.md).
 
 **Definiciones usadas en esta especificación**
@@ -199,7 +199,7 @@
 
 * **REQ-069**: the system SHALL mostrar los presupuestos en una pestaña propia "Presupuestos", separada de la configuración de categorías. Para cada categoría con presupuesto y saldo restante positivo SHALL mostrar "Le quedan ₡X para N días (₡Y por día)", donde N = días restantes del mes incluyendo hoy (mes actual) o todos los días del mes (mes futuro); en un mes pasado SHALL mostrar "Mes cerrado".
 
-* **REQ-070**: the system SHALL permitir definir un **presupuesto total mensual** opcional para todos los gastos. WHEN se guarda, IF el valor no es numérico, es menor o igual a 0 o tiene más de 2 decimales, THEN the system SHALL rechazarlo; un valor vacío lo elimina. WHEN existe, THEN the system SHALL comparar los gastos del mes con ese total usando los mismos estados de REQ-041, SHALL NOT bloquear ningún gasto y SHALL mostrar el aviso de REQ-044 cuando un gasto lo lleve a Rojo.
+* **REQ-070** *(modificado en v6)*: the system SHALL permitir definir un **presupuesto total mensual** opcional. WHEN se guarda, IF el valor no es numérico, es menor o igual a 0 o tiene más de 2 decimales, THEN the system SHALL rechazarlo; un valor vacío lo elimina. WHEN existe, THEN the system SHALL comparar con ese total lo **consumido del mes = gastos del mes + apartado a ahorros del mes** (REQ-092), usando los mismos estados de REQ-041; SHALL NOT bloquear ningún gasto ni transferencia y SHALL mostrar el aviso de REQ-044 cuando un gasto o una transferencia a ahorros lo lleve a Rojo. *(v2–v5: solo contaban los gastos.)*
 
 * **REQ-071**: WHEN existe presupuesto total mensual, IF la suma de los presupuestos por categoría es mayor que el total, THEN the system SHALL mostrar una advertencia informativa con ambos montos, sin bloquear nada.
 
@@ -243,6 +243,18 @@
 
 ---
 
+## 13. Ahorro dentro del presupuesto y metas de ahorro (v6)
+
+* **REQ-092** *(v6)*: the system SHALL calcular el **apartado a ahorros** de un mes como la suma de las transferencias del mes **hacia** cuentas de tipo ahorros menos las transferencias del mes **desde** cuentas de ahorros hacia cuentas de otro tipo, con un mínimo de ₡0, incluyendo las ocurrencias abiertas de programaciones (REQ-081). La tarjeta del presupuesto total SHALL mostrar por separado los **gastos** y el **apartado a ahorros**, con una barra de dos tramos de distinto color y texto. El apartado SHALL NOT contarse como gasto en el Resumen, la tasa de ahorro ni los presupuestos por categoría.
+
+* **REQ-093** *(v6)*: WHEN el usuario crea o edita una cuenta de tipo **ahorros**, THEN the system SHALL permitir indicar una **meta de ahorro** opcional (monto) y una **razón** opcional (texto de hasta 60 caracteres, por ejemplo "Fondo de emergencia"). IF la meta no es numérica, es menor o igual a 0 o tiene más de 2 decimales, THEN the system SHALL rechazarla con un error en vivo. IF se escribe una razón sin meta, THEN the system SHALL pedir el monto de la meta. Las cuentas de otro tipo SHALL NOT tener meta; al cambiar una cuenta a otro tipo, la meta SHALL eliminarse.
+
+* **REQ-094** *(v6)*: WHILE una cuenta de ahorros tiene meta, the system SHALL mostrar en su tarjeta, en su detalle y en la sección **Metas de ahorro** de la pestaña Presupuestos: la razón (o "Meta de ahorro"), el saldo actual frente a la meta con porcentaje y barra, y lo que falta. IF existen programaciones activas que transfieren a esa cuenta, THEN the system SHALL mostrar el aporte mensual equivalente y el mes estimado en que se alcanza la meta ("con ₡X al mes la alcanza en N meses: <mes año>").
+
+* **REQ-095** *(v6)*: WHEN el saldo de una cuenta de ahorros con meta es mayor o igual a la meta, THEN the system SHALL mostrar "✓ ¡Meta alcanzada!" con la barra completa en verde, sin ocultar la cuenta ni la meta. WHEN una transferencia hace que se alcance la meta, THEN the system SHALL mostrarlo en el mensaje de confirmación.
+
+---
+
 ## Trazabilidad rápida: reglas de negocio complejas (requisito del Proyecto Final)
 
 | Regla compleja | REQ | Por qué es compleja |
@@ -256,3 +268,4 @@
 | Programaciones con auto-débito | REQ-079..REQ-083, REQ-086 | Calcula ocurrencias por frecuencia, crea movimientos solo si cumplen la regla de fondos y evita duplicar o recrear ocurrencias |
 | Proyección del mes | REQ-081, REQ-087, REQ-088 | Combina movimientos reales y ocurrencias futuras en resumen, presupuestos y alertas sin tocar el saldo real |
 | Presupuesto total vs. por categoría | REQ-069, REQ-070, REQ-071 | Dos niveles de presupuesto con días restantes del mes y advertencia de inconsistencia |
+| Ahorro en el presupuesto y metas | REQ-070, REQ-092..REQ-095 | Distingue transferencias según el tipo de las dos cuentas, neto y con mínimo 0; la meta combina saldo real y programaciones para estimar la fecha |

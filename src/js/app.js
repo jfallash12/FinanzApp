@@ -55,7 +55,7 @@
       return { type: 'gasto', date: calc.todayISO(), amount: '', description: '', accountId: calc.lastUsedAccountId(state), categoryId: '', toAccountId: '',
         scheduled: false, frequency: 'monthly', ends: 'never', endDate: '', mode: 'auto', pastAction: 'register' };
     }
-    if (name === 'account') { return { name: '', type: 'efectivo', initialBalance: '', creditLimit: '', cutoffDay: '', paymentDay: '' }; }
+    if (name === 'account') { return { name: '', type: 'efectivo', initialBalance: '', creditLimit: '', cutoffDay: '', paymentDay: '', goalAmount: '', goalReason: '' }; }
     if (name === 'settings') { return { monthlyBudget: state.settings.monthlyBudget ? String(state.settings.monthlyBudget) : '' }; }
     return { name: '', kind: 'gasto', monthlyBudget: '' };
   }
@@ -105,7 +105,8 @@
       initialBalance: a.type === 'credito' ? '' : String(a.initialBalance),
       creditLimit: a.type === 'credito' ? String(a.creditLimit) : '',
       cutoffDay: a.cutoffDay ? String(a.cutoffDay) : '',
-      paymentDay: a.paymentDay ? String(a.paymentDay) : ''
+      paymentDay: a.paymentDay ? String(a.paymentDay) : '',
+      goalAmount: a.goalAmount ? String(a.goalAmount) : '', goalReason: a.goalReason || '' // REQ-093
     };
   }
 
@@ -488,20 +489,26 @@
 
   /** REQ-044 / REQ-070: aviso si el gasto llevó a su categoría o al presupuesto total al estado Rojo. */
   function budgetToast(prev, d, okText) {
-    var msgs = [];
+    var msgs = [], good = [];
+    var ym = calc.monthOf(d.date);
     if (d.type === 'gasto') {
-      var ym = calc.monthOf(d.date);
       var before = calc.budgetStatus(prev, d.categoryId, ym);
       var after = calc.budgetStatus(state, d.categoryId, ym);
       if (after.status === 'exceeded' && before.status !== 'exceeded') {
         msgs.push('Superó el presupuesto de ' + calc.getCategory(state, d.categoryId).name + ' (' + calc.formatPercent(after.percent) + ').');
       }
+    }
+    if (d.type === 'gasto' || d.type === 'transferencia') { // REQ-070 (v6): el apartado a ahorros también consume el total
       var tb = calc.totalBudgetStatus(prev, ym), ta = calc.totalBudgetStatus(state, ym);
       if (ta.status === 'exceeded' && tb.status !== 'exceeded') {
         msgs.push('Superó el presupuesto total del mes (' + calc.formatPercent(ta.percent) + ').');
       }
     }
-    toast(msgs.length ? 'warning' : 'ok', [okText].concat(msgs).join(' '));
+    if (d.type === 'transferencia') { // REQ-095
+      var g0 = calc.goalProgress(prev, d.toAccountId), g1 = calc.goalProgress(state, d.toAccountId);
+      if (g1 && g1.reached && !(g0 && g0.reached)) { good.push('🎉 ¡Alcanzó su meta «' + (g1.reason || 'Meta de ahorro') + '»!'); }
+    }
+    toast(msgs.length ? 'warning' : 'ok', [okText].concat(good, msgs).join(' '));
   }
 
   /* ------------------------------------------------------------------ */

@@ -445,3 +445,27 @@ button, input, select { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* v6: apartado a ahorros (REQ-092) y metas de ahorro (REQ-094, REQ-095) */
+.bar.is-split { display: flex; }
+.bar.is-split .bar-fill { border-radius: 0; }
+.bar.is-split .bar-fill:first-child { border-radius: 99px 0 0 99px; }
+.bar-savings { background: repeating-linear-gradient(45deg, #a16207, #a16207 4px, #ca8a04 4px, #ca8a04 8px) !important; }
+.budget-split { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 6px 0 0; font-size: 13px; }
+.key::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.key-expense::before { background: var(--ok); }
+.total-budget.is-warning .key-expense::before { background: var(--warning); }
+.total-budget.is-exceeded .key-expense::before { background: var(--exceeded); }
+.key-savings::before { background: repeating-linear-gradient(45deg, #a16207, #a16207 3px, #ca8a04 3px, #ca8a04 6px); }
+.goal { position: relative; z-index: 1; margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: rgba(255, 255, 255, .16); }
+.goal .bar { background: rgba(255, 255, 255, .3); margin: 6px 0 4px; }
+.goal .bar-fill { background: #fff; }
+.goal.is-reached .bar-fill { background: #bbf7d0; }
+.goal-title { font-size: 13px; }
+.goal-line { margin: 0; font-size: 12px; }
+.goal.is-plain { background: var(--surface-2); margin-top: 4px; }
+.goal.is-plain .bar { background: var(--surface); }
+.goal.is-plain .bar-fill { background: #ca8a04; }
+.goal.is-plain.is-reached .bar-fill { background: var(--ok); }
+.goal.is-plain.is-reached .goal-line:nth-of-type(2) { color: var(--ok); font-weight: 600; }
+.goal-row { display: block; padding: 8px 0; }

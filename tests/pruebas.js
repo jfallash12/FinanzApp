@@ -27,7 +27,7 @@
     accounts: [
       {"id": "acc-efectivo", "name": "Efectivo", "type": "efectivo", "initialBalance": 25000, "archived": false, "createdAt": "2026-09-01T08:00:00.000Z"},
       {"id": "acc-bac", "name": "Cuenta BAC", "type": "debito", "initialBalance": 150000, "archived": false, "createdAt": "2026-09-01T08:01:00.000Z"},
-      {"id": "acc-ahorros", "name": "Ahorros BN", "type": "ahorros", "initialBalance": 200000, "archived": false, "createdAt": "2026-09-01T08:01:30.000Z"},
+      {"id": "acc-ahorros", "name": "Ahorros BN", "type": "ahorros", "initialBalance": 200000, "archived": false, "createdAt": "2026-09-01T08:01:30.000Z", "goalAmount": 1000000, "goalReason": "Fondo de emergencia"},
       {"id": "acc-visa", "name": "Tarjeta Visa", "type": "credito", "creditLimit": 300000, "cutoffDay": 15, "paymentDay": 28, "archived": false, "createdAt": "2026-09-01T08:02:00.000Z"},
       {"id": "acc-tarjeta-vieja", "name": "Tarjeta vieja", "type": "credito", "creditLimit": 100000, "cutoffDay": 5, "paymentDay": 20, "archived": true, "createdAt": "2026-01-10T08:00:00.000Z"}
     ],
@@ -198,7 +198,40 @@
   /* ---------- v2: presupuestos ---------- */
   test('REQ-069 días restantes (26 oct → 6)', function () { return eq(calc.remainingDays('2026-10', TODAY), 6); });
   test('REQ-069 mes pasado = cerrado', function () { return eq(calc.remainingDays('2026-09', TODAY), null); });
-  test('REQ-070 presupuesto total 97 % Ámbar', function () { var t = calc.totalBudgetStatus(DATA, '2026-10'); return eq(Math.round(t.percent) + t.status, '97warning'); });
+  test('REQ-070 (v6) presupuesto total: gastos ₡438,600 + ahorro ₡50,000 = 109 % Rojo', function () {
+    var t = calc.totalBudgetStatus(DATA, '2026-10'); return eq([t.expense, t.savings, t.spent, Math.round(t.percent) + t.status].join(','), '438600,50000,488600,109exceeded');
+  });
+  test('REQ-092 apartado: retiro de ahorros a otra cuenta resta (mínimo 0)', function () {
+    var s = clone(DATA); s.transactions.push({ id: 'mov-r', type: 'transferencia', accountId: 'acc-ahorros', toAccountId: 'acc-bac', amount: 80000, date: '2026-10-21', description: 'Retiro', createdAt: '2026-10-21T00:00:00.000Z' });
+    return eq(calc.savingsSetAside(s, '2026-10', TODAY), 0);
+  });
+  test('REQ-092 apartado: pago de tarjeta y retiro de cajero no cuentan', function () { return eq(calc.savingsSetAside(DATA, '2026-10', TODAY), 50000); });
+  test('REQ-092 apartado incluye transferencias programadas del mes', function () {
+    var s = clone(DATA); s.schedules.push({ id: 'prg-aho', type: 'transferencia', accountId: 'acc-bac', toAccountId: 'acc-ahorros', amount: 100000, description: 'Ahorro quincenal',
+      frequency: 'biweekly', startDate: '2026-11-15', mode: 'auto', skippedDates: [], createdAt: '2026-10-26T00:00:00.000Z' });
+    return eq(calc.savingsSetAside(s, '2026-11', TODAY) + ',' + calc.monthSummary(s, '2026-11', TODAY).expense, '200000,40000');
+  });
+  test('REQ-092 el apartado no cambia gastos ni tasa de ahorro', function () { return eq(calc.monthSummary(DATA, '2026-10', TODAY).expense, 438600); });
+  test('REQ-093 meta inválida y razón sin meta rechazadas', function () {
+    var base = { name: 'Viaje', type: 'ahorros', initialBalance: '0', creditLimit: '', cutoffDay: '', paymentDay: '' };
+    var e1 = v.validateAccount(Object.assign({}, base, { goalAmount: '-5', goalReason: '' }), DATA, null);
+    var e2 = v.validateAccount(Object.assign({}, base, { goalAmount: '', goalReason: 'Japón' }), DATA, null);
+    return eq(!!e1.goalAmount + ',' + !!e2.goalAmount, 'true,true');
+  });
+  test('REQ-093 cambiar a otro tipo elimina la meta', function () {
+    var acc = v.draftToAccount({ name: 'X', type: 'debito', initialBalance: '0', goalAmount: '5000', goalReason: 'Y' }, { id: 'acc-x', createdAt: '2026-10-26T00:00:00.000Z' });
+    return eq('goalAmount' in acc, false);
+  });
+  test('REQ-093 contrato: meta en cuenta no-ahorros es inválida', function () {
+    var s = clone(DATA); s.accounts[0].goalAmount = 1000; return eq(storage.validateState(s).valid, false);
+  });
+  test('REQ-094 progreso de la meta y fecha estimada', function () {
+    var s = clone(DATA); s.schedules.push({ id: 'prg-aho', type: 'transferencia', accountId: 'acc-bac', toAccountId: 'acc-ahorros', amount: 100000, description: 'Ahorro quincenal',
+      frequency: 'biweekly', startDate: '2026-11-15', mode: 'auto', skippedDates: [], createdAt: '2026-10-26T00:00:00.000Z' });
+    var g = calc.goalProgress(s, 'acc-ahorros', TODAY);
+    return eq([g.saved, g.missing, Math.round(g.percent), g.monthly, g.months, g.etaMonth].join(','), '250000,750000,25,200000,4,2027-02');
+  });
+  test('REQ-095 meta alcanzada', function () { var s = clone(DATA); s.accounts[2].goalAmount = 250000; return eq(calc.goalProgress(s, 'acc-ahorros', TODAY).reached, true); });
   test('REQ-070 total 0 rechazado', function () { return has(v.validateSettings({ monthlyBudget: '0' }), 'monthlyBudget', 'mayor a 0'); });
   test('REQ-071 suma por categoría ₡495,000', function () { return eq(calc.categoryBudgetsSum(DATA), 495000); });
   test('REQ-072 migración v1 → v3', function () {

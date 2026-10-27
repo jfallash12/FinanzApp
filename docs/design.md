@@ -10,7 +10,7 @@
 **Curso:** Programación Intencional con IA Generativa
 **Estudiante:** José Fallas — jfallash@ucenfotec.ac.cr
 **Aplicación:** FinanzApp — Finanzas personales
-**Versión:** 5 (Octubre 2026) · Especificación v5 · Contrato `schemaVersion: 3`
+**Versión:** 6 (Octubre 2026) · Especificación v6 · Contrato `schemaVersion: 3` (campos opcionales de meta en cuentas de ahorros)
 
 ---
 
@@ -90,8 +90,9 @@ erDiagram
 | RN-08 | Duplicado: tipo, cuenta, monto, fecha, descripción normalizada | `calc.findDuplicate` |
 | RN-09 | `Disponible = Σ efectivo + débito`; `Ahorros = Σ ahorros`; `Deudas = Σ deudas`; `Patrimonio = Disponible + Ahorros − Deudas` | `calc.balanceSummary` |
 | RN-10 | Último corte = fecha más reciente con `cutoffDay` < hoy; pago = primera fecha con `paymentDay` posterior; `pago del periodo = deuda al corte − pagos posteriores` (≥ 0) | `calc.creditCycle`, `calc.paymentAlerts` |
-| RN-11 | `% total = gastos del mes / settings.monthlyBudget × 100` (mismos umbrales que RN-06); por día: `restante / días restantes del mes` | `calc.totalBudgetStatus`, `calc.remainingDays`, `calc.categoryBudgetsSum` |
+| RN-11 | `% total = (gastos del mes + apartado a ahorros, RN-13) / settings.monthlyBudget × 100` *(v6)* (mismos umbrales que RN-06); por día: `restante / días restantes del mes` | `calc.totalBudgetStatus`, `calc.remainingDays`, `calc.categoryBudgetsSum` |
 | RN-12 *(v4)* | Programación → ocurrencias por frecuencia (una vez · mismo día cada mes o último · días 15 y último). Ocurrencia **abierta** = ni aplicada (movimiento con `scheduleId` + `occurrenceDate`) ni omitida; **programada** si fecha > hoy, **pendiente** si fecha ≤ hoy. Resumen y presupuestos del mes incluyen las abiertas; saldo actual, patrimonio y deudas solo movimientos reales; proyección a fin de mes = reales + abiertas | `calc.scheduleOccurrences`, `openOccurrences`, `dueOccurrences`, `upcomingOccurrences`, `monthItems`, `projectedState`, `projectedBalance`, `projectionAlerts` |
+| RN-13 *(v6)* | **Apartado a ahorros** del mes = Σ transferencias del mes hacia cuentas `ahorros` − Σ transferencias del mes desde `ahorros` hacia cuentas de otro tipo, mínimo 0, incluyendo ocurrencias abiertas. **Consumido del presupuesto total** = gastos del mes + apartado. Una transferencia entre dos cuentas de ahorros no cuenta. **Meta**: progreso = saldo actual / meta; aporte mensual = Σ equivalente mensual de programaciones activas que transfieren a la cuenta; meses estimados = ⌈falta / aporte⌉ | `calc.savingsSetAside`, `calc.totalBudgetStatus`, `calc.goalProgress` |
 
 **Ejemplo verificable (dataset oficial, octubre 2026, hoy = 26 oct):** Efectivo en orden cronológico `25,000 − 15,000 + 40,000 − 18,000 + 35,000 − 31,200 − 4,500 = ₡31,300` (nunca negativo); Visa `−68,500 − 27,500 + 60,000 = −₡36,000` → disponible `₡264,000`; corte 15 oct: deuda `₡96,000` − pago `₡60,000` = **pago del periodo `₡36,000`** el 28 oct (2 días); Disponible `₡392,400` + Ahorros `₡250,000` − Deudas `₡36,000` = Patrimonio `₡606,400`; Alimentación `99,700 / 120,000 = 83.08 %` → "83 %", Ámbar; total `438,600 / 450,000 = 97.47 %` → Ámbar.
 
@@ -340,6 +341,8 @@ sequenceDiagram
 | D26 *(v4)* | Eliminar una programación desenlaza (no borra) sus movimientos | REQ-048: sin borrados colaterales |
 | D28 *(v5.1)* | Los ingresos programados siempre son automáticos (`mode = 'auto'`); la interfaz no muestra "Al llegar la fecha" y los rotula "Automático" en vez de "Auto-débito" | Pedido del estudiante: un salario no es un gasto que se confirma o se debita. Los datos guardados antes con ingreso manual se tratan como automáticos sin migración (se resuelve al calcular la ocurrencia) |
 | D29 *(v5.2)* | En una programación mensual o quincenal, «¿Hasta cuándo?» es un selector `🔁 Sin fin` (por defecto) / `📅 Hasta una fecha`; el campo de fecha final solo aparece con la segunda opción, y la vista previa avisa "⚠ solo habrá 1 pago" si la fecha final lo limita a una ocurrencia. La primera fecha se rotula «Primer pago (desde)» | Pedido del estudiante: un campo "Hasta (opcional)" visible hacía pensar que el salario no se repetía todos los meses, y era fácil dejar una fecha final igual a la primera. No cambia el contrato de datos (`endDate` sigue siendo opcional) |
+| D30 *(v6)* | El apartado a ahorros consume el presupuesto **total**, no los presupuestos por categoría, y no se cuenta como gasto en el Resumen ni en la tasa de ahorro | Pedido del estudiante: "un ahorro no es para gastar", así que debe bajar lo que queda para gastar en el mes. Pero sigue siendo dinero suyo: contarlo como gasto falsearía la tasa de ahorro y los informes por categoría |
+| D31 *(v6)* | La meta vive en la propia cuenta de ahorros (`goalAmount`, `goalReason` opcionales) y el progreso usa el **saldo actual** de la cuenta, no solo lo transferido este mes | Una meta es "juntar ₡X para Y", sin fecha fija. Se agregan campos opcionales sin subir `schemaVersion`: los datos v3 existentes siguen siendo válidos y no requieren migración |
 | D27 *(v5)* | La primera fecha puede estar hasta un año atrás; las ocurrencias anteriores a hoy se resuelven **al guardar** (registrar con su fecha u omitir), nunca quedan como "pendientes" ni las aplica el auto-débito | Quien empieza a usar la app a mitad de mes ya pagó algunos fijos; así no se duplican ni se pierden (REQ-091) |
 | D15 | Formato de dinero `₡12,500.00` (coma de miles y punto decimal), igual al formato en que el usuario escribe los montos | Coherencia entre lo que se escribe y lo que se ve |
 
@@ -435,8 +438,12 @@ sequenceDiagram
 | 089 | Lista de programaciones; cuentas en uso | `SchedulesList` | `calc.schedulesUsingAccount`, `validate.validateArchive`, `validate.validateAccountDelete` |
 | 090 | Migración v2 → v3 | — | `storage.migrate` (`migrateV2`) |
 | 091 *(v5)* | Programación que empezó antes de hoy | `PastOccurrences` (Registrarlos ahora · Ya los registré) | `validate.pastOccurrences`, `validate.validateSchedule` (fondos al registrar), `resolvePast` en `ADD_SCHEDULE` / `UPDATE_SCHEDULE` |
+| 092 *(v6)* | Apartado a ahorros en el presupuesto total | `TotalBudgetCard` (barra de dos tramos) | `calc.savingsSetAside`, `calc.totalBudgetStatus` |
+| 093 *(v6)* | Meta y razón en cuentas de ahorros | `AccountForm` | `validate.validateAccount`, `validate.draftToAccount`, `storage.checkAccount` |
+| 094 *(v6)* | Progreso y fecha estimada de la meta | `GoalProgress` en `AccountCard`, `AccountDetail` y `SavingsGoals` (Presupuestos) | `calc.goalProgress`, `calc.monthlyEquivalent` |
+| 095 *(v6)* | Meta alcanzada | `GoalProgress`, `Toast` | `calc.goalProgress`, `goalToast` |
 
-**Cobertura:** 85 de 85 requerimientos vigentes tienen componente y/o función asignados.
+**Cobertura:** 89 de 89 requerimientos vigentes tienen componente y/o función asignados.
 
 ## 8. Diseño visual (CSS)
 

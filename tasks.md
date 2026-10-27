@@ -212,6 +212,13 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
 - [x] **T-42 (v5.1) Ingresos programados sin "Al llegar la fecha".** Pedido del estudiante: un salario no se confirma ni se "debita". REQ-079 ajustado, D28: `draftToSchedule` fija `mode = 'auto'` en ingresos, `occurrenceToTx` trata ingresos guardados como automáticos, `ScheduleFields` reemplaza el selector por "💰 Los ingresos programados se registran solos en su fecha" y las listas dicen "Automático".
 - [x] **T-43 (v5.2) «¿Hasta cuándo?» con Sin fin por defecto.** Pedido del estudiante: "Hasta (opcional)" hacía dudar si el salario se repetía cada mes. REQ-079 ajustado, D29: borrador con `ends: 'never' | 'date'`, `draftToSchedule` ignora `endDate` con «Sin fin», error si se elige «Hasta una fecha» sin fecha, rótulo «Primer pago (desde)» y aviso en la vista previa cuando solo habrá 1 pago.
 
+## Fase 12 — Versión 6: ahorro en el presupuesto y metas (pedido del estudiante: "si paso ₡100,000 del salario a ahorros, eso debe bajar mi presupuesto total; y quiero una meta y la razón del ahorro")
+
+- [x] **T-44 Apartado a ahorros en el presupuesto total.** REQ-070 modificado, REQ-092, RN-13, D30: `calc.savingsSetAside` (transferencias hacia ahorros − desde ahorros a otro tipo, mínimo 0, con ocurrencias abiertas) y `totalBudgetStatus` = gastos + apartado; `TotalBudgetCard` con barra de dos tramos y leyenda; `budgetToast` avisa también con transferencias.
+  *Aceptación:* con el dataset, octubre muestra "Gastos ₡438,600 · Apartado a ahorros ₡50,000" y 109 % Excedido; el Resumen sigue mostrando gastos ₡438,600 y la tasa de ahorro no cambia.
+- [x] **T-45 Metas de ahorro.** REQ-093..REQ-095, D31: campos opcionales `goalAmount` y `goalReason` (solo ahorros) en contrato, `storage.checkAccount`, `validateAccount`/`draftToAccount` y `AccountForm`; `calc.goalProgress` (saldo / meta, aporte mensual de programaciones, mes estimado); `GoalProgress` en la tarjeta y el detalle de la cuenta; sección **Metas de ahorro** en Presupuestos; aviso "🎉 ¡Alcanzó su meta!".
+  *Aceptación:* "Ahorros BN" muestra "🎯 Fondo de emergencia · ₡250,000 de ₡1,000,000 · 25 % · Le faltan ₡750,000"; con una transferencia mensual programada de ₡100,000 indica "la alcanza en 8 meses (junio 2027)"; una razón sin monto se rechaza.
+
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)
 
 | # | Prueba | Desde |
@@ -262,6 +269,8 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
 | 084 | T-39 | 085 | T-39, T-40 | 086 | T-39 |
 | 087 | T-38, T-40 | 088 | T-38, T-40 | 089 | T-39, T-40 |
 | 090 | T-37 | 027 *(v4)* | T-39 | 050 *(v4)* | T-39 |
+| 070 *(v6)* | T-44 | 092 | T-44 | 093 | T-45 |
+| 094 | T-45 | 095 | T-45 | | |
 
 ## Registro de ejecución
 
@@ -278,3 +287,4 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
 | 2026-10-26 | T-41 | Versión 5: `tests/pruebas.html` 116/116 y recorrido de punta a punta 149/149
 | 2026-10-26 | T-42 | v5.1: `tests/pruebas.html` 118/118 y recorrido de punta a punta 151/151
 | 2026-10-26 | T-43 | v5.2: `tests/pruebas.html` 120/120 y recorrido de punta a punta 151/151
+| 2026-10-26 | T-44, T-45 | Versión 6: `tests/pruebas.html` 129/129 y recorrido de punta a punta 157/157

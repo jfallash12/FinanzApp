@@ -69,7 +69,9 @@
     var credit = a.type === 'credito';
     var base = ['id', 'name', 'type', 'archived', 'createdAt'];
     checkKeys(errors, p, a, base.concat([credit ? 'creditLimit' : 'initialBalance']),
-      base.concat(credit ? ['creditLimit', 'cutoffDay', 'paymentDay'] : ['initialBalance']));
+      base.concat(credit ? ['creditLimit', 'cutoffDay', 'paymentDay'] : a.type === 'ahorros' ? ['initialBalance', 'goalAmount', 'goalReason'] : ['initialBalance']));
+    if ('goalAmount' in a && !(isMoney(a.goalAmount) && a.goalAmount > 0)) { errors.push(p + '.goalAmount debe ser > 0'); } // REQ-093 (v6)
+    if ('goalReason' in a && (!isText(a.goalReason, 60) || !('goalAmount' in a))) { errors.push(p + '.goalReason inválido o sin goalAmount'); }
     if (typeof a.archived !== 'boolean') { errors.push(p + '.archived debe ser booleano'); }
     if (credit && (('cutoffDay' in a) !== ('paymentDay' in a))) { errors.push(p + ': cutoffDay y paymentDay van juntos'); }
     if ('cutoffDay' in a && !isDay(a.cutoffDay)) { errors.push(p + '.cutoffDay debe ser entero 1–28'); }

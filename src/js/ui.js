@@ -75,6 +75,51 @@
       el('div', { class: 'bar-fill', style: { width: w + '%' } }));
   }
 
+  /** REQ-092: barra de dos tramos (gastos + apartado a ahorros). */
+  function splitBar(t) {
+    var e = Math.max(0, Math.min(100, t.expensePercent));
+    var s = Math.max(0, Math.min(100 - e, t.savingsPercent));
+    return el('div', { class: 'bar is-split' + (t.status ? ' is-' + t.status : ''), role: 'presentation' },
+      el('div', { class: 'bar-fill', style: { width: e + '%' } }),
+      el('div', { class: 'bar-fill bar-savings', style: { width: s + '%' } }));
+  }
+
+  /** REQ-094 / REQ-095: progreso de la meta de una cuenta de ahorros. */
+  function GoalProgress(a, opts) {
+    opts = opts || {};
+    var g = calc.goalProgress(S, a.id, TODAY);
+    if (!g) { return null; }
+    var lines = [money(g.saved) + ' de ' + money(g.goal) + ' · ' + calc.formatPercent(Math.min(g.percent, 100))];
+    if (g.reached) { lines.push('✓ ¡Meta alcanzada!'); }
+    else {
+      lines.push('Le faltan ' + money(g.missing));
+      if (g.months) {
+        lines.push('Con ' + money(g.monthly) + ' al mes programados la alcanza en ' + g.months + (g.months === 1 ? ' mes' : ' meses') +
+          ' (' + calc.monthLabel(g.etaMonth).toLowerCase() + ').');
+      } else if (opts.hint) { lines.push('Programe una transferencia mensual a esta cuenta para ver cuándo la alcanza.'); }
+    }
+    return el('div', { class: 'goal' + (g.reached ? ' is-reached' : '') + (opts.plain ? ' is-plain' : '') },
+      el('strong', { class: 'goal-title', text: '🎯 ' + (g.reason || 'Meta de ahorro') }),
+      bar(g.percent, g.reached ? 'ok' : null),
+      lines.map(function (t) { return el('p', { class: 'goal-line', text: t }); }));
+  }
+
+  /** REQ-094: sección Metas de ahorro en Presupuestos. */
+  function SavingsGoals() {
+    var accs = calc.activeAccounts(S).filter(function (a) { return a.type === 'ahorros'; });
+    var withGoal = accs.filter(function (a) { return a.goalAmount; });
+    var body;
+    if (!accs.length) { body = el('p', { class: 'empty-inline', text: 'Cree una cuenta de ahorros para definir una meta.' }); }
+    else if (!withGoal.length) {
+      body = el('p', { class: 'empty-inline', text: 'Ninguna cuenta de ahorros tiene meta. En Cuentas, toque ✎ en una cuenta de ahorros y escriba la meta y su razón.' });
+    } else {
+      body = el('ul', { class: 'list' }, withGoal.map(function (a) {
+        return el('li', { class: 'goal-row' }, el('span', { class: 'muted', text: '🪙 ' + a.name }), GoalProgress(a, { plain: true, hint: true }));
+      }));
+    }
+    return card('Metas de ahorro', 'savings-goals', body);
+  }
+
   function card(title, cls) {
     var children = Array.prototype.slice.call(arguments, 2);
     return el('section', { class: 'card ' + (cls || '') },
@@ -419,14 +464,18 @@
     var sum = calc.categoryBudgetsSum(S);
     var body;
     if (t.budget === null) {
-      body = [el('p', { class: 'muted', text: 'Sin presupuesto total. Gastado en el mes: ' + money(t.spent) + '.' })];
+      body = [el('p', { class: 'muted', text: 'Sin presupuesto total. Gastado en el mes: ' + money(t.expense) +
+        (t.savings > 0 ? ' · apartado a ahorros: ' + money(t.savings) : '') + '.' })];
     } else {
       var rest = t.remaining >= 0 ? 'Quedan ' + money(t.remaining) : 'Excedido por ' + money(-t.remaining);
       body = [
         el('div', { class: 'budget-head' },
           el('strong', { class: 'big-num', text: money(t.spent) + ' de ' + money(t.budget) }),
           el('span', { class: 'badge is-' + t.status, text: calc.formatPercent(t.percent) + ' · ' + STATUS_TEXT[t.status] })),
-        bar(t.percent, t.status),
+        splitBar(t),
+        el('p', { class: 'budget-split' }, // REQ-092
+          el('span', { class: 'key key-expense', text: 'Gastos ' + money(t.expense) }),
+          el('span', { class: 'key key-savings', text: '🪙 Apartado a ahorros ' + money(t.savings) })),
         el('div', { class: 'budget-foot' }, el('span', { class: t.remaining < 0 ? 'text-debt' : 'muted', text: rest }), PerDay(t.remaining))];
       if (sum > t.budget) {
         body.push(el('p', { class: 'info-warning', role: 'note',
@@ -495,7 +544,7 @@
   }
 
   function BudgetsView() {
-    return [MonthSelector(), el('div', { class: 'grid-form' }, TotalBudgetCard({ withForm: true }), BudgetList())];
+    return [MonthSelector(), el('div', { class: 'grid-form' }, el('div', { class: 'acc-col' }, TotalBudgetCard({ withForm: true }), SavingsGoals()), BudgetList())];
   }
 
   /* ====================================================================== */
@@ -725,6 +774,11 @@
         { required: true, wide: true, hint: d.type === 'ahorros'
           ? 'Los ahorros no se gastan directamente: transfiéralos a efectivo o débito (REQ-058).'
           : 'El saldo actual se calcula con los movimientos; no se edita directamente.' })];
+    if (d.type === 'ahorros') { // REQ-093 (v6)
+      amountFields = amountFields.concat([
+        field('account', 'goalAmount', '🎯 Meta de ahorro (₡)', input('account', 'goalAmount', { inputmode: 'decimal', placeholder: 'Opcional — ej. 1000000' }), {}),
+        field('account', 'goalReason', 'Razón del ahorro', input('account', 'goalReason', { maxlength: 60, placeholder: 'Opcional — ej. Fondo de emergencia' }), {})]);
+    }
     return card(f.editingId ? 'Editar cuenta' : 'Nueva cuenta', 'form-card' + (f.editingId ? ' is-editing' : ''),
       el('form', { 'data-submit': 'account', novalidate: true, id: 'form-account' },
         el('div', { class: 'form-grid' },
@@ -769,6 +823,7 @@
       el('h3', { class: 'acc-card-name', text: a.name }),
       el('div', { class: 'acc-card-amount' }, el('span', { text: label }), el('strong', { text: main })),
       sub.map(function (t) { return el('p', { class: 'acc-card-sub', text: t }); }),
+      GoalProgress(a, { hint: opts.big }), // REQ-094
       opts.big ? null : el('button', { type: 'button', class: 'btn-link acc-card-open', 'data-action': 'OPEN_ACCOUNT', 'data-id': a.id, text: 'Ver detalle →' }));
   }
 

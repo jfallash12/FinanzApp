@@ -8,7 +8,7 @@
 
 ![Wireframe Low-Fi v2](./wireframe.png)
 
-> La imagen corresponde a la v2. Los cambios de la v3 y la v4 (programaciones) se describen en §2.
+> La imagen corresponde a la v2. Los cambios de la v3 a la v6 (programaciones, ahorro en el presupuesto y metas) se describen en §2.
 
 ## 1. Layout general
 
@@ -95,6 +95,12 @@
 - Casilla **🗓 Programar** en el formulario y en el registro rápido: frecuencia (Una vez · Cada mes · Quincenal = 15 y último), *Hasta* opcional y modo (⚡ Auto-débito · ✋ Confirmar), con la vista previa de las próximas 3 fechas y "≈ ₡X al mes" en quincenal (REQ-079, REQ-080).
 - Cada mes muestra sus ocurrencias con "🗓 Programado · Auto-débito · en N días" o "⏳ Pendiente de confirmar" (REQ-081); el Resumen agrega *Pendientes de confirmar* (✓ Confirmar · ✎ Ajustar · ⏭ Omitir), *Próximos programados* y avisos de proyección (REQ-083, REQ-087).
 - *Gastos e ingresos* agrega la lista **Pagos e ingresos programados** (REQ-089); las cuentas muestran "Proyectado a fin de mes" (REQ-088).
+
+**Ahorro en el presupuesto y metas (v6)**
+- La tarjeta **Presupuesto total** muestra una barra de dos tramos: gastos (color de estado) y **🪙 Apartado a ahorros** (rayado dorado), con su leyenda (REQ-070, REQ-092).
+- El formulario de una cuenta de **ahorros** agrega *🎯 Meta de ahorro* y *Razón del ahorro*, ambos opcionales (REQ-093).
+- La tarjeta y el detalle de la cuenta de ahorros muestran "🎯 <razón>", la barra de progreso, "₡X de ₡Y · N %", "Le faltan ₡Z" y, si hay transferencias programadas, "la alcanza en N meses (<mes año>)"; al llegar: "✓ ¡Meta alcanzada!" (REQ-094, REQ-095).
+- La pestaña **Presupuestos** agrega la sección **Metas de ahorro** bajo el presupuesto total.
 
 **Movimientos programados (v3, reemplazada)**
 - Un movimiento con fecha futura (hasta un año) se muestra con la etiqueta **"🗓 Programado · en N días"** y fondo rayado (REQ-073).

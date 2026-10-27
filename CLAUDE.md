@@ -12,7 +12,7 @@ entre cuentas (efectivo, débito, ahorros y tarjeta de crédito), calcula **sald
 en ningún momento, muestra un **resumen mensual** (ingresos, gastos, balance neto, tasa de ahorro y avisos de pago de tarjeta),
 controla **presupuestos mensuales** (total y por categoría) con alertas Verde / Ámbar / Rojo que nunca bloquean, ofrece
 un **registro rápido** de gastos e ingresos desde cualquier pestaña y **programaciones** (una vez, mensual o quincenal) con
-auto-débito o confirmación manual, proyectadas en cada mes.
+auto-débito o confirmación manual, proyectadas en cada mes, y **metas de ahorro** con su razón en las cuentas de ahorros.
 
 - **Curso:** Programación Intencional con IA Generativa — Proyecto Final (Greenfield Intentional App).
 - **Stack:** HTML + CSS puro (escrito a mano, **sin frameworks, librerías ni CDN**) + JavaScript vanilla en scripts clásicos (`window.FinanzApp`).
@@ -24,11 +24,11 @@ auto-débito o confirmación manual, proyectadas en cada mes.
 
 | Documento | Contenido |
 |---|---|
-| [`docs/requirements.md`](docs/requirements.md) | Especificación EARS v5: 85 requerimientos vigentes (REQ-001..REQ-091, sin REQ-073..REQ-078) — fuente de verdad del comportamiento |
-| [`docs/design.md`](docs/design.md) | Reglas de negocio RN-01..RN-12, decisiones D1–D29, entrevista Q1–Q11, arquitectura |
-| [`docs/data-contract.json`](docs/data-contract.json) | JSON Schema 2020-12 del estado `PersonalFinanceState` (schemaVersion 3, con migración desde 1 y 2) — contrato estricto |
+| [`docs/requirements.md`](docs/requirements.md) | Especificación EARS v6: 89 requerimientos vigentes (REQ-001..REQ-095, sin REQ-073..REQ-078) — fuente de verdad del comportamiento |
+| [`docs/design.md`](docs/design.md) | Reglas de negocio RN-01..RN-13, decisiones D1–D31, entrevista Q1–Q11, arquitectura |
+| [`docs/data-contract.json`](docs/data-contract.json) | JSON Schema 2020-12 del estado `PersonalFinanceState` (schemaVersion 3, con migración desde 1 y 2; v6 agrega campos opcionales de meta) — contrato estricto |
 | [`docs/wireframe.md`](docs/wireframe.md) | Diseño de interfaz por componentes (+ `wireframe.excalidraw` editable y `wireframe.png`) |
-| [`tasks.md`](tasks.md) | Plan de implementación por fases (T-00..T-43) con criterios de aceptación y pruebas de regresión |
+| [`tasks.md`](tasks.md) | Plan de implementación por fases (T-00..T-45) con criterios de aceptación y pruebas de regresión |
 | [`retrospective.md`](retrospective.md) | Historial de correcciones y reflexiones |
 
 Si algún artefacto contradice otro, mandan los requerimientos (REQ) y luego las reglas (RN).
@@ -50,7 +50,9 @@ Si algún artefacto contradice otro, mandan los requerimientos (REQ) y luego las
 | **Settings** (configuración) | `state.settings` → `{ monthlyBudget? }` | Persistida |
 | **BalanceSummary** | `calc.balanceSummary(state)` → `{ available, savings, debts, netWorth }` | Derivada |
 | **CreditCycle** | `calc.creditCycle(state, accountId, today)` → `{ lastCutoff, dueDate, amountDue, daysUntil }` | Derivada |
-| **TotalBudgetStatus** | `calc.totalBudgetStatus(state, 'YYYY-MM')` | Derivada |
+| **TotalBudgetStatus** | `calc.totalBudgetStatus(state, 'YYYY-MM')` → `{ spent, expense, savings, budget, percent, status, remaining }` | Derivada |
+| **SavingsSetAside** (apartado a ahorros) | `calc.savingsSetAside(state, 'YYYY-MM')` | Derivada |
+| **GoalProgress** (meta de ahorro) | `calc.goalProgress(state, accountId, today)` → `{ goal, reason, saved, missing, percent, reached, monthly, months, etaMonth }` | Derivada |
 | **Schedule** (programación) | `state.schedules[]` → `frequency`, `startDate`, `endDate?`, `mode`, `skippedDates[]` | Persistida |
 | **Occurrence** (ocurrencia) | `calc.openOccurrences(state, from, to, today)` → movimientos virtuales `{ virtual, status, mode }` | Derivada |
 
@@ -61,7 +63,9 @@ Si algún artefacto contradice otro, mandan los requerimientos (REQ) y luego las
 | **Cuenta archivada** | `archived = true`: conserva su historial, no aparece al registrar y solo se archiva con saldo 0 (REQ-063..REQ-065) |
 | **Ciclo de la tarjeta** | `cutoffDay` y `paymentDay` (1–28). Pago del periodo = deuda al último corte − pagos posteriores (RN-10) |
 | **Registro rápido** | Ventana "+ Registrar" en todas las pestañas: monto, categoría, descripción; fecha hoy y última cuenta usada (REQ-067) |
-| **Presupuesto total** | `settings.monthlyBudget` opcional: tope para todos los gastos del mes (REQ-070) |
+| **Presupuesto total** | `settings.monthlyBudget` opcional: tope para los gastos del mes **más el apartado a ahorros** (REQ-070, v6) |
+| **Apartado a ahorros** | Transferencias del mes hacia cuentas de ahorros − retiros de ahorros hacia otras cuentas (mínimo 0). Consume el presupuesto total, pero **no** es gasto (RN-13, D30) |
+| **Meta de ahorro** | `goalAmount` y `goalReason` opcionales, solo en cuentas de ahorros. Progreso = saldo actual / meta (REQ-093..REQ-095) |
 | **Cuenta de crédito** | Tipo `credito`. Tiene `creditLimit > 0` y día de corte / pago. Su saldo es ≤ 0: `deuda = −saldo`; `crédito disponible = creditLimit + saldo` |
 | **Movimiento** | `ingreso` (entra a una cuenta líquida), `gasto` (sale de cualquier cuenta) o `transferencia` (sale de `accountId` y entra a `toAccountId`) |
 | **Pago de tarjeta** | Transferencia hacia una cuenta de crédito. No puede superar la deuda (REQ-032) |
@@ -91,8 +95,9 @@ Si algún artefacto contradice otro, mandan los requerimientos (REQ) y luego las
 - **RN-08:** Duplicado = mismo `type`, `accountId`, `amount`, `date` y `description` normalizada → confirmar.
 - **RN-09:** `Disponible para gastar = Σ efectivo + débito`; `Ahorros = Σ ahorros`; `Deudas = Σ deudas`; `Patrimonio = Disponible + Ahorros − Deudas`.
 - **RN-10:** Último corte = fecha más reciente con `cutoffDay` **estrictamente anterior** a hoy; fecha de pago = primera con `paymentDay` posterior al corte; `pago del periodo = máx(0, deuda al corte − pagos posteriores)`. Aviso si faltan ≤ 7 días o ya venció.
-- **RN-11:** Presupuesto total: `% = gastos del mes / settings.monthlyBudget × 100` con los umbrales de RN-06; por día = `restante / días restantes del mes (incluye hoy)`. **Nunca bloquea.**
+- **RN-11:** Presupuesto total: `% = (gastos del mes + apartado a ahorros) / settings.monthlyBudget × 100` (v6) con los umbrales de RN-06; por día = `restante / días restantes del mes (incluye hoy)`. **Nunca bloquea.**
 - **RN-12 (v4):** Ocurrencias: una vez = primera fecha; mensual = mismo día (o último) cada mes; quincenal = 15 y último. Abierta = ni aplicada ni omitida. Resumen y presupuestos del mes incluyen las abiertas; saldo actual, patrimonio y deudas solo movimientos reales; RN-03 se evalúa al **aplicar** cada ocurrencia.
+- **RN-13 (v6):** Apartado a ahorros = Σ transferencias del mes hacia `ahorros` − Σ transferencias desde `ahorros` hacia otro tipo, mínimo 0 (incluye ocurrencias abiertas). Meta: progreso = saldo actual / `goalAmount`; aporte mensual = Σ equivalente mensual de programaciones activas hacia la cuenta; meses = ⌈falta / aporte⌉.
 
 Detalle y trazabilidad a REQ en [`docs/design.md`](docs/design.md) §3.
 
@@ -140,7 +145,7 @@ Estos son los `SHALL NOT` del sistema — no los toques sin cambiar primero `doc
 ├── .cursorrules                   ← reglas de contexto (remite a este archivo)
 ├── CLAUDE.md                      ← este archivo (memoria semántica + gobierno de la IA)
 ├── docs/
-│   ├── requirements.md            ← especificación EARS v5 (fuente de verdad)
+│   ├── requirements.md            ← especificación EARS v6 (fuente de verdad)
 │   ├── data-contract.json         ← JSON Schema PersonalFinanceState (schemaVersion 3)
 │   ├── wireframe.md               ← boceto de interfaz por componentes
 │   ├── wireframe.excalidraw       ← versión editable (excalidraw.com)
@@ -185,7 +190,7 @@ El estudiante es el **Head Chef** (arquitecto y auditor); la IA es el **Sous Che
 
 **Prohibición de parches fuera de la especificación:**
 
-1. No agregar funcionalidades, campos, pantallas ni comportamientos que no estén en `docs/requirements.md` (por ejemplo: gráficos, exportar a Excel, varias monedas, frecuencias distintas de una vez/mensual/quincenal, metas de ahorro). Si algo falta o es ambiguo, **detenerse y preguntar**; no inventar.
+1. No agregar funcionalidades, campos, pantallas ni comportamientos que no estén en `docs/requirements.md` (por ejemplo: gráficos, exportar a Excel, varias monedas, frecuencias distintas de una vez/mensual/quincenal, varias metas por cuenta). Si algo falta o es ambiguo, **detenerse y preguntar**; no inventar.
 2. No "arreglar" síntomas con casos especiales (`if` para un dato puntual, `try/catch` que oculta errores, valores mágicos). La corrección se hace en la función responsable según `docs/design.md` §7.
 3. Todo cambio de comportamiento se hace en este orden: `requirements.md` → `data-contract.json` / `design.md` → `tasks.md` → código → `tests/pruebas.js`.
 4. Al corregir o ajustar, aplicar **Unchanged Behavior** (§8): declarar qué no puede cambiar, tocar solo los archivos necesarios y volver a pasar las pruebas.

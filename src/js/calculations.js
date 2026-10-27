@@ -572,12 +572,51 @@
   }
 
   /** RN-11 (REQ-070): gastos del mes vs. presupuesto total (settings.monthlyBudget). */
-  function totalBudgetStatus(state, ym) {
-    var spent = monthSummary(state, ym).expense;
+  /**
+   * RN-13 / REQ-092: apartado a ahorros del mes = transferencias hacia cuentas de ahorros
+   * − transferencias desde ahorros hacia cuentas de otro tipo (mínimo 0), con ocurrencias abiertas.
+   */
+  function savingsSetAside(state, ym, today) {
+    function isSav(id) { var a = getAccount(state, id); return !!a && a.type === 'ahorros'; }
+    var list = monthItems(state, ym, today).filter(function (t) { return t.type === 'transferencia'; });
+    var inn = sumAmounts(list.filter(function (t) { return isSav(t.toAccountId) && !isSav(t.accountId); }));
+    var out = sumAmounts(list.filter(function (t) { return isSav(t.accountId) && !isSav(t.toAccountId); }));
+    return Math.max(0, roundMoney(inn - out));
+  }
+
+  /** REQ-070 (v6): consumido = gastos del mes + apartado a ahorros (D30). */
+  function totalBudgetStatus(state, ym, today) {
+    var expense = monthSummary(state, ym, today).expense;
+    var savings = savingsSetAside(state, ym, today);
+    var spent = roundMoney(expense + savings);
     var budget = state.settings && state.settings.monthlyBudget;
-    if (!budget) { return { spent: spent, budget: null, percent: null, status: null, remaining: null }; }
+    var base = { spent: spent, expense: expense, savings: savings };
+    if (!budget) { return Object.assign(base, { budget: null, percent: null, status: null, remaining: null }); }
     var percent = (spent / budget) * 100;
-    return { spent: spent, budget: budget, percent: percent, status: statusFromPercent(percent), remaining: roundMoney(budget - spent) };
+    return Object.assign(base, { budget: budget, percent: percent, status: statusFromPercent(percent), remaining: roundMoney(budget - spent),
+      expensePercent: (expense / budget) * 100, savingsPercent: (savings / budget) * 100 });
+  }
+
+  /**
+   * REQ-094 / REQ-095 (RN-13): progreso de la meta de una cuenta de ahorros.
+   * null si la cuenta no tiene meta. monthly = aporte mensual de programaciones activas hacia la cuenta.
+   */
+  function goalProgress(state, accountId, today) {
+    today = today || todayISO();
+    var a = getAccount(state, accountId);
+    if (!a || a.type !== 'ahorros' || !a.goalAmount) { return null; }
+    var saved = currentBalance(state, accountId, today);
+    var missing = Math.max(0, roundMoney(a.goalAmount - saved));
+    var monthly = sumAmounts((state.schedules || []).filter(function (sch) {
+      return sch.type === 'transferencia' && sch.toAccountId === accountId && sch.frequency !== 'once' &&
+        (!sch.endDate || sch.endDate >= today);
+    }).map(function (sch) { return { amount: monthlyEquivalent(sch) }; }));
+    var months = missing > 0 && monthly > 0 ? Math.ceil(missing / monthly) : null;
+    return {
+      goal: a.goalAmount, reason: a.goalReason || null, saved: saved, missing: missing,
+      percent: (saved / a.goalAmount) * 100, reached: saved >= a.goalAmount,
+      monthly: monthly, months: months, etaMonth: months ? addMonths(monthOf(today), months) : null
+    };
   }
 
   /** REQ-071: suma de los presupuestos por categoría. */
@@ -678,6 +717,8 @@
     runningBalances: runningBalances,
     lastUsedAccountId: lastUsedAccountId,
     totalBudgetStatus: totalBudgetStatus,
+    savingsSetAside: savingsSetAside,
+    goalProgress: goalProgress,
     categoryBudgetsSum: categoryBudgetsSum,
     normalize: normalize,
     accountBalance: accountBalance,

@@ -75,6 +75,10 @@
       acc.cutoffDay = Number(str(d.cutoffDay).trim());
       acc.paymentDay = Number(str(d.paymentDay).trim());
     } else { acc.initialBalance = Number(str(d.initialBalance).trim()); }
+    if (d.type === 'ahorros' && str(d.goalAmount).trim() !== '') { // REQ-093 (v6): solo ahorros; otro tipo elimina la meta
+      acc.goalAmount = Number(str(d.goalAmount).trim());
+      if (str(d.goalReason).trim() !== '') { acc.goalReason = str(d.goalReason).trim(); }
+    }
     acc.archived = !!base.archived;
     acc.createdAt = base.createdAt;
     return acc;
@@ -100,6 +104,13 @@
     } else if (ACCOUNT_TYPES.indexOf(d.type) !== -1) {
       var ini = parseAmount(d.initialBalance, { label: 'El saldo inicial', allowZero: true }); // REQ-004
       if (ini.error) { errors.initialBalance = ini.error; }
+    }
+    if (d.type === 'ahorros') { // REQ-093 (v6): meta y razón opcionales
+      var goal = parseAmount(d.goalAmount, { label: 'La meta', optional: true });
+      var reason = str(d.goalReason).trim();
+      if (goal.error) { errors.goalAmount = goal.error; }
+      else if (reason !== '' && goal.value === null) { errors.goalAmount = 'Indique el monto de la meta para «' + reason.slice(0, 30) + '».'; }
+      if (reason.length > 60) { errors.goalReason = 'La razón admite como máximo 60 caracteres.'; }
     }
 
     // REQ-009: el nuevo saldo inicial / límite no puede violar el invariante de fondos.
