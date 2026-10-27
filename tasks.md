@@ -6,7 +6,7 @@
 > [`docs/decisiones.md`](docs/decisiones.md) · [`docs/data-contract.json`](docs/data-contract.json) ·
 > [`docs/wireframe.md`](docs/wireframe.md) · reglas en [`CLAUDE.md`](CLAUDE.md) y [`.cursorrules`](.cursorrules).
 
-**Estado:** Fases 0–11 completadas; Fase 12 en curso · Leyenda: `[ ]` pendiente · `[x]` hecha.
+**Estado:** ✅ todas las tareas completadas · Leyenda: `[ ]` pendiente · `[x]` hecha.
 Los números de tarea se conservan porque los commits los citan.
 
 ---
@@ -215,7 +215,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
   *Aceptación:* octubre (₡438,600) frente a septiembre (₡15,000) → "▲ 2824 % más que septiembre 2026"; septiembre → "Sin gastos en agosto 2026".
 - [x] **T-52 Categorías con más gasto.** REQ-101, D38: `calc.topCategories`, `TopCategories`.
   *Aceptación:* octubre → Vivienda ₡250,000 (57 %), Alimentación ₡99,700 (23 %), Servicios ₡38,900 (9 %); agosto sin gastos → "Aún no hay gastos en agosto 2026".
-- [ ] **T-53 Primeros pasos.** REQ-102, D39: `calc.firstSteps`, `FirstSteps` en lugar del mensaje "Bienvenido…" del Resumen.
+- [x] **T-53 Primeros pasos.** REQ-102, D39: `calc.firstSteps`, `FirstSteps` en lugar del mensaje "Bienvenido…" del Resumen.
   *Aceptación:* app vacía → 3 pasos pendientes y botón «Ir a Cuentas»; con una cuenta → paso 1 ✓ y botón a «Gastos e ingresos»; con los datos de prueba la tarjeta no aparece.
 
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)

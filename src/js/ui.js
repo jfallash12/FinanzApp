@@ -536,9 +536,32 @@
       opts.withForm ? SettingsForm() : el('button', { type: 'button', class: 'btn btn-ghost btn-sm', 'data-action': 'SET_TAB', 'data-tab': 'presupuestos', text: 'Ver presupuestos →' }));
   }
 
+  function FirstSteps() { // REQ-102
+    var st = calc.firstSteps(S);
+    if (st.done) { return null; }
+    var steps = [
+      { ok: st.account, text: 'Cree una cuenta (efectivo, débito, ahorros o tarjeta de crédito)', tab: 'cuentas', button: 'Ir a Cuentas' },
+      { ok: st.transaction, text: 'Registre su primer gasto o ingreso', tab: 'movimientos', button: 'Ir a Gastos e ingresos' },
+      { ok: st.budget, text: 'Defina un presupuesto, total o por categoría', tab: 'presupuestos', button: 'Ir a Presupuestos' }
+    ];
+    var next = steps.filter(function (x) { return !x.ok; })[0];
+    return card('👋 Primeros pasos', 'first-steps',
+      el('ol', { class: 'steps' }, steps.map(function (x) {
+        return el('li', { class: 'step' + (x.ok ? ' is-done' : '') },
+          el('span', { class: 'step-mark', 'aria-hidden': 'true', text: x.ok ? '✓' : '○' }),
+          el('span', { class: 'grow', text: x.text }),
+          el('span', { class: 'badge ' + (x.ok ? 'is-ok' : 'is-todo'), text: x.ok ? 'Hecho' : 'Pendiente' })); // REQ-057
+      })),
+      el('div', { class: 'steps-foot' },
+        el('button', { type: 'button', class: 'btn btn-primary', 'data-action': 'SET_TAB', 'data-tab': next.tab, text: next.button }),
+        st.account ? null : el('span', { class: 'muted small', text: '¿Ya tiene un respaldo? Impórtelo en la pestaña Cuentas.' })));
+  }
+
   function SummaryView() {
-    if (!calc.activeAccounts(S).length) { return [MonthSelector(), NoAccounts('Bienvenido a FinanzApp. Para empezar, cree su primera cuenta (efectivo, débito, ahorros o tarjeta de crédito).')]; }
-    return [MonthSelector(), PaymentAlerts(), ProjectionAlerts(), PendingOccurrences(), SummaryCards(), TopCategories(), UpcomingScheduled(), el('div', { class: 'grid-2' }, AccountsOverview(), TotalBudgetCard())];
+    if (!calc.activeAccounts(S).length) {
+      return [MonthSelector(), FirstSteps() || NoAccounts('No tiene cuentas activas. Cree una cuenta o reactive una archivada para ver su resumen.')];
+    }
+    return [MonthSelector(), FirstSteps(), PaymentAlerts(), ProjectionAlerts(), PendingOccurrences(), SummaryCards(), TopCategories(), UpcomingScheduled(), el('div', { class: 'grid-2' }, AccountsOverview(), TotalBudgetCard())];
   }
 
   /* ====================================================================== */

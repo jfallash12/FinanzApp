@@ -402,6 +402,16 @@
     return eq(calc.topCategories(s, '2026-09', 3, TODAY).map(function (x) { return x.category.name; }).join(','), 'Alimentación,Entretenimiento,Salud');
   });
 
+  /* ---------- Primeros pasos (REQ-102) ---------- */
+  test('REQ-102 app vacía → 3 pasos pendientes', function () {
+    var f = calc.firstSteps(storage.emptyState()); return eq([f.account, f.transaction, f.budget, f.done].join(','), 'false,false,false,false');
+  });
+  test('REQ-102 con datos de prueba → completos', function () { return eq(calc.firstSteps(DATA).done, true); });
+  test('REQ-102 presupuesto total también cuenta', function () {
+    var s = clone(DATA); s.categories.forEach(function (c) { delete c.monthlyBudget; });
+    var a = calc.firstSteps(s).budget; s.settings = {}; return eq(a + ',' + calc.firstSteps(s).budget, 'true,false');
+  });
+
   /* ---------- Reporte ---------- */
   var passed = results.filter(function (r) { return r.ok; }).length;
   var out = document.getElementById('out');

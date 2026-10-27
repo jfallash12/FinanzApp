@@ -552,6 +552,14 @@
       scheduledIncome: sum('ingreso', true), scheduledExpense: sum('gasto', true) };
   }
 
+  /** REQ-102 / D39: primeros pasos, derivados del estado (no se guardan). */
+  function firstSteps(state) {
+    var account = state.accounts.length > 0;
+    var transaction = state.transactions.length > 0;
+    var budget = !!state.settings.monthlyBudget || state.categories.some(function (c) { return !!c.monthlyBudget; });
+    return { account: account, transaction: transaction, budget: budget, done: account && transaction && budget };
+  }
+
   /**
    * REQ-101 / D38: hasta n categorías de gasto con más gasto del mes (incluye programados),
    * de mayor a menor y, si empatan, por nombre. percent = % del total de gastos del mes.
@@ -749,6 +757,7 @@
     monthItems: monthItems,
     monthComparison: monthComparison,
     topCategories: topCategories,
+    firstSteps: firstSteps,
     remainingDays: remainingDays,
     monthLabel: monthLabel,
     toCents: toCents,
