@@ -1,0 +1,25 @@
+# Dependencias
+node_modules/
+
+# Entorno
+.env
+.env.local
+*.local
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build / salida
+dist/
+build/
+
+# Capturas de pruebas
+/*.png
+src/**/*.png

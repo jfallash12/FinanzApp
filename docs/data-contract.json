@@ -1,0 +1,874 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jfallash12/FinanzApp/docs/data-contract.json",
+  "title": "PersonalFinanceState",
+  "description": "Estado completo de la aplicación FinanzApp. Todo este objeto se persiste en LocalStorage (clave 'finanzapp.state') en cada mutación y se restaura al iniciar (REQ-051, REQ-052). Versión 2: cuentas de ahorros, archivadas y con fechas de tarjeta; presupuesto total mensual en settings. Versión 3: programaciones (schedules) de pagos e ingresos fijos. Un estado schemaVersion 1 o 2 se migra al iniciar (REQ-072, REQ-090).",
+  "$comment": "Campos DERIVADOS, nunca persistidos (se recalculan en cada render): saldo de cuenta = initialBalance + ingresos + transferencias entrantes - gastos - transferencias salientes (RN-01); deuda y crédito disponible (RN-01); patrimonio (RN-02); ingresos, gastos, balance neto y tasa de ahorro del mes (RN-05); gastado y estado del presupuesto por categoría (RN-06); neto del día (RN-07); disponible para gastar, ahorros y deudas (RN-09); último corte, fecha de pago y pago del periodo (RN-10); estado del presupuesto total (RN-11). Reglas que JSON Schema NO puede expresar y que valida validations.js: nombres únicos normalizados de cuentas y categorías (REQ-003, REQ-014); accountId, toAccountId y categoryId deben existir (integridad referencial); el tipo de la categoría coincide con el tipo del movimiento (REQ-028); toAccountId != accountId (REQ-029); fecha de movimiento no posterior a hoy (REQ-027, v4); primera fecha de una programación entre hoy y hoy + 365 días al crearla (REQ-079); cada (scheduleId, occurrenceDate) aparece en un solo movimiento y scheduleId debe existir (REQ-082, REQ-086); las ocurrencias y su estado (programada, pendiente, aplicada, omitida) se derivan, no se persisten (REQ-080, REQ-081); ninguna cuenta líquida con saldo negativo y ninguna cuenta de crédito con deuda mayor a su límite ni con saldo positivo (RN-03, REQ-030..REQ-032); ningún ingreso en una cuenta de crédito (REQ-032); ningún gasto desde una cuenta de ahorros (REQ-058); solo se archiva una cuenta con saldo 0 (REQ-063); montos con máximo 2 decimales (REQ-024).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "accounts",
+    "categories",
+    "transactions",
+    "schedules",
+    "settings"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "description": "Versión del contrato. Un estado válido con versión 1 o 2 se migra a 3 (REQ-072, REQ-090); cualquier otro estado que no valide se trata como corrupto (REQ-053).",
+      "const": 3
+    },
+    "accounts": {
+      "description": "Cuentas del usuario (REQ-001..REQ-011). Puede estar vacía.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/account"
+      }
+    },
+    "categories": {
+      "description": "Categorías de gasto e ingreso (REQ-012..REQ-019). Siempre deben existir las dos categorías del sistema.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/category"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "cat-otros-gastos"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "cat-otros-ingresos"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      ]
+    },
+    "transactions": {
+      "description": "Movimientos ingresados por el usuario (REQ-020..REQ-037). Nunca se generan automáticamente (REQ-050).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/transaction"
+      }
+    },
+    "schedules": {
+      "description": "Programaciones de pagos e ingresos fijos (REQ-079..REQ-090). Las ocurrencias se derivan; solo se guardan las omitidas.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/schedule"
+      }
+    },
+    "settings": {
+      "description": "Configuración del usuario (REQ-070).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "monthlyBudget": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/money"
+            },
+            {
+              "exclusiveMinimum": 0
+            }
+          ],
+          "description": "Presupuesto total mensual opcional para todos los gastos (REQ-070)."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "isoDate": {
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
+      "description": "Fecha ISO YYYY-MM-DD. La validez de calendario (p. ej. 2026-02-30) la verifica calculations.isValidISODate."
+    },
+    "money": {
+      "type": "number",
+      "multipleOf": 0.01,
+      "description": "Monto en colones con máximo 2 decimales (REQ-024)."
+    },
+    "nonBlankText": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "account": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "type",
+        "archived",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^acc-[a-z0-9-]+$"
+        },
+        "name": {
+          "$ref": "#/$defs/nonBlankText",
+          "maxLength": 40
+        },
+        "type": {
+          "enum": [
+            "efectivo",
+            "debito",
+            "ahorros",
+            "credito"
+          ]
+        },
+        "initialBalance": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/money"
+            },
+            {
+              "minimum": 0
+            }
+          ],
+          "description": "Solo cuentas líquidas (efectivo, débito, ahorros). 0 es válido (REQ-004)."
+        },
+        "creditLimit": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/money"
+            },
+            {
+              "exclusiveMinimum": 0
+            }
+          ],
+          "description": "Solo cuentas de crédito (REQ-005)."
+        },
+        "cutoffDay": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 28,
+          "description": "Solo crédito: día de corte (REQ-060). Opcional solo en tarjetas migradas de la versión 1."
+        },
+        "paymentDay": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 28,
+          "description": "Solo crédito: día de pago (REQ-060)."
+        },
+        "archived": {
+          "type": "boolean",
+          "description": "true = cuenta archivada: conserva su historial pero no se usa en movimientos nuevos (REQ-063..REQ-065)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "credito"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "creditLimit"
+        ],
+        "not": {
+          "required": [
+            "initialBalance"
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "initialBalance"
+        ],
+        "allOf": [
+          {
+            "not": {
+              "required": [
+                "creditLimit"
+              ]
+            }
+          },
+          {
+            "not": {
+              "required": [
+                "cutoffDay"
+              ]
+            }
+          },
+          {
+            "not": {
+              "required": [
+                "paymentDay"
+              ]
+            }
+          }
+        ]
+      },
+      "dependentRequired": {
+        "cutoffDay": [
+          "paymentDay"
+        ],
+        "paymentDay": [
+          "cutoffDay"
+        ]
+      }
+    },
+    "category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "system"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^cat-[a-z0-9-]+$"
+        },
+        "name": {
+          "$ref": "#/$defs/nonBlankText",
+          "maxLength": 40
+        },
+        "kind": {
+          "enum": [
+            "gasto",
+            "ingreso"
+          ]
+        },
+        "monthlyBudget": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/money"
+            },
+            {
+              "exclusiveMinimum": 0
+            }
+          ],
+          "description": "Presupuesto mensual opcional; ausente = 'Sin presupuesto' (REQ-043). Solo en categorías de gasto (REQ-015)."
+        },
+        "system": {
+          "type": "boolean",
+          "description": "true solo para cat-otros-gastos y cat-otros-ingresos: no se eliminan ni cambian de tipo (REQ-016)."
+        }
+      },
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "ingreso"
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "monthlyBudget"
+          ]
+        }
+      }
+    },
+    "transaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "accountId",
+        "amount",
+        "date",
+        "description",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^mov-[a-z0-9-]+$"
+        },
+        "type": {
+          "enum": [
+            "ingreso",
+            "gasto",
+            "transferencia"
+          ]
+        },
+        "accountId": {
+          "type": "string",
+          "pattern": "^acc-[a-z0-9-]+$",
+          "description": "Cuenta de origen (gasto, transferencia) o de destino (ingreso)."
+        },
+        "toAccountId": {
+          "type": "string",
+          "pattern": "^acc-[a-z0-9-]+$",
+          "description": "Solo transferencias: cuenta destino, distinta de accountId (REQ-029)."
+        },
+        "categoryId": {
+          "type": "string",
+          "pattern": "^cat-[a-z0-9-]+$",
+          "description": "Solo ingresos y gastos; su kind coincide con type (REQ-028)."
+        },
+        "amount": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/money"
+            },
+            {
+              "exclusiveMinimum": 0
+            }
+          ]
+        },
+        "date": {
+          "$ref": "#/$defs/isoDate"
+        },
+        "description": {
+          "$ref": "#/$defs/nonBlankText",
+          "maxLength": 80
+        },
+        "scheduleId": {
+          "type": "string",
+          "pattern": "^prg-[a-z0-9-]+$",
+          "description": "Programación que originó el movimiento (auto-débito, confirmación o ajuste)."
+        },
+        "occurrenceDate": {
+          "$ref": "#/$defs/isoDate",
+          "description": "Fecha de la ocurrencia que este movimiento aplica (REQ-082, REQ-083)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "transferencia"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "toAccountId"
+        ],
+        "not": {
+          "required": [
+            "categoryId"
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "categoryId"
+        ],
+        "not": {
+          "required": [
+            "toAccountId"
+          ]
+        }
+      },
+      "dependentRequired": {
+        "scheduleId": [
+          "occurrenceDate"
+        ],
+        "occurrenceDate": [
+          "scheduleId"
+        ]
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "accountId",
+        "amount",
+        "description",
+        "frequency",
+        "startDate",
+        "mode",
+        "skippedDates",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^prg-[a-z0-9-]+$"
+        },
+        "type": {
+          "enum": [
+            "ingreso",
+            "gasto",
+            "transferencia"
+          ]
+        },
+        "accountId": {
+          "type": "string",
+          "pattern": "^acc-[a-z0-9-]+$"
+        },
+        "toAccountId": {
+          "type": "string",
+          "pattern": "^acc-[a-z0-9-]+$"
+        },
+        "categoryId": {
+          "type": "string",
+          "pattern": "^cat-[a-z0-9-]+$"
+        },
+        "amount": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/money"
+            },
+            {
+              "exclusiveMinimum": 0
+            }
+          ],
+          "description": "Monto de CADA ocurrencia (en quincenal, por quincena)."
+        },
+        "description": {
+          "$ref": "#/$defs/nonBlankText",
+          "maxLength": 80
+        },
+        "frequency": {
+          "enum": [
+            "once",
+            "monthly",
+            "biweekly"
+          ],
+          "description": "once = una vez; monthly = mismo día cada mes (o último día); biweekly = días 15 y último de cada mes (REQ-080)."
+        },
+        "startDate": {
+          "$ref": "#/$defs/isoDate"
+        },
+        "endDate": {
+          "$ref": "#/$defs/isoDate",
+          "description": "Opcional; no aplica a once."
+        },
+        "mode": {
+          "enum": [
+            "auto",
+            "manual"
+          ],
+          "description": "auto = auto-débito (REQ-082); manual = confirmar (REQ-083)."
+        },
+        "skippedDates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/isoDate"
+          },
+          "uniqueItems": true,
+          "description": "Ocurrencias omitidas (REQ-084, REQ-086)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "transferencia"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "toAccountId"
+            ],
+            "not": {
+              "required": [
+                "categoryId"
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "categoryId"
+            ],
+            "not": {
+              "required": [
+                "toAccountId"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "frequency": {
+                "const": "once"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "endDate"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": 3,
+      "accounts": [],
+      "categories": [
+        {
+          "id": "cat-alimentacion",
+          "name": "Alimentación",
+          "kind": "gasto",
+          "system": false
+        },
+        {
+          "id": "cat-transporte",
+          "name": "Transporte",
+          "kind": "gasto",
+          "system": false
+        },
+        {
+          "id": "cat-vivienda",
+          "name": "Vivienda",
+          "kind": "gasto",
+          "system": false
+        },
+        {
+          "id": "cat-servicios",
+          "name": "Servicios",
+          "kind": "gasto",
+          "system": false
+        },
+        {
+          "id": "cat-entretenimiento",
+          "name": "Entretenimiento",
+          "kind": "gasto",
+          "system": false
+        },
+        {
+          "id": "cat-salud",
+          "name": "Salud",
+          "kind": "gasto",
+          "system": false
+        },
+        {
+          "id": "cat-otros-gastos",
+          "name": "Otros gastos",
+          "kind": "gasto",
+          "system": true
+        },
+        {
+          "id": "cat-salario",
+          "name": "Salario",
+          "kind": "ingreso",
+          "system": false
+        },
+        {
+          "id": "cat-otros-ingresos",
+          "name": "Otros ingresos",
+          "kind": "ingreso",
+          "system": true
+        }
+      ],
+      "transactions": [],
+      "schedules": [],
+      "settings": {}
+    },
+    {
+      "schemaVersion": 3,
+      "accounts": [
+        {
+          "id": "acc-efectivo",
+          "name": "Efectivo",
+          "type": "efectivo",
+          "initialBalance": 25000,
+          "archived": false,
+          "createdAt": "2026-09-01T08:00:00.000Z"
+        },
+        {
+          "id": "acc-bac",
+          "name": "Cuenta BAC",
+          "type": "debito",
+          "initialBalance": 150000,
+          "archived": false,
+          "createdAt": "2026-09-01T08:01:00.000Z"
+        },
+        {
+          "id": "acc-ahorros",
+          "name": "Ahorros BN",
+          "type": "ahorros",
+          "initialBalance": 200000,
+          "archived": false,
+          "createdAt": "2026-09-01T08:01:30.000Z"
+        },
+        {
+          "id": "acc-visa",
+          "name": "Tarjeta Visa",
+          "type": "credito",
+          "creditLimit": 300000,
+          "cutoffDay": 15,
+          "paymentDay": 28,
+          "archived": false,
+          "createdAt": "2026-09-01T08:02:00.000Z"
+        },
+        {
+          "id": "acc-tarjeta-vieja",
+          "name": "Tarjeta vieja",
+          "type": "credito",
+          "creditLimit": 100000,
+          "cutoffDay": 5,
+          "paymentDay": 20,
+          "archived": true,
+          "createdAt": "2026-01-10T08:00:00.000Z"
+        }
+      ],
+      "categories": [
+        {
+          "id": "cat-alimentacion",
+          "name": "Alimentación",
+          "kind": "gasto",
+          "monthlyBudget": 120000,
+          "system": false
+        },
+        {
+          "id": "cat-transporte",
+          "name": "Transporte",
+          "kind": "gasto",
+          "monthlyBudget": 40000,
+          "system": false
+        },
+        {
+          "id": "cat-vivienda",
+          "name": "Vivienda",
+          "kind": "gasto",
+          "monthlyBudget": 250000,
+          "system": false
+        },
+        {
+          "id": "cat-servicios",
+          "name": "Servicios",
+          "kind": "gasto",
+          "monthlyBudget": 55000,
+          "system": false
+        },
+        {
+          "id": "cat-entretenimiento",
+          "name": "Entretenimiento",
+          "kind": "gasto",
+          "monthlyBudget": 30000,
+          "system": false
+        },
+        {
+          "id": "cat-salud",
+          "name": "Salud",
+          "kind": "gasto",
+          "system": false
+        },
+        {
+          "id": "cat-otros-gastos",
+          "name": "Otros gastos",
+          "kind": "gasto",
+          "system": true
+        },
+        {
+          "id": "cat-salario",
+          "name": "Salario",
+          "kind": "ingreso",
+          "system": false
+        },
+        {
+          "id": "cat-otros-ingresos",
+          "name": "Otros ingresos",
+          "kind": "ingreso",
+          "system": true
+        }
+      ],
+      "transactions": [
+        {
+          "id": "mov-001",
+          "type": "gasto",
+          "accountId": "acc-efectivo",
+          "categoryId": "cat-alimentacion",
+          "amount": 15000,
+          "date": "2026-09-28",
+          "description": "Panadería",
+          "createdAt": "2026-09-28T15:00:00.000Z"
+        },
+        {
+          "id": "mov-002",
+          "type": "ingreso",
+          "accountId": "acc-bac",
+          "categoryId": "cat-salario",
+          "amount": 650000,
+          "date": "2026-10-01",
+          "description": "Salario octubre",
+          "createdAt": "2026-10-01T14:00:00.000Z"
+        },
+        {
+          "id": "mov-003",
+          "type": "gasto",
+          "accountId": "acc-bac",
+          "categoryId": "cat-vivienda",
+          "amount": 250000,
+          "date": "2026-10-02",
+          "description": "Alquiler octubre",
+          "createdAt": "2026-10-02T14:00:00.000Z"
+        },
+        {
+          "id": "mov-013",
+          "type": "transferencia",
+          "accountId": "acc-bac",
+          "toAccountId": "acc-ahorros",
+          "amount": 50000,
+          "date": "2026-10-02",
+          "description": "Ahorro mensual",
+          "createdAt": "2026-10-02T15:00:00.000Z"
+        },
+        {
+          "id": "mov-004",
+          "type": "transferencia",
+          "accountId": "acc-bac",
+          "toAccountId": "acc-efectivo",
+          "amount": 40000,
+          "date": "2026-10-03",
+          "description": "Retiro en cajero",
+          "createdAt": "2026-10-03T14:00:00.000Z"
+        },
+        {
+          "id": "mov-005",
+          "type": "gasto",
+          "accountId": "acc-visa",
+          "categoryId": "cat-alimentacion",
+          "amount": 68500,
+          "date": "2026-10-05",
+          "description": "Supermercado",
+          "createdAt": "2026-10-05T14:00:00.000Z"
+        },
+        {
+          "id": "mov-006",
+          "type": "gasto",
+          "accountId": "acc-bac",
+          "categoryId": "cat-servicios",
+          "amount": 38900,
+          "date": "2026-10-08",
+          "description": "Electricidad y agua",
+          "createdAt": "2026-10-08T14:00:00.000Z"
+        },
+        {
+          "id": "mov-007",
+          "type": "gasto",
+          "accountId": "acc-efectivo",
+          "categoryId": "cat-transporte",
+          "amount": 18000,
+          "date": "2026-10-10",
+          "description": "Gasolina",
+          "createdAt": "2026-10-10T14:00:00.000Z"
+        },
+        {
+          "id": "mov-008",
+          "type": "gasto",
+          "accountId": "acc-visa",
+          "categoryId": "cat-entretenimiento",
+          "amount": 27500,
+          "date": "2026-10-12",
+          "description": "Cine y cena",
+          "createdAt": "2026-10-12T14:00:00.000Z"
+        },
+        {
+          "id": "mov-012",
+          "type": "ingreso",
+          "accountId": "acc-efectivo",
+          "categoryId": "cat-otros-ingresos",
+          "amount": 35000,
+          "date": "2026-10-14",
+          "description": "Venta de libros",
+          "createdAt": "2026-10-14T14:00:00.000Z"
+        },
+        {
+          "id": "mov-009",
+          "type": "gasto",
+          "accountId": "acc-efectivo",
+          "categoryId": "cat-alimentacion",
+          "amount": 31200,
+          "date": "2026-10-15",
+          "description": "Feria del agricultor",
+          "createdAt": "2026-10-15T14:00:00.000Z"
+        },
+        {
+          "id": "mov-010",
+          "type": "gasto",
+          "accountId": "acc-efectivo",
+          "categoryId": "cat-transporte",
+          "amount": 4500,
+          "date": "2026-10-15",
+          "description": "Bus",
+          "createdAt": "2026-10-15T15:00:00.000Z"
+        },
+        {
+          "id": "mov-011",
+          "type": "transferencia",
+          "accountId": "acc-bac",
+          "toAccountId": "acc-visa",
+          "amount": 60000,
+          "date": "2026-10-20",
+          "description": "Pago tarjeta",
+          "createdAt": "2026-10-20T14:00:00.000Z"
+        }
+      ],
+      "schedules": [
+        {
+          "id": "prg-salario",
+          "type": "ingreso",
+          "accountId": "acc-bac",
+          "categoryId": "cat-salario",
+          "amount": 650000,
+          "description": "Salario",
+          "frequency": "monthly",
+          "startDate": "2026-11-01",
+          "mode": "auto",
+          "skippedDates": [],
+          "createdAt": "2026-10-20T10:00:00.000Z"
+        },
+        {
+          "id": "prg-gasolina",
+          "type": "gasto",
+          "accountId": "acc-efectivo",
+          "categoryId": "cat-transporte",
+          "amount": 20000,
+          "description": "Gasolina",
+          "frequency": "biweekly",
+          "startDate": "2026-11-01",
+          "mode": "manual",
+          "skippedDates": [],
+          "createdAt": "2026-10-20T10:01:00.000Z"
+        }
+      ],
+      "settings": {
+        "monthlyBudget": 450000
+      }
+    }
+  ]
+}

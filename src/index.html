@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- REQ-047 / D6: la app no puede hacer peticiones de red; solo carga sus propios archivos. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>FinanzApp — Finanzas personales</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="app">
+    <noscript>Esta aplicación necesita JavaScript habilitado.</noscript>
+  </div>
+
+  <!-- Scripts clásicos (no ES Modules: no funcionan en file://). Orden obligatorio (design.md §5.1). -->
+  <script src="js/calculations.js"></script>
+  <script src="js/validations.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

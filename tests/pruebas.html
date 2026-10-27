@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'none'">
+  <title>FinanzApp — Pruebas de regresión</title>
+  <style>
+    body { font: 14px/1.5 system-ui, sans-serif; max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 3px 0; border-bottom: 1px solid #eee; }
+    .ok { color: #15803d; } .fail { color: #c2283b; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>FinanzApp — Pruebas de regresión (lógica pura)</h1>
+  <p>Abra este archivo con doble clic. No modifica los datos de la aplicación: usa una copia del dataset oficial.</p>
+  <div id="out"></div>
+  <script src="../src/js/calculations.js"></script>
+  <script src="../src/js/validations.js"></script>
+  <script src="../src/js/storage.js"></script>
+  <script src="pruebas.js"></script>
+</body>
+</html>
