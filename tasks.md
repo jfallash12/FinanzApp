@@ -218,6 +218,8 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
   *Aceptación:* con el dataset, octubre muestra "Gastos ₡438,600 · Apartado a ahorros ₡50,000" y 109 % Excedido; el Resumen sigue mostrando gastos ₡438,600 y la tasa de ahorro no cambia.
 - [x] **T-45 Metas de ahorro.** REQ-093..REQ-095, D31: campos opcionales `goalAmount` y `goalReason` (solo ahorros) en contrato, `storage.checkAccount`, `validateAccount`/`draftToAccount` y `AccountForm`; `calc.goalProgress` (saldo / meta, aporte mensual de programaciones, mes estimado); `GoalProgress` en la tarjeta y el detalle de la cuenta; sección **Metas de ahorro** en Presupuestos; aviso "🎉 ¡Alcanzó su meta!".
   *Aceptación:* "Ahorros BN" muestra "🎯 Fondo de emergencia · ₡250,000 de ₡1,000,000 · 25 % · Le faltan ₡750,000"; con una transferencia mensual programada de ₡100,000 indica "la alcanza en 8 meses (junio 2027)"; una razón sin monto se rechaza.
+- [x] **T-46 (v6.1) Detalle de aportes de la meta.** Pedido del estudiante: "asigné ₡100,000 al mes y la meta dice ₡200,000". REQ-094 ajustado, D32: `goalProgress` devuelve `sources` y `duplicates`; `GoalProgress` lista cada transferencia programada con su frecuencia y advierte repetidas.
+  *Aceptación:* una transferencia mensual de ₡100,000 muestra "• <descripción>: ₡100,000 cada mes"; una quincenal muestra "cada quincena (15 y último) = ₡200,000 al mes"; dos iguales muestran el aviso de repetidas.
 
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)
 
@@ -270,7 +272,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
 | 087 | T-38, T-40 | 088 | T-38, T-40 | 089 | T-39, T-40 |
 | 090 | T-37 | 027 *(v4)* | T-39 | 050 *(v4)* | T-39 |
 | 070 *(v6)* | T-44 | 092 | T-44 | 093 | T-45 |
-| 094 | T-45 | 095 | T-45 | | |
+| 094 | T-45, T-46 | 095 | T-45 | | |
 
 ## Registro de ejecución
 
@@ -288,3 +290,4 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
 | 2026-10-26 | T-42 | v5.1: `tests/pruebas.html` 118/118 y recorrido de punta a punta 151/151
 | 2026-10-26 | T-43 | v5.2: `tests/pruebas.html` 120/120 y recorrido de punta a punta 151/151
 | 2026-10-26 | T-44, T-45 | Versión 6: `tests/pruebas.html` 129/129 y recorrido de punta a punta 157/157
+| 2026-10-26 | T-46 | v6.1: `tests/pruebas.html` 131/131 y recorrido de punta a punta 157/157

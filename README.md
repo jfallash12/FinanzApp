@@ -59,7 +59,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(<ejemplo>));
 
 Para empezar de cero: `localStorage.removeItem('finanzapp.state')` y F5.
 
-**Pruebas:** abra `tests/pruebas.html` con doble clic → 129 pruebas en verde.
+**Pruebas:** abra `tests/pruebas.html` con doble clic → 131 pruebas en verde.
 
 ## Demostración (auditoría del cliente)
 

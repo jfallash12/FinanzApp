@@ -93,9 +93,16 @@
     if (g.reached) { lines.push('✓ ¡Meta alcanzada!'); }
     else {
       lines.push('Le faltan ' + money(g.missing));
-      if (g.months) {
-        lines.push('Con ' + money(g.monthly) + ' al mes programados la alcanza en ' + g.months + (g.months === 1 ? ' mes' : ' meses') +
+      if (g.months) { // REQ-094 (v6.1): detalle de cada aporte para que el total se pueda verificar
+        g.sources.forEach(function (x) {
+          lines.push('• ' + x.description + ': ' + money(x.amount) + (x.frequency === 'biweekly'
+            ? ' cada quincena (15 y último) = ' + money(x.monthly) + ' al mes' : ' cada mes'));
+        });
+        lines.push((g.sources.length > 1 ? 'Total ' + money(g.monthly) + ' al mes: la' : 'La') + ' alcanza en ' + g.months + (g.months === 1 ? ' mes' : ' meses') +
           ' (' + calc.monthLabel(g.etaMonth).toLowerCase() + ').');
+        if (g.duplicates) {
+          lines.push('⚠ Hay transferencias programadas repetidas hacia esta cuenta. Revise «Pagos e ingresos programados» en Gastos e ingresos.');
+        }
       } else if (opts.hint) { lines.push('Programe una transferencia mensual a esta cuenta para ver cuándo la alcanza.'); }
     }
     return el('div', { class: 'goal' + (g.reached ? ' is-reached' : '') + (opts.plain ? ' is-plain' : '') },

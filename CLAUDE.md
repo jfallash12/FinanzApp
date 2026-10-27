@@ -25,10 +25,10 @@ auto-débito o confirmación manual, proyectadas en cada mes, y **metas de ahorr
 | Documento | Contenido |
 |---|---|
 | [`docs/requirements.md`](docs/requirements.md) | Especificación EARS v6: 89 requerimientos vigentes (REQ-001..REQ-095, sin REQ-073..REQ-078) — fuente de verdad del comportamiento |
-| [`docs/design.md`](docs/design.md) | Reglas de negocio RN-01..RN-13, decisiones D1–D31, entrevista Q1–Q11, arquitectura |
+| [`docs/design.md`](docs/design.md) | Reglas de negocio RN-01..RN-13, decisiones D1–D32, entrevista Q1–Q11, arquitectura |
 | [`docs/data-contract.json`](docs/data-contract.json) | JSON Schema 2020-12 del estado `PersonalFinanceState` (schemaVersion 3, con migración desde 1 y 2; v6 agrega campos opcionales de meta) — contrato estricto |
 | [`docs/wireframe.md`](docs/wireframe.md) | Diseño de interfaz por componentes (+ `wireframe.excalidraw` editable y `wireframe.png`) |
-| [`tasks.md`](tasks.md) | Plan de implementación por fases (T-00..T-45) con criterios de aceptación y pruebas de regresión |
+| [`tasks.md`](tasks.md) | Plan de implementación por fases (T-00..T-46) con criterios de aceptación y pruebas de regresión |
 | [`retrospective.md`](retrospective.md) | Historial de correcciones y reflexiones |
 
 Si algún artefacto contradice otro, mandan los requerimientos (REQ) y luego las reglas (RN).

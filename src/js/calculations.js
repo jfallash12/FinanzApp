@@ -601,21 +601,29 @@
    * REQ-094 / REQ-095 (RN-13): progreso de la meta de una cuenta de ahorros.
    * null si la cuenta no tiene meta. monthly = aporte mensual de programaciones activas hacia la cuenta.
    */
+  function normText(t) { return String(t || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+
   function goalProgress(state, accountId, today) {
     today = today || todayISO();
     var a = getAccount(state, accountId);
     if (!a || a.type !== 'ahorros' || !a.goalAmount) { return null; }
     var saved = currentBalance(state, accountId, today);
     var missing = Math.max(0, roundMoney(a.goalAmount - saved));
-    var monthly = sumAmounts((state.schedules || []).filter(function (sch) {
+    var sources = (state.schedules || []).filter(function (sch) {
       return sch.type === 'transferencia' && sch.toAccountId === accountId && sch.frequency !== 'once' &&
         (!sch.endDate || sch.endDate >= today);
-    }).map(function (sch) { return { amount: monthlyEquivalent(sch) }; }));
+    }).map(function (sch) { // REQ-094 (v6.1): cada aporte con su frecuencia
+      return { id: sch.id, description: sch.description, amount: sch.amount, frequency: sch.frequency, monthly: monthlyEquivalent(sch) };
+    });
+    var monthly = sumAmounts(sources.map(function (x) { return { amount: x.monthly }; }));
+    var dupes = sources.filter(function (x, i) {
+      return sources.some(function (y, j) { return j < i && y.amount === x.amount && y.frequency === x.frequency && normText(y.description) === normText(x.description); });
+    }).length;
     var months = missing > 0 && monthly > 0 ? Math.ceil(missing / monthly) : null;
     return {
       goal: a.goalAmount, reason: a.goalReason || null, saved: saved, missing: missing,
       percent: (saved / a.goalAmount) * 100, reached: saved >= a.goalAmount,
-      monthly: monthly, months: months, etaMonth: months ? addMonths(monthOf(today), months) : null
+      monthly: monthly, sources: sources, duplicates: dupes, months: months, etaMonth: months ? addMonths(monthOf(today), months) : null
     };
   }
 

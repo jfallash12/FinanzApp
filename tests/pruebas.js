@@ -231,6 +231,17 @@
     var g = calc.goalProgress(s, 'acc-ahorros', TODAY);
     return eq([g.saved, g.missing, Math.round(g.percent), g.monthly, g.months, g.etaMonth].join(','), '250000,750000,25,200000,4,2027-02');
   });
+  test('REQ-094 (v6.1) transferencia mensual de ₡100,000 aporta ₡100,000 al mes', function () {
+    var s = clone(DATA); s.schedules.push({ id: 'prg-usa', type: 'transferencia', accountId: 'acc-bac', toAccountId: 'acc-ahorros', amount: 100000, description: 'Viaje USA',
+      frequency: 'monthly', startDate: '2026-11-01', mode: 'auto', skippedDates: [], createdAt: '2026-10-26T00:00:00.000Z' });
+    var g = calc.goalProgress(s, 'acc-ahorros', TODAY);
+    return eq([g.monthly, g.sources.length, g.sources[0].frequency, g.duplicates, g.months].join(','), '100000,1,monthly,0,8');
+  });
+  test('REQ-094 (v6.1) dos programaciones iguales se detectan como repetidas', function () {
+    var s = clone(DATA); [1, 2].forEach(function (n) { s.schedules.push({ id: 'prg-usa' + n, type: 'transferencia', accountId: 'acc-bac', toAccountId: 'acc-ahorros', amount: 100000, description: 'Viaje USA',
+      frequency: 'monthly', startDate: '2026-11-01', mode: 'auto', skippedDates: [], createdAt: '2026-10-26T00:00:00.000Z' }); });
+    var g = calc.goalProgress(s, 'acc-ahorros', TODAY); return eq(g.monthly + ',' + g.duplicates, '200000,1');
+  });
   test('REQ-095 meta alcanzada', function () { var s = clone(DATA); s.accounts[2].goalAmount = 250000; return eq(calc.goalProgress(s, 'acc-ahorros', TODAY).reached, true); });
   test('REQ-070 total 0 rechazado', function () { return has(v.validateSettings({ monthlyBudget: '0' }), 'monthlyBudget', 'mayor a 0'); });
   test('REQ-071 suma por categoría ₡495,000', function () { return eq(calc.categoryBudgetsSum(DATA), 495000); });
