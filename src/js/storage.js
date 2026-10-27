@@ -1,7 +1,7 @@
 /*
  * storage.js — FinanzApp.storage
  * Persistencia en LocalStorage (REQ-051, REQ-052, REQ-053, REQ-054) y migración v1 → v2 (REQ-072).
- * validateState() replica a mano docs/data-contract.json (D8: sin librerías de JSON Schema)
+ * validateState() valida a mano docs/data-contract.json y las reglas entre campos de docs/design.md §6 (D8: sin librerías)
  * y agrega las reglas de su $comment que JSON Schema no puede expresar.
  */
 (function (global) {
@@ -45,7 +45,7 @@
     };
   }
 
-  /* ---------- Validador del contrato (schemaVersion 2) ---------- */
+  /* ---------- Validador del contrato (schemaVersion 3) ---------- */
 
   function isObj(o) { return !!o && typeof o === 'object' && !Array.isArray(o); }
   function isNum(n) { return typeof n === 'number' && isFinite(n); }
@@ -153,7 +153,7 @@
     });
   }
 
-  /** Integridad referencial y reglas de negocio del $comment del contrato. */
+  /** Integridad referencial y reglas entre campos (docs/design.md §6). */
   function checkRelations(errors, s) {
     var txIds = {};
     s.transactions.forEach(function (t, i) {

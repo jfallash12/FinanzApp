@@ -1,6 +1,6 @@
 /*
  * pruebas.js — Pruebas de regresión de la lógica pura (calculations, validations, storage).
- * Sin librerías: abrir tests/pruebas.html con doble clic. Usa el dataset oficial (examples[1]).
+ * Sin librerías: abrir tests/pruebas.html con doble clic. Usa el dataset oficial (tests/datos-ejemplo.json).
  * Cada prueba indica el REQ / RN que protege (Unchanged Behavior).
  */
 (function () {
@@ -21,7 +21,7 @@
   }
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
 
-  /* Dataset oficial = docs/data-contract.json → examples[1] (copiado aquí porque file:// no permite leer archivos). */
+  /* Dataset oficial = tests/datos-ejemplo.json (copiado aquí porque file:// no permite leer archivos). */
   var DATA = {
     schemaVersion: 3,
     accounts: [

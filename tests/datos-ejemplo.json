@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 3,
+  "accounts": [
+    {
+      "id": "acc-efectivo",
+      "name": "Efectivo",
+      "type": "efectivo",
+      "initialBalance": 25000,
+      "archived": false,
+      "createdAt": "2026-09-01T08:00:00.000Z"
+    },
+    {
+      "id": "acc-bac",
+      "name": "Cuenta BAC",
+      "type": "debito",
+      "initialBalance": 150000,
+      "archived": false,
+      "createdAt": "2026-09-01T08:01:00.000Z"
+    },
+    {
+      "id": "acc-ahorros",
+      "name": "Ahorros BN",
+      "type": "ahorros",
+      "initialBalance": 200000,
+      "archived": false,
+      "createdAt": "2026-09-01T08:01:30.000Z",
+      "goalAmount": 1000000,
+      "goalReason": "Fondo de emergencia"
+    },
+    {
+      "id": "acc-visa",
+      "name": "Tarjeta Visa",
+      "type": "credito",
+      "creditLimit": 300000,
+      "cutoffDay": 15,
+      "paymentDay": 28,
+      "archived": false,
+      "createdAt": "2026-09-01T08:02:00.000Z"
+    },
+    {
+      "id": "acc-tarjeta-vieja",
+      "name": "Tarjeta vieja",
+      "type": "credito",
+      "creditLimit": 100000,
+      "cutoffDay": 5,
+      "paymentDay": 20,
+      "archived": true,
+      "createdAt": "2026-01-10T08:00:00.000Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-alimentacion",
+      "name": "Alimentación",
+      "kind": "gasto",
+      "monthlyBudget": 120000,
+      "system": false
+    },
+    {
+      "id": "cat-transporte",
+      "name": "Transporte",
+      "kind": "gasto",
+      "monthlyBudget": 40000,
+      "system": false
+    },
+    {
+      "id": "cat-vivienda",
+      "name": "Vivienda",
+      "kind": "gasto",
+      "monthlyBudget": 250000,
+      "system": false
+    },
+    {
+      "id": "cat-servicios",
+      "name": "Servicios",
+      "kind": "gasto",
+      "monthlyBudget": 55000,
+      "system": false
+    },
+    {
+      "id": "cat-entretenimiento",
+      "name": "Entretenimiento",
+      "kind": "gasto",
+      "monthlyBudget": 30000,
+      "system": false
+    },
+    {
+      "id": "cat-salud",
+      "name": "Salud",
+      "kind": "gasto",
+      "system": false
+    },
+    {
+      "id": "cat-otros-gastos",
+      "name": "Otros gastos",
+      "kind": "gasto",
+      "system": true
+    },
+    {
+      "id": "cat-salario",
+      "name": "Salario",
+      "kind": "ingreso",
+      "system": false
+    },
+    {
+      "id": "cat-otros-ingresos",
+      "name": "Otros ingresos",
+      "kind": "ingreso",
+      "system": true
+    }
+  ],
+  "transactions": [
+    {
+      "id": "mov-001",
+      "type": "gasto",
+      "accountId": "acc-efectivo",
+      "categoryId": "cat-alimentacion",
+      "amount": 15000,
+      "date": "2026-09-28",
+      "description": "Panadería",
+      "createdAt": "2026-09-28T15:00:00.000Z"
+    },
+    {
+      "id": "mov-002",
+      "type": "ingreso",
+      "accountId": "acc-bac",
+      "categoryId": "cat-salario",
+      "amount": 650000,
+      "date": "2026-10-01",
+      "description": "Salario octubre",
+      "createdAt": "2026-10-01T14:00:00.000Z"
+    },
+    {
+      "id": "mov-003",
+      "type": "gasto",
+      "accountId": "acc-bac",
+      "categoryId": "cat-vivienda",
+      "amount": 250000,
+      "date": "2026-10-02",
+      "description": "Alquiler octubre",
+      "createdAt": "2026-10-02T14:00:00.000Z"
+    },
+    {
+      "id": "mov-013",
+      "type": "transferencia",
+      "accountId": "acc-bac",
+      "toAccountId": "acc-ahorros",
+      "amount": 50000,
+      "date": "2026-10-02",
+      "description": "Ahorro mensual",
+      "createdAt": "2026-10-02T15:00:00.000Z"
+    },
+    {
+      "id": "mov-004",
+      "type": "transferencia",
+      "accountId": "acc-bac",
+      "toAccountId": "acc-efectivo",
+      "amount": 40000,
+      "date": "2026-10-03",
+      "description": "Retiro en cajero",
+      "createdAt": "2026-10-03T14:00:00.000Z"
+    },
+    {
+      "id": "mov-005",
+      "type": "gasto",
+      "accountId": "acc-visa",
+      "categoryId": "cat-alimentacion",
+      "amount": 68500,
+      "date": "2026-10-05",
+      "description": "Supermercado",
+      "createdAt": "2026-10-05T14:00:00.000Z"
+    },
+    {
+      "id": "mov-006",
+      "type": "gasto",
+      "accountId": "acc-bac",
+      "categoryId": "cat-servicios",
+      "amount": 38900,
+      "date": "2026-10-08",
+      "description": "Electricidad y agua",
+      "createdAt": "2026-10-08T14:00:00.000Z"
+    },
+    {
+      "id": "mov-007",
+      "type": "gasto",
+      "accountId": "acc-efectivo",
+      "categoryId": "cat-transporte",
+      "amount": 18000,
+      "date": "2026-10-10",
+      "description": "Gasolina",
+      "createdAt": "2026-10-10T14:00:00.000Z"
+    },
+    {
+      "id": "mov-008",
+      "type": "gasto",
+      "accountId": "acc-visa",
+      "categoryId": "cat-entretenimiento",
+      "amount": 27500,
+      "date": "2026-10-12",
+      "description": "Cine y cena",
+      "createdAt": "2026-10-12T14:00:00.000Z"
+    },
+    {
+      "id": "mov-012",
+      "type": "ingreso",
+      "accountId": "acc-efectivo",
+      "categoryId": "cat-otros-ingresos",
+      "amount": 35000,
+      "date": "2026-10-14",
+      "description": "Venta de libros",
+      "createdAt": "2026-10-14T14:00:00.000Z"
+    },
+    {
+      "id": "mov-009",
+      "type": "gasto",
+      "accountId": "acc-efectivo",
+      "categoryId": "cat-alimentacion",
+      "amount": 31200,
+      "date": "2026-10-15",
+      "description": "Feria del agricultor",
+      "createdAt": "2026-10-15T14:00:00.000Z"
+    },
+    {
+      "id": "mov-010",
+      "type": "gasto",
+      "accountId": "acc-efectivo",
+      "categoryId": "cat-transporte",
+      "amount": 4500,
+      "date": "2026-10-15",
+      "description": "Bus",
+      "createdAt": "2026-10-15T15:00:00.000Z"
+    },
+    {
+      "id": "mov-011",
+      "type": "transferencia",
+      "accountId": "acc-bac",
+      "toAccountId": "acc-visa",
+      "amount": 60000,
+      "date": "2026-10-20",
+      "description": "Pago tarjeta",
+      "createdAt": "2026-10-20T14:00:00.000Z"
+    }
+  ],
+  "schedules": [
+    {
+      "id": "prg-salario",
+      "type": "ingreso",
+      "accountId": "acc-bac",
+      "categoryId": "cat-salario",
+      "amount": 650000,
+      "description": "Salario",
+      "frequency": "monthly",
+      "startDate": "2026-11-01",
+      "mode": "auto",
+      "skippedDates": [],
+      "createdAt": "2026-10-20T10:00:00.000Z"
+    },
+    {
+      "id": "prg-gasolina",
+      "type": "gasto",
+      "accountId": "acc-efectivo",
+      "categoryId": "cat-transporte",
+      "amount": 20000,
+      "description": "Gasolina",
+      "frequency": "biweekly",
+      "startDate": "2026-11-01",
+      "mode": "manual",
+      "skippedDates": [],
+      "createdAt": "2026-10-20T10:01:00.000Z"
+    }
+  ],
+  "settings": {
+    "monthlyBudget": 450000
+  }
+}
