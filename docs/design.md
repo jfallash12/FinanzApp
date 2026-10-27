@@ -153,7 +153,7 @@ graph TD
 | `BudgetsView` / `PerDay` | Pestaña Presupuestos; "Le quedan ₡X para N días" o "Mes cerrado" | `calc.remainingDays` | — | 069 |
 | `AccountCards` / `AccountCard` | Tarjetas visuales por tipo; activas y sección Archivadas; ciclo de la tarjeta | `calc.creditCycle` | `EDIT_ACCOUNT`, `ARCHIVE_ACCOUNT`, `UNARCHIVE_ACCOUNT`, `DELETE_ACCOUNT`, `OPEN_ACCOUNT` | 061, 063–066 |
 | `AccountDetail` | Movimientos de una cuenta con el saldo después de cada uno | `calc.runningBalances` | `CLOSE_ACCOUNT`, `EDIT_TRANSACTION`, `DELETE_TRANSACTION` | 066 |
-| `BackupCard` | Exportar datos (descarga un `.json`) e Importar datos (elige un archivo) en la pestaña Cuentas | `state` | `EXPORT_DATA`, `IMPORT_FILE` → `IMPORT_STATE` | 097, 098 |
+| `BackupCard` | Exportar datos (descarga un `.json`), Importar datos (elige un archivo) y Borrar todos los datos, en la pestaña Cuentas | `state` | `EXPORT_DATA`, `IMPORT_FILE` → `IMPORT_STATE`, `RESET_STATE` | 097, 098, 103 |
 | `Filters` (búsqueda) | Campo «Buscar en la descripción» junto a los filtros de cuenta y categoría | `ui.filters.text` | `SET_FILTER` | 099 |
 | `SummaryCards` (comparación) | Debajo de «Gastos del mes»: ▲/▼ N % frente al mes anterior | `calc.monthComparison` | — | 100 |
 | `TopCategories` | «¿En qué se va la plata?»: hasta 3 categorías con su monto, % y barra | `calc.topCategories` | — | 101 |
@@ -235,7 +235,7 @@ flowchart TD
   X --> RN
 ```
 
-**Acciones de dominio:** `ADD_SCHEDULE`, `UPDATE_SCHEDULE`, `DELETE_SCHEDULE`, `CONFIRM_OCCURRENCE`, `SKIP_OCCURRENCE`, `PROCESS_SCHEDULES`, `IMPORT_STATE`, `ADD_ACCOUNT`, `UPDATE_ACCOUNT`, `DELETE_ACCOUNT`, `ARCHIVE_ACCOUNT`, `UNARCHIVE_ACCOUNT`, `SAVE_SETTINGS`, `ADD_CATEGORY`, `UPDATE_CATEGORY`, `DELETE_CATEGORY`, `ADD_TRANSACTION`, `UPDATE_TRANSACTION`, `DELETE_TRANSACTION`.
+**Acciones de dominio:** `ADD_SCHEDULE`, `UPDATE_SCHEDULE`, `DELETE_SCHEDULE`, `CONFIRM_OCCURRENCE`, `SKIP_OCCURRENCE`, `PROCESS_SCHEDULES`, `IMPORT_STATE`, `RESET_STATE`, `ADD_ACCOUNT`, `UPDATE_ACCOUNT`, `DELETE_ACCOUNT`, `ARCHIVE_ACCOUNT`, `UNARCHIVE_ACCOUNT`, `SAVE_SETTINGS`, `ADD_CATEGORY`, `UPDATE_CATEGORY`, `DELETE_CATEGORY`, `ADD_TRANSACTION`, `UPDATE_TRANSACTION`, `DELETE_TRANSACTION`.
 
 ### 5.5. Secuencias clave
 
@@ -369,7 +369,7 @@ El contrato define la **forma** de cada entidad. Estas reglas entre campos no se
 | 045 | Formato y redondeo | todos los montos | `calc.formatMoney`, `calc.formatPercent` |
 | 046 | Negativos con signo y alerta | `SummaryCards`, `TransactionList` | clases `is-negative` |
 | 047 | Sin red | `index.html` (CSP) | sin `fetch`/XHR (D6) |
-| 048 | Sin borrados colaterales | — | reducers de alcance mínimo; solo `IMPORT_STATE` reemplaza todo, con confirmación |
+| 048 | Sin borrados colaterales | — | reducers de alcance mínimo; solo `IMPORT_STATE` y `RESET_STATE` reemplazan todo, con confirmación |
 | 049 | Saldo no editable | `AccountForm` (sin campo saldo) | saldo derivado (RN-01) |
 | 050 | Sin movimientos automáticos salvo el auto-débito | — | solo `processSchedules` crea movimientos, desde programaciones |
 | 051 | Guardar en cada cambio | — | `persist()` al final de `dispatch` |
@@ -419,8 +419,9 @@ El contrato define la **forma** de cada entidad. Estas reglas entre campos no se
 | 100 | Comparación con el mes anterior | `SummaryCards` | `calc.monthComparison` |
 | 101 | Categorías con más gasto | `TopCategories` | `calc.topCategories` |
 | 102 | Primeros pasos | `FirstSteps` | `calc.firstSteps` |
+| 103 | Borrar todos los datos | `BackupCard` → `Dialog` | `DOMAIN.RESET_STATE`, `storage.emptyState` |
 
-**Cobertura:** 96 de 96 requerimientos vigentes tienen componente y/o función asignados.
+**Cobertura:** 97 de 97 requerimientos vigentes tienen componente y/o función asignados.
 
 ## 8. Diseño visual (CSS)
 

@@ -5,7 +5,7 @@
 > El comportamiento esperado se expresa con `SHALL` (obligatorio) y el comportamiento que **no debe cambiar** se expresa con `SHALL NOT`.
 >
 > **Contrato de datos:** [`data-contract.json`](./data-contract.json). **Reglas de negocio:** RN-01..RN-13 en [`design.md`](./design.md).
-> 96 requerimientos, de REQ-001 a REQ-102. Los números REQ-073 a REQ-078 no se usan; se conservan los demás porque el código y las pruebas los citan.
+> 97 requerimientos, de REQ-001 a REQ-103. Los números REQ-073 a REQ-078 no se usan; se conservan los demás porque el código y las pruebas los citan.
 
 **Definiciones usadas en esta especificación**
 
@@ -135,7 +135,7 @@
 
 * **REQ-047**: the system SHALL NOT enviar datos a servidores externos ni requerir conexión a internet.
 
-* **REQ-048**: the system SHALL NOT eliminar cuentas, categorías ni movimientos como efecto secundario de otra operación. Las únicas excepciones son la reasignación de categoría confirmada por el usuario (REQ-017) y la importación de un respaldo confirmada por el usuario, que reemplaza todos los datos (REQ-098).
+* **REQ-048**: the system SHALL NOT eliminar cuentas, categorías ni movimientos como efecto secundario de otra operación. Las únicas excepciones son la reasignación de categoría confirmada por el usuario (REQ-017) la importación de un respaldo confirmada por el usuario, que reemplaza todos los datos (REQ-098), y el borrado de todos los datos confirmado por el usuario (REQ-103).
 
 * **REQ-049**: the system SHALL NOT permitir editar el saldo de una cuenta directamente: el saldo es siempre un valor derivado de su saldo inicial y sus movimientos.
 
@@ -263,6 +263,8 @@
 
 * **REQ-101**: WHEN el mes seleccionado tiene gastos, THEN the system SHALL mostrar en el Resumen la tarjeta **¿En qué se va la plata?** con las hasta 3 categorías de gasto con más gasto del mes (incluye programados), de mayor a menor (empate: por nombre), cada una con su monto, su porcentaje del total de gastos del mes y una barra. IF el mes no tiene gastos, THEN SHALL mostrar "Aún no hay gastos en <mes>".
 
+* **REQ-103**: WHEN el usuario toca **Borrar todos los datos** en la tarjeta de respaldo de la pestaña Cuentas, THEN the system SHALL pedir confirmación indicando cuántas cuentas, movimientos y programaciones se eliminarán y recomendando exportar antes (REQ-097). Solo tras confirmar SHALL reemplazar el estado por el estado inicial (sin cuentas, movimientos ni programaciones, con las categorías predeterminadas de REQ-012 y sin presupuesto total), guardarlo (REQ-051) y mostrar el Resumen. WHEN el usuario cancela, THEN the system SHALL NOT modificar nada. IF el estado ya es el inicial, THEN the system SHALL avisar "No hay datos para borrar" sin pedir confirmación.
+
 * **REQ-102**: WHILE no se hayan completado los tres primeros pasos —(1) crear una cuenta, (2) registrar un movimiento y (3) definir un presupuesto por categoría o total—, the system SHALL mostrar al inicio del Resumen la tarjeta **Primeros pasos** con cada paso marcado como ✓ hecho o pendiente (con texto, REQ-057) y un botón que lleva a la pestaña donde se hace el siguiente paso pendiente. WHEN los tres pasos están hechos, THEN the system SHALL NOT mostrar la tarjeta. Los pasos se derivan del estado y SHALL NOT guardarse.
 
 ---
@@ -280,5 +282,5 @@
 | Programaciones con auto-débito | REQ-079..REQ-083, REQ-086 | Calcula ocurrencias por frecuencia, crea movimientos solo si cumplen la regla de fondos y evita duplicar o recrear ocurrencias |
 | Proyección del mes | REQ-081, REQ-087, REQ-088 | Combina movimientos reales y ocurrencias futuras en resumen, presupuestos y alertas sin tocar el saldo real |
 | Presupuesto total vs. por categoría | REQ-069, REQ-070, REQ-071 | Dos niveles de presupuesto con días restantes del mes y advertencia de inconsistencia |
-| Importar un respaldo | REQ-098, REQ-048, REQ-053 | Valida, migra y verifica la regla de fondos de un archivo externo antes de reemplazar todo, solo con confirmación |
+| Importar un respaldo y borrar todo | REQ-098, REQ-103, REQ-048, REQ-053 | Valida, migra y verifica la regla de fondos de un archivo externo antes de reemplazar todo, solo con confirmación |
 | Ahorro en el presupuesto y metas | REQ-070, REQ-092..REQ-095 | Distingue transferencias según el tipo de las dos cuentas, neto y con mínimo 0; la meta combina saldo real y programaciones para estimar la fecha |

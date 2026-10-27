@@ -6,7 +6,7 @@
 > [`docs/decisiones.md`](docs/decisiones.md) · [`docs/data-contract.json`](docs/data-contract.json) ·
 > [`docs/wireframe.md`](docs/wireframe.md) · reglas en [`CLAUDE.md`](CLAUDE.md) y [`.cursorrules`](.cursorrules).
 
-**Estado:** ✅ todas las tareas completadas · Leyenda: `[ ]` pendiente · `[x]` hecha.
+**Estado:** Fases 0–13 completadas; Fase 14 en curso · Leyenda: `[ ]` pendiente · `[x]` hecha.
 Los números de tarea se conservan porque los commits los citan.
 
 ---
@@ -231,6 +231,12 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 - [x] **T-58 Efectos.** Elevación al pasar el mouse, barras con degradado, encabezados de día y estados vacíos.
   *Aceptación:* con `prefers-reduced-motion: reduce` no hay transiciones; 154/154 pruebas.
 
+## Fase 14 — Borrar todos los datos
+
+- [x] **T-59 Especificación.** REQ-103 y REQ-048 ampliado; D43; `RESET_STATE` en `design.md`.
+- [ ] **T-60 Botón «Borrar todos los datos».** `DOMAIN.RESET_STATE` en `app.js` y botón en `BackupCard`.
+  *Aceptación:* con los datos de prueba, el diálogo dice "5 cuentas, 13 movimientos y 2 programaciones" y recomienda exportar; Cancelar no cambia nada; Confirmar deja 0 cuentas, las 9 categorías predeterminadas y la tarjeta Primeros pasos, y sigue así tras F5; con la app ya vacía avisa "No hay datos para borrar"; exportar → borrar → importar devuelve el Patrimonio ₡606,400.
+
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)
 
 | # | Prueba | Desde |
@@ -258,7 +264,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 | 007 | T-05, T-17 | 026 | T-03, T-10 | 045 | T-04, T-18 |
 | 008 | T-08, T-20 | 027 | T-03, T-10, T-39 | 046 | T-18, T-19 |
 | 009 | T-08, T-20 | 028 | T-10, T-19 | 047 | T-01 |
-| 010 | T-08, T-13 | 029 | T-10, T-19 | 048 | T-14, T-49 |
+| 010 | T-08, T-13 | 029 | T-10, T-19 | 048 | T-14, T-49, T-60 |
 | 011 | T-13, T-22 | 030 | T-05, T-10 | 049 | T-05, T-20 |
 | 012 | T-11, T-21 | 031 | T-05, T-10 | 050 | T-39 |
 | 013 | T-14, T-21 | 032 | T-10 | 051 | T-11, T-12 |
@@ -281,5 +287,6 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 | 068 | T-32 | 069 | T-33 | 070 | T-33, T-44 |
 | 097 | T-49 | 098 | T-49 | 099 | T-50 |
 | 100 | T-51 | 101 | T-52 | 102 | T-53 |
+| 103 | T-60 | | | | |
 
 **Resultado final:** `tests/pruebas.html` 154/154; recorrido de punta a punta 161/161 más los criterios de aceptación de T-49..T-53 en escritorio y a 375 px; consola limpia y 0 peticiones de red.

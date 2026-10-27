@@ -70,6 +70,7 @@ El código y las pruebas las citan por su número (D1, D2…), por eso los núme
 | D37 | El texto de búsqueda es estado de interfaz (`ui.filters.text`), no se guarda, y al teclear se conserva la posición del cursor | Igual que los otros filtros (REQ-036) |
 | D38 | La comparación y las categorías con más gasto usan la misma base que el Resumen: movimientos reales + ocurrencias abiertas del mes | Los números del Resumen cuadran entre sí |
 | D39 | Los primeros pasos se derivan del estado (`calc.firstSteps`) y no hay opción de ocultarlos | Evita un campo nuevo en el contrato; la tarjeta desaparece sola al completar los pasos |
+| D43 | Borrar todos los datos deja el **estado inicial** guardado (categorías predeterminadas incluidas), en vez de quitar la clave de `localStorage` | La app sigue el mismo camino de siempre (`dispatch` → `validateState` → guardar) y queda lista para registrar sin recargar |
 
 ## Diseño visual
 

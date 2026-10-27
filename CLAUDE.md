@@ -50,7 +50,7 @@ Las fórmulas completas (RN-01..RN-13) están en [`docs/design.md`](docs/design.
 4. **Montos válidos:** mayores que 0, numéricos y con máximo 2 decimales. Los textos obligatorios no pueden estar vacíos.
 5. **Persistencia:** el estado completo se guarda en `localStorage` en cada cambio y se restaura al abrir. Un estado dañado no bloquea la app: inicia vacía con aviso.
 6. **Sin red:** nada sale del navegador; no se usa `fetch`, XHR ni CDN.
-7. **Sin borrados colaterales:** ninguna operación elimina cuentas, categorías o movimientos de forma indirecta; importar un respaldo reemplaza todo solo tras confirmar. Una cuenta con movimientos no se elimina; se archiva, y solo con saldo 0.
+7. **Sin borrados colaterales:** ninguna operación elimina cuentas, categorías o movimientos de forma indirecta; importar un respaldo o borrar todos los datos reemplaza todo, y solo tras confirmar. Una cuenta con movimientos no se elimina; se archiva, y solo con saldo 0.
 8. **Sin movimientos automáticos**, salvo el auto-débito de una programación que el usuario configuró. Una ocurrencia nunca se aplica dos veces ni se recrea si el usuario borró su movimiento.
 9. **Fechas futuras** solo con "🗓 Programar".
 10. **Duplicados** solo se guardan con confirmación.
@@ -72,10 +72,10 @@ Las fórmulas completas (RN-01..RN-13) están en [`docs/design.md`](docs/design.
 
 | Archivo | Contenido |
 |---|---|
-| `docs/requirements.md` | Requerimientos EARS (REQ-001..REQ-102) |
+| `docs/requirements.md` | Requerimientos EARS (REQ-001..REQ-103) |
 | `docs/data-contract.json` | Estructura de los datos (JSON Schema) |
 | `docs/design.md` | Arquitectura, reglas de negocio, componentes y mapeo REQ → código |
-| `docs/decisiones.md` | Decisiones técnicas D1–D39 |
+| `docs/decisiones.md` | Decisiones técnicas D1–D43 |
 | `docs/wireframe.md` / `.png` | Interfaz |
 | `docs/retrospectiva.md` | Lo que aprendí en el proyecto |
 | `tasks.md` | Plan de tareas y pruebas de regresión |
