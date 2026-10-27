@@ -6,7 +6,7 @@
 > [`docs/decisiones.md`](docs/decisiones.md) · [`docs/data-contract.json`](docs/data-contract.json) ·
 > [`docs/wireframe.md`](docs/wireframe.md) · reglas en [`CLAUDE.md`](CLAUDE.md) y [`.cursorrules`](.cursorrules).
 
-**Estado:** ✅ todas las tareas completadas · Leyenda: `[ ]` pendiente · `[x]` hecha.
+**Estado:** Fases 0–11 completadas; Fase 12 en curso · Leyenda: `[ ]` pendiente · `[x]` hecha.
 Los números de tarea se conservan porque los commits los citan.
 
 ---
@@ -204,6 +204,20 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 - [x] **T-46 Detalle de aportes de la meta.** REQ-094, D32: `goalProgress` devuelve `sources` y `duplicates`; `GoalProgress` lista cada transferencia programada con su frecuencia y advierte repetidas.
   *Aceptación:* una transferencia mensual de ₡100,000 muestra "• <descripción>: ₡100,000 cada mes"; una quincenal muestra "cada quincena (15 y último) = ₡200,000 al mes"; dos iguales muestran el aviso de repetidas.
 
+## Fase 12 — Respaldo de datos y ayudas del Resumen
+
+- [x] **T-48 Especificación.** REQ-097..REQ-102 y REQ-048 ampliado; D34–D39; componentes y API en `design.md`.
+- [ ] **T-49 Exportar e importar datos.** REQ-097, REQ-098, D34–D36: `storage.parseBackup`, `storage.backupFileName`, `exportData` y `DOMAIN.IMPORT_STATE` en `app.js`, `BackupCard` en Cuentas.
+  *Aceptación:* Exportar descarga `finanzapp-AAAA-MM-DD.json`; importarlo en una app vacía y confirmar → mismos saldos (Patrimonio ₡606,400); un archivo con texto cualquiera o con una cuenta en negativo → "El archivo no es un respaldo válido de FinanzApp" y nada cambia; Cancelar no cambia nada.
+- [ ] **T-50 Buscar por descripción.** REQ-099, D37: `filters.text` en `calc.filterTransactions`; campo de búsqueda en `Filters`.
+  *Aceptación:* en octubre, buscar "bus" muestra solo «Bus» (₡4,500); "PAN" encuentra «Panadería» en septiembre; combinado con la cuenta Visa y "cine" muestra «Cine y cena».
+- [ ] **T-51 Comparación con el mes anterior.** REQ-100, D38: `calc.monthComparison`; texto bajo «Gastos del mes».
+  *Aceptación:* octubre (₡438,600) frente a septiembre (₡15,000) → "▲ 2824 % más que septiembre"; septiembre → "Sin gastos en agosto".
+- [ ] **T-52 Categorías con más gasto.** REQ-101, D38: `calc.topCategories`, `TopCategories`.
+  *Aceptación:* octubre → Vivienda ₡250,000 (57 %), Alimentación ₡99,700 (23 %), Servicios ₡38,900 (9 %); noviembre sin gastos → "Aún no hay gastos en noviembre 2026".
+- [ ] **T-53 Primeros pasos.** REQ-102, D39: `calc.firstSteps`, `FirstSteps` en lugar del mensaje "Bienvenido…" del Resumen.
+  *Aceptación:* app vacía → 3 pasos pendientes y botón «Ir a Cuentas»; con una cuenta → paso 1 ✓ y botón a «Gastos e ingresos»; con los datos de prueba la tarjeta no aparece.
+
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)
 
 | # | Prueba | Desde |
@@ -231,7 +245,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 | 007 | T-05, T-17 | 026 | T-03, T-10 | 045 | T-04, T-18 |
 | 008 | T-08, T-20 | 027 | T-03, T-10, T-39 | 046 | T-18, T-19 |
 | 009 | T-08, T-20 | 028 | T-10, T-19 | 047 | T-01 |
-| 010 | T-08, T-13 | 029 | T-10, T-19 | 048 | T-14 |
+| 010 | T-08, T-13 | 029 | T-10, T-19 | 048 | T-14, T-49 |
 | 011 | T-13, T-22 | 030 | T-05, T-10 | 049 | T-05, T-20 |
 | 012 | T-11, T-21 | 031 | T-05, T-10 | 050 | T-39 |
 | 013 | T-14, T-21 | 032 | T-10 | 051 | T-11, T-12 |
@@ -252,5 +266,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 | 066 | T-31 | 093 | T-45 | 094 | T-45, T-46 |
 | 067 | T-32 | 095 | T-45 | 096 | T-47 |
 | 068 | T-32 | 069 | T-33 | 070 | T-33, T-44 |
+| 097 | T-49 | 098 | T-49 | 099 | T-50 |
+| 100 | T-51 | 101 | T-52 | 102 | T-53 |
 
 **Resultado final:** `tests/pruebas.html` 133/133 y recorrido de punta a punta 161/161, consola limpia y 0 peticiones de red.

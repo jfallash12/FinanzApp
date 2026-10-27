@@ -153,6 +153,11 @@ graph TD
 | `BudgetsView` / `PerDay` | Pestaña Presupuestos; "Le quedan ₡X para N días" o "Mes cerrado" | `calc.remainingDays` | — | 069 |
 | `AccountCards` / `AccountCard` | Tarjetas visuales por tipo; activas y sección Archivadas; ciclo de la tarjeta | `calc.creditCycle` | `EDIT_ACCOUNT`, `ARCHIVE_ACCOUNT`, `UNARCHIVE_ACCOUNT`, `DELETE_ACCOUNT`, `OPEN_ACCOUNT` | 061, 063–066 |
 | `AccountDetail` | Movimientos de una cuenta con el saldo después de cada uno | `calc.runningBalances` | `CLOSE_ACCOUNT`, `EDIT_TRANSACTION`, `DELETE_TRANSACTION` | 066 |
+| `BackupCard` | Exportar datos (descarga un `.json`) e Importar datos (elige un archivo) en la pestaña Cuentas | `state` | `EXPORT_DATA`, `IMPORT_FILE` → `IMPORT_STATE` | 097, 098 |
+| `Filters` (búsqueda) | Campo «Buscar en la descripción» junto a los filtros de cuenta y categoría | `ui.filters.text` | `SET_FILTER` | 099 |
+| `SummaryCards` (comparación) | Debajo de «Gastos del mes»: ▲/▼ N % frente al mes anterior | `calc.monthComparison` | — | 100 |
+| `TopCategories` | «¿En qué se va la plata?»: hasta 3 categorías con su monto, % y barra | `calc.topCategories` | — | 101 |
+| `FirstSteps` | «Primeros pasos» con ✓ / pendiente y botón al siguiente paso | `calc.firstSteps` | `SET_TAB` | 102 |
 
 ## 5. Estructura de módulos y manejo de estado
 
@@ -197,13 +202,13 @@ Regla de dependencias: `calculations.js` no depende de nada, y solo `app.js` toc
 ### 5.3. API de cada módulo
 
 **`calculations.js` (puro, sin DOM):**
-`parseISODate(s)`, `isValidISODate(s)`, `todayISO(now?)`, `monthOf(iso)`, `currentMonth(now?)`, `isValidMonth(ym)`, `addMonths(ym, n)`, `monthLabel(ym)`, `toCents(n)`, `fromCents(c)`, `sumAmounts(list)`, `hasMax2Decimals(n)`, `roundMoney(n)`, `formatMoney(n, {sign})`, `formatPercent(p)`, `getAccount(state, id)`, `getCategory(state, id)`, `daysInMonth(ym)`, `daysBetween(a, b)`, `remainingDays(ym, today)`, `isLiquid(account)`, `isSavings(account)`, `isCredit(account)`, `activeAccounts(state)`, `normalize(s)`, `accountBalance(state, id, excludeTxId?)`, `creditDebt(state, id, excludeTxId?)`, `timeline(state, id, excludeTxId?)` (interna), `availableFunds(state, id, excludeTxId?, date?)`, `paymentRoom(state, id, excludeTxId?, date?)`, `balanceSummary(state)`, `creditCycle(state, id, today)`, `paymentAlerts(state, today)`, `runningBalances(state, id)`, `lastUsedAccountId(state)`, `totalBudgetStatus(state, ym)`, `categoryBudgetsSum(state)`, `getSchedule`, `scheduleOccurrences(sch, from, to)`, `isOccurrenceApplied`, `isOccurrenceDone`, `occurrenceToTx`, `openOccurrences(state, from, to, today)`, `dueOccurrences(state, today)`, `upcomingOccurrences(state, today, days)`, `nextOccurrence(state, sch, today)`, `monthlyEquivalent(sch)`, `endOfMonth(iso)`, `projectedState`, `projectedBalance`, `hasOpenThisMonth`, `schedulesUsingAccount`, `projectionAlerts`, `monthItems(state, ym, today)`, `categoryScheduleCount`, `netWorth(state)`, `accountViolations(state)`, `accountMovementCount(state, id)`, `categoryMovementCount(state, id)`, `sortTransactions(list)`, `monthTransactions(state, ym)`, `monthSummary(state, ym)`, `categorySpent(state, catId, ym)`, `statusFromPercent(p)`, `budgetStatus(state, catId, ym)`, `dayNet(list)`, `groupByDate(list)`, `filterTransactions(state, ym, filters)`, `findDuplicate(state, tx, excludeTxId?)`.
+`parseISODate(s)`, `isValidISODate(s)`, `todayISO(now?)`, `monthOf(iso)`, `currentMonth(now?)`, `isValidMonth(ym)`, `addMonths(ym, n)`, `monthLabel(ym)`, `toCents(n)`, `fromCents(c)`, `sumAmounts(list)`, `hasMax2Decimals(n)`, `roundMoney(n)`, `formatMoney(n, {sign})`, `formatPercent(p)`, `getAccount(state, id)`, `getCategory(state, id)`, `daysInMonth(ym)`, `daysBetween(a, b)`, `remainingDays(ym, today)`, `isLiquid(account)`, `isSavings(account)`, `isCredit(account)`, `activeAccounts(state)`, `normalize(s)`, `accountBalance(state, id, excludeTxId?)`, `creditDebt(state, id, excludeTxId?)`, `timeline(state, id, excludeTxId?)` (interna), `availableFunds(state, id, excludeTxId?, date?)`, `paymentRoom(state, id, excludeTxId?, date?)`, `balanceSummary(state)`, `creditCycle(state, id, today)`, `paymentAlerts(state, today)`, `runningBalances(state, id)`, `lastUsedAccountId(state)`, `totalBudgetStatus(state, ym)`, `categoryBudgetsSum(state)`, `getSchedule`, `scheduleOccurrences(sch, from, to)`, `isOccurrenceApplied`, `isOccurrenceDone`, `occurrenceToTx`, `openOccurrences(state, from, to, today)`, `dueOccurrences(state, today)`, `upcomingOccurrences(state, today, days)`, `nextOccurrence(state, sch, today)`, `monthlyEquivalent(sch)`, `endOfMonth(iso)`, `projectedState`, `projectedBalance`, `hasOpenThisMonth`, `schedulesUsingAccount`, `projectionAlerts`, `monthItems(state, ym, today)`, `categoryScheduleCount`, `netWorth(state)`, `accountViolations(state)`, `accountMovementCount(state, id)`, `categoryMovementCount(state, id)`, `sortTransactions(list)`, `monthTransactions(state, ym)`, `monthSummary(state, ym)`, `categorySpent(state, catId, ym)`, `statusFromPercent(p)`, `budgetStatus(state, catId, ym)`, `dayNet(list)`, `groupByDate(list)`, `filterTransactions(state, ym, filters, today)` (filtros `accountId`, `categoryId`, `text`), `findDuplicate(state, tx, excludeTxId?)`, `monthComparison(state, ym, today)`, `topCategories(state, ym, n, today)`, `firstSteps(state)`.
 
 **`validations.js` (puro; devuelve `{ campo: 'mensaje' }`, vacío = válido; `_form` = error general):**
 `isBlank(v)`, `hasErrors(e)`, `parseAmount(raw, {label, allowZero, optional})`, `draftToAccount(d, base)`, `draftToTransaction(d, base)`, `parseDay(raw, label)`, `validateMovementFields(d, state, original)`, `draftToSchedule(d, base)`, `validateSchedule(d, state, originalId, today)`, `validateSkip(scheduleId, date, state)`, `pastOccurrences(state, sch, today)`, `validateAccount(d, state, originalId)`, `validateAccountDelete(id, state)`, `validateArchive(id, state)`, `validateSettings(d)`, `validateCategory(d, state, originalId)`, `validateCategoryDelete(id, state)`, `validateReassign(d, id, state)`, `validateTransaction(d, state, originalId, today?)`, `validateTransactionDelete(id, state)`.
 
 **`storage.js`:**
-`STORAGE_KEY = 'finanzapp.state'`, `SCHEMA_VERSION = 3`, `emptyState()`, `migrate(obj, today)` (v1 → v2 → v3, REQ-072, REQ-090), `validateState(obj)` → `{ valid, errors[] }` (contrato + reglas de §6), `loadState()` → `{ state, notice, migrated }`, `saveState(state)` → `true | error`.
+`STORAGE_KEY = 'finanzapp.state'`, `SCHEMA_VERSION = 3`, `emptyState()`, `migrate(obj, today)` (v1 → v2 → v3, REQ-072, REQ-090), `validateState(obj)` → `{ valid, errors[] }` (contrato + reglas de §6), `loadState()` → `{ state, notice, migrated }`, `saveState(state)` → `true | error`, `parseBackup(text)` → `{ state }` o `{ error }` (migra y valida un respaldo, REQ-098), `backupFileName(today)`.
 
 **`ui.js`:** `el(tag, props, ...children)`, `mount(root)`, `render(state, ui)`, `updateForm(form, ui)`.
 
@@ -230,7 +235,7 @@ flowchart TD
   X --> RN
 ```
 
-**Acciones de dominio:** `ADD_SCHEDULE`, `UPDATE_SCHEDULE`, `DELETE_SCHEDULE`, `CONFIRM_OCCURRENCE`, `SKIP_OCCURRENCE`, `PROCESS_SCHEDULES`, `ADD_ACCOUNT`, `UPDATE_ACCOUNT`, `DELETE_ACCOUNT`, `ARCHIVE_ACCOUNT`, `UNARCHIVE_ACCOUNT`, `SAVE_SETTINGS`, `ADD_CATEGORY`, `UPDATE_CATEGORY`, `DELETE_CATEGORY`, `ADD_TRANSACTION`, `UPDATE_TRANSACTION`, `DELETE_TRANSACTION`.
+**Acciones de dominio:** `ADD_SCHEDULE`, `UPDATE_SCHEDULE`, `DELETE_SCHEDULE`, `CONFIRM_OCCURRENCE`, `SKIP_OCCURRENCE`, `PROCESS_SCHEDULES`, `IMPORT_STATE`, `ADD_ACCOUNT`, `UPDATE_ACCOUNT`, `DELETE_ACCOUNT`, `ARCHIVE_ACCOUNT`, `UNARCHIVE_ACCOUNT`, `SAVE_SETTINGS`, `ADD_CATEGORY`, `UPDATE_CATEGORY`, `DELETE_CATEGORY`, `ADD_TRANSACTION`, `UPDATE_TRANSACTION`, `DELETE_TRANSACTION`.
 
 ### 5.5. Secuencias clave
 
@@ -364,7 +369,7 @@ El contrato define la **forma** de cada entidad. Estas reglas entre campos no se
 | 045 | Formato y redondeo | todos los montos | `calc.formatMoney`, `calc.formatPercent` |
 | 046 | Negativos con signo y alerta | `SummaryCards`, `TransactionList` | clases `is-negative` |
 | 047 | Sin red | `index.html` (CSP) | sin `fetch`/XHR (D6) |
-| 048 | Sin borrados colaterales | — | reducers de alcance mínimo |
+| 048 | Sin borrados colaterales | — | reducers de alcance mínimo; solo `IMPORT_STATE` reemplaza todo, con confirmación |
 | 049 | Saldo no editable | `AccountForm` (sin campo saldo) | saldo derivado (RN-01) |
 | 050 | Sin movimientos automáticos salvo el auto-débito | — | solo `processSchedules` crea movimientos, desde programaciones |
 | 051 | Guardar en cada cambio | — | `persist()` al final de `dispatch` |
@@ -408,7 +413,14 @@ El contrato define la **forma** de cada entidad. Estas reglas entre campos no se
 | 095 | Meta alcanzada | `GoalProgress`, `Toast` | `calc.goalProgress`, `goalToast` |
 | 096 | Próximos programados por mes y semana | `UpcomingScheduled` (◀ 7 días antes · 7 días después ▶) | `calc.upcomingStart`, `calc.openOccurrences`, `UI_ACTIONS.SET_UPCOMING`, `PREV_MONTH`/`NEXT_MONTH` |
 
-**Cobertura:** 90 de 90 requerimientos vigentes tienen componente y/o función asignados.
+| 097 | Exportar datos | `BackupCard` | `exportData` en `app.js`, `storage.backupFileName` |
+| 098 | Importar datos | `BackupCard` → `Dialog` | `storage.parseBackup`, `DOMAIN.IMPORT_STATE` |
+| 099 | Buscar por descripción | `Filters` | `calc.filterTransactions` (`filters.text`) |
+| 100 | Comparación con el mes anterior | `SummaryCards` | `calc.monthComparison` |
+| 101 | Categorías con más gasto | `TopCategories` | `calc.topCategories` |
+| 102 | Primeros pasos | `FirstSteps` | `calc.firstSteps` |
+
+**Cobertura:** 96 de 96 requerimientos vigentes tienen componente y/o función asignados.
 
 ## 8. Diseño visual (CSS)
 

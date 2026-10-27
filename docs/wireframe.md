@@ -105,5 +105,12 @@
 - La pestaña **Presupuestos** agrega la sección **Metas de ahorro** bajo el presupuesto total.
 - La tarjeta **Próximos programados** del Resumen sigue al mes seleccionado (en un mes futuro: "Programados del 1 nov al 7 nov") y tiene **◀ 7 días antes · 7 días después ▶** (REQ-096).
 
+**Respaldo y ayudas del Resumen**
+- El Resumen empieza con **Primeros pasos** (1 cuenta · 2 movimiento · 3 presupuesto, con ✓ o pendiente) hasta completarlos (REQ-102).
+- Debajo de «Gastos del mes»: "▲ N % más que <mes anterior>" o "▼ N % menos…" (REQ-100).
+- Tarjeta **¿En qué se va la plata?** con las 3 categorías de más gasto, monto, % y barra (REQ-101).
+- *Gastos e ingresos*: campo **🔎 Buscar en la descripción** junto a los filtros (REQ-099).
+- *Cuentas*: tarjeta **💾 Respaldo de datos** con *Exportar datos* e *Importar datos*; importar pide confirmación porque reemplaza todo (REQ-097, REQ-098).
+
 **Persistencia**
 - Todo el estado (`schemaVersion`, `accounts`, `categories`, `transactions`, `schedules`, `settings`) se guarda en `localStorage` en cada cambio y se restaura al iniciar (REQ-051, REQ-052). Sin servidores ni internet (REQ-047).

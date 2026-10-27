@@ -5,7 +5,7 @@
 > El comportamiento esperado se expresa con `SHALL` (obligatorio) y el comportamiento que **no debe cambiar** se expresa con `SHALL NOT`.
 >
 > **Contrato de datos:** [`data-contract.json`](./data-contract.json). **Reglas de negocio:** RN-01..RN-13 en [`design.md`](./design.md).
-> 90 requerimientos, de REQ-001 a REQ-096. Los números REQ-073 a REQ-078 no se usan; se conservan los demás porque el código y las pruebas los citan.
+> 96 requerimientos, de REQ-001 a REQ-102. Los números REQ-073 a REQ-078 no se usan; se conservan los demás porque el código y las pruebas los citan.
 
 **Definiciones usadas en esta especificación**
 
@@ -135,7 +135,7 @@
 
 * **REQ-047**: the system SHALL NOT enviar datos a servidores externos ni requerir conexión a internet.
 
-* **REQ-048**: the system SHALL NOT eliminar cuentas, categorías ni movimientos como efecto secundario de otra operación. La única modificación colateral permitida es la reasignación de categoría confirmada por el usuario (REQ-017).
+* **REQ-048**: the system SHALL NOT eliminar cuentas, categorías ni movimientos como efecto secundario de otra operación. Las únicas excepciones son la reasignación de categoría confirmada por el usuario (REQ-017) y la importación de un respaldo confirmada por el usuario, que reemplaza todos los datos (REQ-098).
 
 * **REQ-049**: the system SHALL NOT permitir editar el saldo de una cuenta directamente: el saldo es siempre un valor derivado de su saldo inicial y sus movimientos.
 
@@ -251,6 +251,22 @@
 
 ---
 
+## 13. Respaldo de datos y ayudas para entender el mes
+
+* **REQ-097**: WHEN el usuario toca **Exportar datos**, THEN the system SHALL descargar un archivo `finanzapp-AAAA-MM-DD.json` (fecha de hoy) con el estado completo en el formato de [`data-contract.json`](./data-contract.json). SHALL NOT modificar el estado ni usar la red (REQ-047).
+
+* **REQ-098**: WHEN el usuario elige un archivo en **Importar datos**, IF no es JSON válido, pesa más de 5 MB o, después de migrarlo (REQ-072, REQ-090), no cumple el contrato o la regla de fondos (RN-03), THEN the system SHALL rechazarlo con el aviso "El archivo no es un respaldo válido de FinanzApp" y SHALL NOT modificar los datos actuales. En caso contrario SHALL mostrar cuántas cuentas, movimientos y programaciones trae y advertir que reemplazará **todos** los datos actuales; solo tras confirmar SHALL reemplazar el estado, guardarlo (REQ-051) y aplicar los auto-débitos vencidos (REQ-082). WHEN el usuario cancela, THEN the system SHALL NOT modificar nada.
+
+* **REQ-099**: the system SHALL permitir **buscar** en la lista de gastos e ingresos del mes seleccionado por texto en la descripción (normalizado, el texto puede estar en cualquier parte), combinable con los filtros de cuenta y categoría (REQ-036) e incluyendo las ocurrencias programadas (REQ-081). La búsqueda SHALL NOT modificar datos. IF ningún movimiento coincide, THEN SHALL mostrar el mensaje de lista vacía.
+
+* **REQ-100**: the system SHALL mostrar en el Resumen, junto a los gastos del mes seleccionado, la comparación con los gastos del mes anterior (misma base de REQ-039 y REQ-081): "▲ N % más que <mes anterior>", "▼ N % menos que <mes anterior>" o "Igual que <mes anterior>". IF los gastos del mes anterior son 0, THEN SHALL mostrar "Sin gastos en <mes anterior>" sin porcentaje.
+
+* **REQ-101**: WHEN el mes seleccionado tiene gastos, THEN the system SHALL mostrar en el Resumen la tarjeta **¿En qué se va la plata?** con las hasta 3 categorías de gasto con más gasto del mes (incluye programados), de mayor a menor (empate: por nombre), cada una con su monto, su porcentaje del total de gastos del mes y una barra. IF el mes no tiene gastos, THEN SHALL mostrar "Aún no hay gastos en <mes>".
+
+* **REQ-102**: WHILE no se hayan completado los tres primeros pasos —(1) crear una cuenta, (2) registrar un movimiento y (3) definir un presupuesto por categoría o total—, the system SHALL mostrar al inicio del Resumen la tarjeta **Primeros pasos** con cada paso marcado como ✓ hecho o pendiente (con texto, REQ-057) y un botón que lleva a la pestaña donde se hace el siguiente paso pendiente. WHEN los tres pasos están hechos, THEN the system SHALL NOT mostrar la tarjeta. Los pasos se derivan del estado y SHALL NOT guardarse.
+
+---
+
 ## Trazabilidad rápida: reglas de negocio complejas (requisito del Proyecto Final)
 
 | Regla compleja | REQ | Por qué es compleja |
@@ -264,4 +280,5 @@
 | Programaciones con auto-débito | REQ-079..REQ-083, REQ-086 | Calcula ocurrencias por frecuencia, crea movimientos solo si cumplen la regla de fondos y evita duplicar o recrear ocurrencias |
 | Proyección del mes | REQ-081, REQ-087, REQ-088 | Combina movimientos reales y ocurrencias futuras en resumen, presupuestos y alertas sin tocar el saldo real |
 | Presupuesto total vs. por categoría | REQ-069, REQ-070, REQ-071 | Dos niveles de presupuesto con días restantes del mes y advertencia de inconsistencia |
+| Importar un respaldo | REQ-098, REQ-048, REQ-053 | Valida, migra y verifica la regla de fondos de un archivo externo antes de reemplazar todo, solo con confirmación |
 | Ahorro en el presupuesto y metas | REQ-070, REQ-092..REQ-095 | Distingue transferencias según el tipo de las dos cuentas, neto y con mínimo 0; la meta combina saldo real y programaciones para estimar la fecha |

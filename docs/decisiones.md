@@ -59,3 +59,14 @@ El código y las pruebas las citan por su número (D1, D2…), por eso los núme
 | D30 | El apartado a ahorros consume el presupuesto **total**, pero no los presupuestos por categoría, y no cuenta como gasto en el Resumen ni en la tasa de ahorro | El dinero ahorrado no está disponible para gastar, pero sigue siendo del usuario: contarlo como gasto falsearía la tasa de ahorro |
 | D31 | La meta vive en la cuenta de ahorros (`goalAmount`, `goalReason` opcionales) y el progreso usa el **saldo actual** de la cuenta | Una meta es "juntar ₡X para Y", sin fecha fija; los campos opcionales no cambian `schemaVersion` |
 | D32 | La meta muestra cada transferencia programada que la alimenta (descripción, monto, frecuencia y equivalente mensual) y advierte si hay programaciones repetidas | Un total sin desglose no se puede verificar |
+
+## Respaldo y ayudas del Resumen
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D34 | Exportar crea un `Blob` con el JSON del estado y lo descarga con un enlace `download`; importar lee el archivo con `FileReader` | Todo ocurre en el navegador, sin red (REQ-047) |
+| D35 | Importar **reemplaza** todos los datos; no los fusiona | Fusionar mezclaría IDs y nombres repetidos y podría romper la regla de fondos; reemplazar con confirmación es predecible |
+| D36 | Un respaldo pasa por la misma migración y el mismo `validateState` que los datos guardados | Un archivo externo no es confiable; así nunca entra un estado inválido |
+| D37 | El texto de búsqueda es estado de interfaz (`ui.filters.text`), no se guarda, y al teclear se conserva la posición del cursor | Igual que los otros filtros (REQ-036) |
+| D38 | La comparación y las categorías con más gasto usan la misma base que el Resumen: movimientos reales + ocurrencias abiertas del mes | Los números del Resumen cuadran entre sí |
+| D39 | Los primeros pasos se derivan del estado (`calc.firstSteps`) y no hay opción de ocultarlos | Evita un campo nuevo en el contrato; la tarjeta desaparece sola al completar los pasos |
