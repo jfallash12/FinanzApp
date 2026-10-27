@@ -48,12 +48,12 @@
         accountId: keep && isActiveAccount(keep.accountId) ? keep.accountId : calc.lastUsedAccountId(state),
         categoryId: '',
         toAccountId: '',
-        scheduled: false, frequency: 'monthly', endDate: '', mode: 'auto', pastAction: 'register' // REQ-079, REQ-091
+        scheduled: false, frequency: 'monthly', ends: 'never', endDate: '', mode: 'auto', pastAction: 'register' // REQ-079, REQ-091
       };
     }
     if (name === 'quick') { // REQ-067: hoy y última cuenta usada
       return { type: 'gasto', date: calc.todayISO(), amount: '', description: '', accountId: calc.lastUsedAccountId(state), categoryId: '', toAccountId: '',
-        scheduled: false, frequency: 'monthly', endDate: '', mode: 'auto', pastAction: 'register' };
+        scheduled: false, frequency: 'monthly', ends: 'never', endDate: '', mode: 'auto', pastAction: 'register' };
     }
     if (name === 'account') { return { name: '', type: 'efectivo', initialBalance: '', creditLimit: '', cutoffDay: '', paymentDay: '' }; }
     if (name === 'settings') { return { monthlyBudget: state.settings.monthlyBudget ? String(state.settings.monthlyBudget) : '' }; }
@@ -87,7 +87,7 @@
     return {
       type: t.type, date: t.date, amount: String(t.amount), description: t.description,
       accountId: t.accountId, categoryId: t.categoryId || '', toAccountId: t.toAccountId || '',
-      scheduled: false, frequency: 'monthly', endDate: '', mode: 'auto', pastAction: 'register'
+      scheduled: false, frequency: 'monthly', ends: 'never', endDate: '', mode: 'auto', pastAction: 'register'
     };
   }
 
@@ -95,7 +95,7 @@
     return {
       type: sch.type, date: sch.startDate, amount: String(sch.amount), description: sch.description,
       accountId: sch.accountId, categoryId: sch.categoryId || '', toAccountId: sch.toAccountId || '',
-      scheduled: true, frequency: sch.frequency, endDate: sch.endDate || '', mode: sch.mode, pastAction: 'register'
+      scheduled: true, frequency: sch.frequency, ends: sch.endDate ? 'date' : 'never', endDate: sch.endDate || '', mode: sch.mode, pastAction: 'register'
     };
   }
 
@@ -543,7 +543,7 @@
     ADJUST_OCCURRENCE: function (a) { // REQ-083 "Ajustar": formulario precargado y enlazado a la ocurrencia
       var sch = calc.getSchedule(state, a.scheduleId);
       var d = occurrenceDraft(sch, a.date);
-      d.scheduled = false; d.frequency = 'monthly'; d.endDate = ''; d.mode = 'auto';
+      d.scheduled = false; d.frequency = 'monthly'; d.ends = 'never'; d.endDate = ''; d.mode = 'auto';
       ui.forms.transaction = { draft: d, touched: {}, editingId: null, editingScheduleId: null, link: { scheduleId: sch.id, date: a.date } };
       ui.errors.transaction = validateForm('transaction');
       ui.activeTab = 'movimientos'; ui.selectedAccountId = null; ui.scrollToForm = true;

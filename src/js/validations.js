@@ -367,7 +367,8 @@
       skippedDates: base.skippedDates || [], createdAt: base.createdAt
     };
     if (d.type === 'transferencia') { sch.toAccountId = d.toAccountId; } else { sch.categoryId = d.categoryId; }
-    if (d.frequency !== 'once' && str(d.endDate).trim() !== '') { sch.endDate = str(d.endDate).trim(); }
+    if (d.frequency !== 'once' && d.ends !== 'never' && str(d.endDate).trim() !== '') { sch.endDate // D29: «Sin fin» ignora la fecha
+       = str(d.endDate).trim(); }
     var out = {};
     ['id', 'type', 'accountId', 'toAccountId', 'categoryId', 'amount', 'description', 'frequency', 'startDate', 'endDate', 'mode', 'skippedDates', 'createdAt']
       .forEach(function (k) { if (sch[k] !== undefined) { out[k] = sch[k]; } });
@@ -392,7 +393,8 @@
     else if (calc.daysBetween(today, start) > MAX_SCHEDULE_DAYS) {
       errors.date = 'Solo se programa hasta un año adelante (' + calc.addDays(today, MAX_SCHEDULE_DAYS) + ').';
     }
-    var end = str(d.endDate).trim();
+    var end = d.ends === 'never' ? '' : str(d.endDate).trim(); // D29
+    if (d.frequency !== 'once' && d.ends === 'date' && end === '') { errors.endDate = 'Elija hasta qué fecha, o marque «🔁 Sin fin».'; }
     if (d.frequency !== 'once' && end !== '') {
       if (!calc.isValidISODate(end)) { errors.endDate = 'La fecha "hasta" no es válida.'; }
       else if (calc.isValidISODate(start) && end < start) { errors.endDate = 'La fecha "hasta" no puede ser anterior a la primera fecha.'; }

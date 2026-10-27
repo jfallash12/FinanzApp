@@ -210,6 +210,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
   *Aceptación:* editar "Internet, Luz, Agua y Gas" (mensual, ₡70,000) y cambiar la primera fecha al 6 de octubre → se registra el pago del 6 de octubre con su fecha y la próxima ocurrencia es el 6 de noviembre.
 
 - [x] **T-42 (v5.1) Ingresos programados sin "Al llegar la fecha".** Pedido del estudiante: un salario no se confirma ni se "debita". REQ-079 ajustado, D28: `draftToSchedule` fija `mode = 'auto'` en ingresos, `occurrenceToTx` trata ingresos guardados como automáticos, `ScheduleFields` reemplaza el selector por "💰 Los ingresos programados se registran solos en su fecha" y las listas dicen "Automático".
+- [x] **T-43 (v5.2) «¿Hasta cuándo?» con Sin fin por defecto.** Pedido del estudiante: "Hasta (opcional)" hacía dudar si el salario se repetía cada mes. REQ-079 ajustado, D29: borrador con `ends: 'never' | 'date'`, `draftToSchedule` ignora `endDate` con «Sin fin», error si se elige «Hasta una fecha» sin fecha, rótulo «Primer pago (desde)» y aviso en la vista previa cuando solo habrá 1 pago.
 
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)
 
@@ -276,3 +277,4 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
 | 2026-10-26 | T-37..T-40 | Versión 4 (programaciones): `tests/pruebas.html` 112/112 y recorrido de punta a punta 145/145. El recorrido detectó un error real (el ajuste de una ocurrencia no quedaba enlazado) que se corrigió antes de entregar
 | 2026-10-26 | T-41 | Versión 5: `tests/pruebas.html` 116/116 y recorrido de punta a punta 149/149
 | 2026-10-26 | T-42 | v5.1: `tests/pruebas.html` 118/118 y recorrido de punta a punta 151/151
+| 2026-10-26 | T-43 | v5.2: `tests/pruebas.html` 120/120 y recorrido de punta a punta 151/151

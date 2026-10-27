@@ -513,7 +513,7 @@
       ? field(form, 'toAccountId', 'Cuenta destino', select(form, 'toAccountId', accountOptions(form, 'toAccountId', 'Elija la cuenta destino…'), { rerender: true }), { required: true })
       : field(form, 'categoryId', 'Categoría', select(form, 'categoryId', catOptions, { rerender: true }), { required: true });
     var f = U.forms[form];
-    var date = field(form, 'date', d.scheduled ? 'Primera fecha' : 'Fecha',
+    var date = field(form, 'date', d.scheduled ? (d.frequency === 'once' ? 'Fecha' : 'Primer pago (desde)') : 'Fecha',
       input(form, 'date', { type: 'date', max: d.scheduled ? calc.addDays(TODAY, validate.MAX_SCHEDULE_DAYS) : TODAY, min: d.scheduled ? calc.addDays(TODAY, -validate.MAX_SCHEDULE_DAYS) : null,
         rerender: d.scheduled }), { required: true }); // REQ-091: al cambiar la fecha se recalculan los pagos anteriores
     var amount = field(form, 'amount', 'Monto (₡)', input(form, 'amount', { inputmode: 'decimal', placeholder: '0.00' }), { required: true });
@@ -544,12 +544,15 @@
         field(form, 'frequency', 'Frecuencia', segmented(form, 'frequency', [
           { value: 'once', label: 'Una vez' }, { value: 'monthly', label: 'Cada mes' }, { value: 'biweekly', label: 'Quincenal' }]),
           { wide: true, hint: d.frequency === 'biweekly' ? 'Quincenal = días 15 y último de cada mes. El monto es por quincena.' : null }),
-        d.frequency !== 'once' ? field(form, 'endDate', 'Hasta (opcional)', input(form, 'endDate', { type: 'date', rerender: true }), {}) : null,
+        d.frequency !== 'once' ? field(form, 'ends', '¿Hasta cuándo?', segmented(form, 'ends', [ // D29: por defecto se repite sin fin
+          { value: 'never', label: '🔁 Sin fin' }, { value: 'date', label: '📅 Hasta una fecha' }]),
+          { hint: d.ends === 'date' ? null : (d.frequency === 'monthly' ? 'Se repite todos los meses hasta que usted la elimine.' : 'Se repite cada quincena hasta que usted la elimine.') }) : null,
+        d.frequency !== 'once' && d.ends === 'date' ? field(form, 'endDate', 'Último pago (fecha final)', input(form, 'endDate', { type: 'date', min: d.date, rerender: true }), {}) : null,
         d.type === 'ingreso' // D28: los ingresos no piden modo
-          ? el('p', { class: 'field-hint income-auto' + (d.frequency === 'once' ? ' field-wide' : ''), text: '💰 Los ingresos programados se registran solos en su fecha, en la cuenta que recibe.' })
+          ? el('p', { class: 'field-hint income-auto' + (d.frequency === 'once' || d.ends === 'date' ? ' field-wide' : ''), text: '💰 Los ingresos programados se registran solos en su fecha, en la cuenta que recibe.' })
           : field(form, 'mode', 'Al llegar la fecha', segmented(form, 'mode', [
             { value: 'auto', label: '⚡ Auto-débito' }, { value: 'manual', label: '✋ Confirmar' }]),
-            { wide: d.frequency === 'once', hint: d.mode === 'auto' ? 'Se registra solo desde la cuenta elegida si hay fondos.' : 'Queda pendiente para que usted lo confirme, ajuste u omita.' })),
+            { wide: d.frequency === 'once' || d.ends === 'date', hint: d.mode === 'auto' ? 'Se registra solo desde la cuenta elegida si hay fondos.' : 'Queda pendiente para que usted lo confirme, ajuste u omita.' })),
       el('p', { class: 'field-hint schedule-preview', 'data-preview': form, text: preview }),
       PastOccurrences(form));
   }
@@ -561,7 +564,7 @@
     if (!calc.isValidISODate(d.date) || d.date >= TODAY || ['once', 'monthly', 'biweekly'].indexOf(d.frequency) === -1) { return null; }
     var orig = f.editingScheduleId ? calc.getSchedule(S, f.editingScheduleId) : null;
     var sch = { id: f.editingScheduleId || 'prg-candidato', frequency: d.frequency, startDate: d.date, skippedDates: orig ? orig.skippedDates : [],
-      endDate: d.frequency !== 'once' && calc.isValidISODate(d.endDate) && d.endDate >= d.date ? d.endDate : undefined };
+      endDate: draftEnd(d) && draftEnd(d) >= d.date ? draftEnd(d) : undefined };
     var dates = validate.pastOccurrences(S, sch, TODAY);
     if (!dates.length) { return null; }
     var amt = Number(String(d.amount).trim());
@@ -573,12 +576,19 @@
         { wide: true, hint: d.pastAction === 'skip' ? 'No se crea ningún movimiento por esas fechas.' : 'Se crea un gasto o ingreso por cada fecha, con su fecha real, desde la cuenta elegida.' }));
   }
 
+  /** D29: fecha final efectiva del borrador (null = sin fin). */
+  function draftEnd(d) {
+    return d.frequency !== 'once' && d.ends !== 'never' && calc.isValidISODate(d.endDate) ? d.endDate : null;
+  }
+
   /** REQ-080: próximas 3 fechas y equivalente mensual (quincenal). */
   function schedulePreview(d) {
     if (!d.scheduled || !calc.isValidISODate(d.date) || ['once', 'monthly', 'biweekly'].indexOf(d.frequency) === -1) { return ''; }
-    var sch = { frequency: d.frequency, startDate: d.date, endDate: d.frequency !== 'once' && calc.isValidISODate(d.endDate) ? d.endDate : null };
+    var sch = { frequency: d.frequency, startDate: d.date, endDate: draftEnd(d) };
     var next = calc.scheduleOccurrences(sch, d.date, calc.addDays(d.date, 400)).slice(0, 3);
     var text = next.length ? 'Próximas fechas: ' + next.map(dateLabel).join(' · ') : 'Sin fechas en ese rango.';
+    if (d.frequency !== 'once' && sch.endDate && next.length === 1) { text += ' — ⚠ Con esa fecha final solo habrá 1 pago.'; }
+    else if (d.frequency !== 'once' && !sch.endDate && next.length) { text += ' …'; }
     var amt = Number(String(d.amount).trim());
     if (d.frequency === 'biweekly' && amt > 0 && calc.hasMax2Decimals(amt)) { text += ' — ≈ ' + money(amt * 2) + ' al mes'; }
     return text;

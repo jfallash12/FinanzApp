@@ -252,6 +252,14 @@
   test('D28 ingreso guardado como manual se trata como automático', function () {
     var s = clone(DATA); s.schedules[0].mode = 'manual'; return eq(calc.dueOccurrences(s, '2026-11-01')[0].mode, 'auto');
   });
+  test('D29 «Sin fin» ignora la fecha final (se repite todos los meses)', function () {
+    var d = sch({ type: 'ingreso', accountId: 'acc-bac', categoryId: 'cat-salario', amount: '1000000', description: 'Pago Planilla', date: '2026-10-30', ends: 'never', endDate: '2026-10-30' });
+    return eq(String(v.draftToSchedule(d, { id: 'prg-x', createdAt: '', skippedDates: [] }).endDate), 'undefined');
+  });
+  test('D29 «Hasta una fecha» sin fecha → error', function () {
+    var d = sch({ type: 'ingreso', accountId: 'acc-bac', categoryId: 'cat-salario', amount: '1000000', description: 'Pago Planilla', date: '2026-10-30', ends: 'date', endDate: '' });
+    return eq(!!v.validateSchedule(d, DATA, null, TODAY).endDate, true);
+  });
   test('REQ-080 equivalente mensual quincenal', function () { return eq(calc.monthlyEquivalent(GAS), 40000); });
   test('REQ-081 noviembre incluye los programados', function () {
     var m = calc.monthSummary(DATA, '2026-11', TODAY); return eq([m.income, m.expense, m.scheduledIncome, m.scheduledExpense].join(','), '650000,40000,650000,40000');
