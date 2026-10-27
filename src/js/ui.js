@@ -106,7 +106,7 @@
     return el('input', {
       id: 'f-' + form + '-' + name, 'data-form': form, 'data-field': name,
       type: opts.type || 'text', value: U.forms[form].draft[name], inputmode: opts.inputmode,
-      placeholder: opts.placeholder, maxlength: opts.maxlength, max: opts.max, min: opts.min, autocomplete: 'off',
+      placeholder: opts.placeholder, maxlength: opts.maxlength, max: opts.max, min: opts.min, autocomplete: 'off', 'data-rerender': opts.rerender ? true : null,
       'aria-invalid': fieldError(form, name) ? 'true' : null
     });
   }
@@ -512,7 +512,8 @@
       : field(form, 'categoryId', 'Categoría', select(form, 'categoryId', catOptions, { rerender: true }), { required: true });
     var f = U.forms[form];
     var date = field(form, 'date', d.scheduled ? 'Primera fecha' : 'Fecha',
-      input(form, 'date', { type: 'date', max: d.scheduled ? calc.addDays(TODAY, validate.MAX_SCHEDULE_DAYS) : TODAY, min: d.scheduled && !f.editingScheduleId ? TODAY : null }), { required: true });
+      input(form, 'date', { type: 'date', max: d.scheduled ? calc.addDays(TODAY, validate.MAX_SCHEDULE_DAYS) : TODAY, min: d.scheduled ? calc.addDays(TODAY, -validate.MAX_SCHEDULE_DAYS) : null,
+        rerender: d.scheduled }), { required: true }); // REQ-091: al cambiar la fecha se recalculan los pagos anteriores
     var amount = field(form, 'amount', 'Monto (₡)', input(form, 'amount', { inputmode: 'decimal', placeholder: '0.00' }), { required: true });
     var desc = field(form, 'description', 'Descripción', input(form, 'description', { maxlength: 120, placeholder: 'Ej. Supermercado' }), { required: true, wide: true });
     var types = form === 'quick' ? ['gasto', 'ingreso'] : ['gasto', 'ingreso', 'transferencia'];
@@ -541,11 +542,31 @@
         field(form, 'frequency', 'Frecuencia', segmented(form, 'frequency', [
           { value: 'once', label: 'Una vez' }, { value: 'monthly', label: 'Cada mes' }, { value: 'biweekly', label: 'Quincenal' }]),
           { wide: true, hint: d.frequency === 'biweekly' ? 'Quincenal = días 15 y último de cada mes. El monto es por quincena.' : null }),
-        d.frequency !== 'once' ? field(form, 'endDate', 'Hasta (opcional)', input(form, 'endDate', { type: 'date' }), {}) : null,
+        d.frequency !== 'once' ? field(form, 'endDate', 'Hasta (opcional)', input(form, 'endDate', { type: 'date', rerender: true }), {}) : null,
         field(form, 'mode', 'Al llegar la fecha', segmented(form, 'mode', [
           { value: 'auto', label: '⚡ Auto-débito' }, { value: 'manual', label: '✋ Confirmar' }]),
           { wide: d.frequency === 'once', hint: d.mode === 'auto' ? 'Se registra solo desde la cuenta elegida si hay fondos.' : 'Queda pendiente para que usted lo confirme, ajuste u omita.' })),
-      el('p', { class: 'field-hint schedule-preview', 'data-preview': form, text: preview }));
+      el('p', { class: 'field-hint schedule-preview', 'data-preview': form, text: preview }),
+      PastOccurrences(form));
+  }
+
+  /** REQ-091: pagos con fecha anterior a hoy → registrarlos ahora u omitirlos. */
+  function PastOccurrences(form) {
+    var f = U.forms[form];
+    var d = f.draft;
+    if (!calc.isValidISODate(d.date) || d.date >= TODAY || ['once', 'monthly', 'biweekly'].indexOf(d.frequency) === -1) { return null; }
+    var orig = f.editingScheduleId ? calc.getSchedule(S, f.editingScheduleId) : null;
+    var sch = { id: f.editingScheduleId || 'prg-candidato', frequency: d.frequency, startDate: d.date, skippedDates: orig ? orig.skippedDates : [],
+      endDate: d.frequency !== 'once' && calc.isValidISODate(d.endDate) && d.endDate >= d.date ? d.endDate : undefined };
+    var dates = validate.pastOccurrences(S, sch, TODAY);
+    if (!dates.length) { return null; }
+    var amt = Number(String(d.amount).trim());
+    return el('div', { class: 'past-box' },
+      el('p', { class: 'past-title', text: '⏮ ' + (dates.length === 1 ? 'Hay 1 pago con fecha anterior a hoy: ' : 'Hay ' + dates.length + ' pagos con fecha anterior a hoy: ') +
+        dates.map(dateLabel).join(' · ') + (amt > 0 ? ' (' + money(amt * dates.length) + ')' : '') }),
+      field(form, 'pastAction', '¿Qué hago con ' + (dates.length === 1 ? 'ese pago' : 'esos pagos') + '?', segmented(form, 'pastAction', [
+        { value: 'register', label: '✅ Registrarlos ahora' }, { value: 'skip', label: '↪ Ya los registré' }]),
+        { wide: true, hint: d.pastAction === 'skip' ? 'No se crea ningún movimiento por esas fechas.' : 'Se crea un gasto o ingreso por cada fecha, con su fecha real, desde la cuenta elegida.' }));
   }
 
   /** REQ-080: próximas 3 fechas y equivalente mensual (quincenal). */

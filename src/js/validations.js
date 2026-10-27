@@ -386,7 +386,9 @@
     var keepStart = original && original.startDate === start; // editar sin mover la primera fecha
     if (start === '') { errors.date = 'La primera fecha es obligatoria.'; }
     else if (!calc.isValidISODate(start)) { errors.date = 'La fecha no es válida (formato AAAA-MM-DD).'; }
-    else if (start < today && !keepStart) { errors.date = 'La primera fecha no puede ser anterior a hoy.'; }
+    else if (calc.daysBetween(start, today) > MAX_SCHEDULE_DAYS && !keepStart) { // REQ-079 (v5)
+      errors.date = 'La primera fecha puede ser como máximo un año atrás (' + calc.addDays(today, -MAX_SCHEDULE_DAYS) + ').';
+    }
     else if (calc.daysBetween(today, start) > MAX_SCHEDULE_DAYS) {
       errors.date = 'Solo se programa hasta un año adelante (' + calc.addDays(today, MAX_SCHEDULE_DAYS) + ').';
     }
@@ -395,7 +397,35 @@
       if (!calc.isValidISODate(end)) { errors.endDate = 'La fecha "hasta" no es válida.'; }
       else if (calc.isValidISODate(start) && end < start) { errors.endDate = 'La fecha "hasta" no puede ser anterior a la primera fecha.'; }
     }
+    if (hasErrors(errors)) { return errors; }
+
+    // REQ-091 (v5): ocurrencias anteriores a hoy
+    var candidate = draftToSchedule(d, { id: originalId || 'prg-candidato', createdAt: original ? original.createdAt : '', skippedDates: original ? original.skippedDates : [] });
+    var past = pastOccurrences(state, candidate, today);
+    if (past.length && d.pastAction !== 'register' && d.pastAction !== 'skip') {
+      errors.pastAction = 'Indique si registra ahora los pagos anteriores a hoy o si ya los registró.';
+    } else if (past.length && d.pastAction === 'register') {
+      var txs = past.map(function (date, i) {
+        var t = draftToTransaction({ type: d.type, accountId: d.accountId, toAccountId: d.toAccountId, categoryId: d.categoryId,
+          amount: d.amount, date: date, description: d.description }, { id: 'mov-pasado-' + i, createdAt: '9999-12-31T23:59:59.999Z' });
+        return t;
+      });
+      var bad = calc.accountViolations({ accounts: state.accounts, transactions: state.transactions.concat(txs) })[0];
+      if (bad) {
+        errors._form = 'No se pueden registrar los pagos anteriores: ' + violationMessage(bad).replace(/^La operación/, 'el registro') +
+          ' Elija «Ya los registré» o revise el saldo inicial.';
+      }
+    }
     return errors;
+  }
+
+  /** REQ-091: fechas de ocurrencias anteriores a hoy que no están aplicadas ni omitidas. */
+  function pastOccurrences(state, sch, today) {
+    today = today || calc.todayISO();
+    var yesterday = calc.addDays(today, -1);
+    if (sch.startDate > yesterday) { return []; }
+    var st = { transactions: state.transactions, schedules: (state.schedules || []).filter(function (x) { return x.id !== sch.id; }).concat([sch]) };
+    return calc.scheduleOccurrences(sch, sch.startDate, yesterday).filter(function (date) { return !calc.isOccurrenceDone(st, sch, date); });
   }
 
   /** REQ-084: omitir una ocurrencia abierta. */
@@ -415,6 +445,7 @@
     draftToSchedule: draftToSchedule,
     validateSchedule: validateSchedule,
     validateSkip: validateSkip,
+    pastOccurrences: pastOccurrences,
     isBlank: isBlank,
     hasErrors: hasErrors,
     parseAmount: parseAmount,

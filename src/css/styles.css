@@ -421,6 +421,9 @@ button, input, select { font: inherit; color: inherit; }
 .pending-list, .schedules { margin-top: 16px; }
 .acc-col > .card + .card { margin-top: 0; }
 
+.past-box { margin-top: 10px; padding: 10px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+.past-title { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
+
 /* ---------- Responsive y accesibilidad ---------- */
 
 @media (max-width: 900px) {

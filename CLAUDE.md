@@ -24,11 +24,11 @@ auto-débito o confirmación manual, proyectadas en cada mes.
 
 | Documento | Contenido |
 |---|---|
-| [`docs/requirements.md`](docs/requirements.md) | Especificación EARS v4: 84 requerimientos vigentes (REQ-001..REQ-090, sin REQ-073..REQ-078) — fuente de verdad del comportamiento |
-| [`docs/design.md`](docs/design.md) | Reglas de negocio RN-01..RN-12, decisiones D1–D26, entrevista Q1–Q11, arquitectura |
+| [`docs/requirements.md`](docs/requirements.md) | Especificación EARS v5: 85 requerimientos vigentes (REQ-001..REQ-091, sin REQ-073..REQ-078) — fuente de verdad del comportamiento |
+| [`docs/design.md`](docs/design.md) | Reglas de negocio RN-01..RN-12, decisiones D1–D27, entrevista Q1–Q11, arquitectura |
 | [`docs/data-contract.json`](docs/data-contract.json) | JSON Schema 2020-12 del estado `PersonalFinanceState` (schemaVersion 3, con migración desde 1 y 2) — contrato estricto |
 | [`docs/wireframe.md`](docs/wireframe.md) | Diseño de interfaz por componentes (+ `wireframe.excalidraw` editable y `wireframe.png`) |
-| [`tasks.md`](tasks.md) | Plan de implementación por fases (T-00..T-40) con criterios de aceptación y pruebas de regresión |
+| [`tasks.md`](tasks.md) | Plan de implementación por fases (T-00..T-41) con criterios de aceptación y pruebas de regresión |
 | [`retrospective.md`](retrospective.md) | Historial de correcciones y reflexiones |
 
 Si algún artefacto contradice otro, mandan los requerimientos (REQ) y luego las reglas (RN).
@@ -84,7 +84,7 @@ Si algún artefacto contradice otro, mandan los requerimientos (REQ) y luego las
 - **RN-01:** `saldo = initialBalance + Σ ingresos + Σ transf. entrantes − Σ gastos − Σ transf. salientes` (crédito: `initialBalance = 0`).
 - **RN-02:** `Patrimonio = Σ saldos de todas las cuentas` (las deudas restan).
 - **RN-03 (invariante de fondos, cronológica):** recorriendo los movimientos en orden de fecha y `createdAt`, ninguna cuenta líquida tiene saldo < 0 y ninguna tarjeta tiene deuda > límite ni saldo > 0 **en ningún momento**. Lo que puede salir en una fecha = saldo mínimo desde esa fecha en adelante. Se verifica **antes** de aceptar cualquier alta, edición o borrado. **Sí bloquea.**
-- **RN-04:** Validaciones de borde: monto > 0, numérico, máx. 2 decimales; fecha ISO real y no futura (para el futuro: "Programar", primera fecha hoy..hoy+365); descripción 1–80; categoría del mismo tipo; transferencia entre cuentas distintas.
+- **RN-04:** Validaciones de borde: monto > 0, numérico, máx. 2 decimales; fecha ISO real y no futura (para el futuro: "Programar", primera fecha entre hoy−365 y hoy+365; si es anterior a hoy, los pagos ya vencidos se registran u omiten al guardar, REQ-091); descripción 1–80; categoría del mismo tipo; transferencia entre cuentas distintas.
 - **RN-05:** `Balance neto = ingresos del mes − gastos del mes`; `Tasa de ahorro = neto / ingresos × 100` ("—" si ingresos = 0). Transferencias excluidas.
 - **RN-06:** `% presupuesto = gastado del mes / monthlyBudget × 100` → ok ≤ 80 · warning ≤ 100 · exceeded > 100. Se evalúa sin redondear. **Nunca bloquea.**
 - **RN-07:** `Neto del día = Σ ingresos − Σ gastos` de la fecha.
@@ -140,7 +140,7 @@ Estos son los `SHALL NOT` del sistema — no los toques sin cambiar primero `doc
 ├── .cursorrules                   ← reglas de contexto (remite a este archivo)
 ├── CLAUDE.md                      ← este archivo (memoria semántica + gobierno de la IA)
 ├── docs/
-│   ├── requirements.md            ← especificación EARS v4 (fuente de verdad)
+│   ├── requirements.md            ← especificación EARS v5 (fuente de verdad)
 │   ├── data-contract.json         ← JSON Schema PersonalFinanceState (schemaVersion 3)
 │   ├── wireframe.md               ← boceto de interfaz por componentes
 │   ├── wireframe.excalidraw       ← versión editable (excalidraw.com)

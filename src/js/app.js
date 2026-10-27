@@ -48,12 +48,12 @@
         accountId: keep && isActiveAccount(keep.accountId) ? keep.accountId : calc.lastUsedAccountId(state),
         categoryId: '',
         toAccountId: '',
-        scheduled: false, frequency: 'monthly', endDate: '', mode: 'auto' // REQ-079
+        scheduled: false, frequency: 'monthly', endDate: '', mode: 'auto', pastAction: 'register' // REQ-079, REQ-091
       };
     }
     if (name === 'quick') { // REQ-067: hoy y última cuenta usada
       return { type: 'gasto', date: calc.todayISO(), amount: '', description: '', accountId: calc.lastUsedAccountId(state), categoryId: '', toAccountId: '',
-        scheduled: false, frequency: 'monthly', endDate: '', mode: 'auto' };
+        scheduled: false, frequency: 'monthly', endDate: '', mode: 'auto', pastAction: 'register' };
     }
     if (name === 'account') { return { name: '', type: 'efectivo', initialBalance: '', creditLimit: '', cutoffDay: '', paymentDay: '' }; }
     if (name === 'settings') { return { monthlyBudget: state.settings.monthlyBudget ? String(state.settings.monthlyBudget) : '' }; }
@@ -87,7 +87,7 @@
     return {
       type: t.type, date: t.date, amount: String(t.amount), description: t.description,
       accountId: t.accountId, categoryId: t.categoryId || '', toAccountId: t.toAccountId || '',
-      scheduled: false, frequency: 'monthly', endDate: '', mode: 'auto'
+      scheduled: false, frequency: 'monthly', endDate: '', mode: 'auto', pastAction: 'register'
     };
   }
 
@@ -95,7 +95,7 @@
     return {
       type: sch.type, date: sch.startDate, amount: String(sch.amount), description: sch.description,
       accountId: sch.accountId, categoryId: sch.categoryId || '', toAccountId: sch.toAccountId || '',
-      scheduled: true, frequency: sch.frequency, endDate: sch.endDate || '', mode: sch.mode
+      scheduled: true, frequency: sch.frequency, endDate: sch.endDate || '', mode: sch.mode, pastAction: 'register'
     };
   }
 
@@ -336,10 +336,14 @@
       form: 'transaction',
       formOf: function (a) { return a.source === 'quick' ? 'quick' : 'transaction'; },
       validate: function (a) { return validate.validateSchedule(a.draft, state, null); },
-      reduce: function (s, a) { s.schedules.push(validate.draftToSchedule(a.draft, { id: newId('prg'), createdAt: nowISO(), skippedDates: [] })); },
+      reduce: function (s, a) {
+        var sch = validate.draftToSchedule(a.draft, { id: newId('prg'), createdAt: nowISO(), skippedDates: [] });
+        s.schedules.push(sch);
+        a.past = resolvePast(s, sch, a.draft.pastAction); // REQ-091
+      },
       after: function (a) {
         if (a.source === 'quick') { ui.quickOpen = false; resetForm('quick'); } else { resetForm('transaction'); }
-        toast('ok', 'Programado: ' + scheduleText(a.draft) + '.');
+        toast('ok', 'Programado: ' + scheduleText(a.draft) + '.' + pastText(a));
         processSchedules(); // si la primera fecha es hoy y es auto-débito, se aplica ya (REQ-082)
       }
     },
@@ -349,8 +353,9 @@
       reduce: function (s, a) { // REQ-085: solo cambian las ocurrencias no aplicadas (los movimientos creados no se tocan)
         var i = findIndex(s.schedules, a.id);
         s.schedules[i] = validate.draftToSchedule(a.draft, s.schedules[i]);
+        a.past = resolvePast(s, s.schedules[i], a.draft.pastAction); // REQ-091
       },
-      after: function () { resetForm('transaction'); toast('ok', 'Programación actualizada.'); processSchedules(); }
+      after: function (a) { resetForm('transaction'); toast('ok', 'Programación actualizada.' + pastText(a)); processSchedules(); }
     },
     DELETE_SCHEDULE: {
       form: null,
@@ -432,6 +437,31 @@
   function occurrenceDraft(sch, date) {
     return { type: sch.type, date: date, amount: String(sch.amount), description: sch.description,
       accountId: sch.accountId, categoryId: sch.categoryId || '', toAccountId: sch.toAccountId || '' };
+  }
+
+  /**
+   * REQ-091: registra (con su fecha, enlazados) u omite las ocurrencias anteriores a hoy.
+   * Devuelve { action, count }.
+   */
+  function resolvePast(s, sch, action) {
+    var dates = validate.pastOccurrences(s, sch, calc.todayISO());
+    dates.forEach(function (date) {
+      if (action === 'register') {
+        var tx = validate.draftToTransaction(occurrenceDraft(sch, date), { id: newId('mov'), createdAt: nowISO() });
+        s.transactions.push(linkTx(tx, { scheduleId: sch.id, date: date }));
+      } else if (sch.skippedDates.indexOf(date) === -1) {
+        sch.skippedDates.push(date);
+      }
+    });
+    return { action: action, count: dates.length };
+  }
+
+  function pastText(a) {
+    if (!a.past || !a.past.count) { return ''; }
+    var n = a.past.count;
+    return a.past.action === 'register'
+      ? ' Se registr' + (n === 1 ? 'ó 1 pago anterior' : 'aron ' + n + ' pagos anteriores') + ' con su fecha.'
+      : ' ' + n + (n === 1 ? ' pago anterior quedó marcado' : ' pagos anteriores quedaron marcados') + ' como ya registrado' + (n === 1 ? '' : 's') + '.';
   }
 
   function linkTx(tx, link) {

@@ -222,7 +222,17 @@
   }
   test('REQ-027 (v4) fecha futura sin Programar rechazada', function () { return has(v.validateTransaction(tx({ date: '2026-10-27' }), DATA, null, TODAY), 'date', 'Programar'); });
   test('REQ-079 programación válida (hipoteca el 31)', function () { return eq(v.hasErrors(v.validateSchedule(sch({}), DATA, null, TODAY)), false); });
-  test('REQ-079 primera fecha en el pasado rechazada', function () { return has(v.validateSchedule(sch({ date: '2026-10-25' }), DATA, null, TODAY), 'date', 'anterior a hoy'); });
+  test('REQ-079 (v5) primera fecha en el pasado aceptada', function () { return eq(v.hasErrors(v.validateSchedule(sch({ date: '2026-10-06', categoryId: 'cat-servicios', amount: '70000', pastAction: 'register' }), DATA, null, TODAY)), false); });
+  test('REQ-079 (v5) más de un año atrás rechazado', function () { return has(v.validateSchedule(sch({ date: '2025-10-25' }), DATA, null, TODAY), 'date', 'un año atrás'); });
+  test('REQ-091 pagos anteriores a hoy', function () {
+    return eq(v.pastOccurrences(DATA, { id: 'prg-x', frequency: 'biweekly', startDate: '2026-09-01', skippedDates: [] }, TODAY).join(','), '2026-09-15,2026-09-30,2026-10-15');
+  });
+  test('REQ-091 registrar pagos anteriores sin fondos rechazado', function () {
+    return has(v.validateSchedule(sch({ date: '2026-10-06', accountId: 'acc-efectivo', categoryId: 'cat-servicios', amount: '60000', pastAction: 'register' }), DATA, null, TODAY), '_form', 'Ya los registré');
+  });
+  test('REQ-091 "Ya los registré" no revisa fondos', function () {
+    return eq(v.hasErrors(v.validateSchedule(sch({ date: '2026-10-06', accountId: 'acc-efectivo', categoryId: 'cat-servicios', amount: '60000', pastAction: 'skip' }), DATA, null, TODAY)), false);
+  });
   test('REQ-079 más de un año adelante rechazado', function () { return has(v.validateSchedule(sch({ date: '2027-10-27' }), DATA, null, TODAY), 'date', 'un año'); });
   test('REQ-079 "hasta" antes de la primera fecha', function () { return has(v.validateSchedule(sch({ endDate: '2026-10-01' }), DATA, null, TODAY), 'endDate', 'anterior'); });
   test('REQ-079 monto inválido también en programación', function () { return has(v.validateSchedule(sch({ amount: '-5' }), DATA, null, TODAY), 'amount', 'mayor a 0'); });

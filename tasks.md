@@ -3,13 +3,13 @@
 > **Spec-Driven Coding.** Plan de desarrollo incremental y verificable, ordenado por fases,
 > generado con IA a partir de los insumos armonizados y revisado por el estudiante (Head Chef) antes de programar.
 >
-> **Insumos (fuentes de verdad):** [`docs/requirements.md`](docs/requirements.md) (84 REQ vigentes, EARS v4) ·
+> **Insumos (fuentes de verdad):** [`docs/requirements.md`](docs/requirements.md) (85 REQ vigentes, EARS v5) ·
 > [`docs/design.md`](docs/design.md) (componentes, módulos, `dispatch`, mapeo REQ → función) ·
 > [`docs/data-contract.json`](docs/data-contract.json) (schemaVersion 3) ·
 > [`docs/wireframe.md`](docs/wireframe.md) + [`docs/wireframe.png`](docs/wireframe.png) ·
 > reglas en [`CLAUDE.md`](CLAUDE.md) y [`.cursorrules`](.cursorrules).
 
-**Estado:** ✅ Fases 0–11 completadas (T-00..T-40; Fase 9 = v2, Fase 10 = v3, Fase 11 = v4) · Leyenda: `[ ]` pendiente · `[x]` hecha
+**Estado:** ✅ Fases 0–11 completadas (T-00..T-41; Fase 9 = v2, Fase 10 = v3, Fase 11 = v4 y v5) · Leyenda: `[ ]` pendiente · `[x]` hecha
 
 ---
 
@@ -206,6 +206,9 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
   *Aceptación:* al adelantar el reloj al 31 de octubre, el salario y la hipoteca (auto) se registran solos una sola vez; la gasolina (manual) queda pendiente; un auto-débito sin fondos no se aplica.
 - [x] **T-40 Interfaz.** Casilla "🗓 Programar" con frecuencia, hasta, modo y vista previa; etiquetas Programado / Pendiente; "Pendientes de confirmar"; "Pagos e ingresos programados"; "Proyectado a fin de mes"; aviso de proyección. REQ-079..REQ-089.
 
+- [x] **T-41 (v5) Programaciones que empezaron antes de usar la app.** Pedido del estudiante: "pagué los servicios el 6 pero los registro hoy". REQ-079 modificado (primera fecha hasta un año atrás) y REQ-091: `validate.pastOccurrences`, `resolvePast`, `PastOccurrences` (✅ Registrarlos ahora · ↪ Ya los registré), fondos revisados al registrar.
+  *Aceptación:* editar "Internet, Luz, Agua y Gas" (mensual, ₡70,000) y cambiar la primera fecha al 6 de octubre → se registra el pago del 6 de octubre con su fecha y la próxima ocurrencia es el 6 de noviembre.
+
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)
 
 | # | Prueba | Desde |
@@ -269,3 +272,4 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
 | 2026-10-26 | fix(T-31) | "Editar" desde el detalle de cuenta ahora abre el formulario (reportado por el estudiante); pruebas 87/87 y 117/117
 | 2026-10-26 | T-34..T-36 | Versión 3 (programados): `tests/pruebas.html` 102/102 y recorrido de punta a punta 127/127
 | 2026-10-26 | T-37..T-40 | Versión 4 (programaciones): `tests/pruebas.html` 112/112 y recorrido de punta a punta 145/145. El recorrido detectó un error real (el ajuste de una ocurrencia no quedaba enlazado) que se corrigió antes de entregar
+| 2026-10-26 | T-41 | Versión 5: `tests/pruebas.html` 116/116 y recorrido de punta a punta 149/149

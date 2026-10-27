@@ -10,7 +10,7 @@
 **Curso:** Programación Intencional con IA Generativa
 **Estudiante:** José Fallas — jfallash@ucenfotec.ac.cr
 **Aplicación:** FinanzApp — Finanzas personales
-**Versión:** 4 (Octubre 2026) · Especificación v4 · Contrato `schemaVersion: 3`
+**Versión:** 5 (Octubre 2026) · Especificación v5 · Contrato `schemaVersion: 3`
 
 ---
 
@@ -215,7 +215,7 @@ Regla de dependencias: `calculations.js` no depende de nada, y solo `app.js` toc
 `parseISODate(s)`, `isValidISODate(s)`, `todayISO(now?)`, `monthOf(iso)`, `currentMonth(now?)`, `isValidMonth(ym)`, `addMonths(ym, n)`, `monthLabel(ym)`, `toCents(n)`, `fromCents(c)`, `sumAmounts(list)`, `hasMax2Decimals(n)`, `roundMoney(n)`, `formatMoney(n, {sign})`, `formatPercent(p)`, `getAccount(state, id)`, `getCategory(state, id)`, `daysInMonth(ym)`, `daysBetween(a, b)`, `remainingDays(ym, today)`, `isLiquid(account)`, `isSavings(account)`, `isCredit(account)`, `activeAccounts(state)`, `normalize(s)`, `accountBalance(state, id, excludeTxId?)`, `creditDebt(state, id, excludeTxId?)`, `timeline(state, id, excludeTxId?)` (interna), `availableFunds(state, id, excludeTxId?, date?)`, `paymentRoom(state, id, excludeTxId?, date?)`, `balanceSummary(state)`, `creditCycle(state, id, today)`, `paymentAlerts(state, today)`, `runningBalances(state, id)`, `lastUsedAccountId(state)`, `totalBudgetStatus(state, ym)`, `categoryBudgetsSum(state)`, *(v4)* `getSchedule`, `scheduleOccurrences(sch, from, to)`, `isOccurrenceApplied`, `isOccurrenceDone`, `occurrenceToTx`, `openOccurrences(state, from, to, today)`, `dueOccurrences(state, today)`, `upcomingOccurrences(state, today, days)`, `nextOccurrence(state, sch, today)`, `monthlyEquivalent(sch)`, `endOfMonth(iso)`, `projectedState`, `projectedBalance`, `hasOpenThisMonth`, `schedulesUsingAccount`, `projectionAlerts`, `monthItems(state, ym, today)`, `categoryScheduleCount`, `netWorth(state)`, `accountViolations(state)`, `accountMovementCount(state, id)`, `categoryMovementCount(state, id)`, `sortTransactions(list)`, `monthTransactions(state, ym)`, `monthSummary(state, ym)`, `categorySpent(state, catId, ym)`, `statusFromPercent(p)`, `budgetStatus(state, catId, ym)`, `dayNet(list)`, `groupByDate(list)`, `filterTransactions(state, ym, filters)`, `findDuplicate(state, tx, excludeTxId?)`.
 
 **`validations.js` (puro; devuelve `{ campo: 'mensaje' }`, vacío = válido; `_form` = error general):**
-`isBlank(v)`, `hasErrors(e)`, `parseAmount(raw, {label, allowZero, optional})`, `draftToAccount(d, base)`, `draftToTransaction(d, base)`, `parseDay(raw, label)`, *(v4)* `validateMovementFields(d, state, original)`, `draftToSchedule(d, base)`, `validateSchedule(d, state, originalId, today)`, `validateSkip(scheduleId, date, state)`, `validateAccount(d, state, originalId)`, `validateAccountDelete(id, state)`, `validateArchive(id, state)`, `validateSettings(d)`, `validateCategory(d, state, originalId)`, `validateCategoryDelete(id, state)`, `validateReassign(d, id, state)`, `validateTransaction(d, state, originalId, today?)`, `validateTransactionDelete(id, state)`.
+`isBlank(v)`, `hasErrors(e)`, `parseAmount(raw, {label, allowZero, optional})`, `draftToAccount(d, base)`, `draftToTransaction(d, base)`, `parseDay(raw, label)`, *(v4)* `validateMovementFields(d, state, original)`, `draftToSchedule(d, base)`, `validateSchedule(d, state, originalId, today)`, `validateSkip(scheduleId, date, state)`, `pastOccurrences(state, sch, today)` *(v5)*, `validateAccount(d, state, originalId)`, `validateAccountDelete(id, state)`, `validateArchive(id, state)`, `validateSettings(d)`, `validateCategory(d, state, originalId)`, `validateCategoryDelete(id, state)`, `validateReassign(d, id, state)`, `validateTransaction(d, state, originalId, today?)`, `validateTransactionDelete(id, state)`.
 
 **`storage.js`:**
 `STORAGE_KEY = 'finanzapp.state'`, `SCHEMA_VERSION = 3`, `emptyState()`, `migrate(obj, today)` (v1 → v2 → v3, REQ-072, REQ-090), `validateState(obj)` → `{ valid, errors[] }` (réplica manual del contrato + reglas del `$comment`), `loadState()` → `{ state, notice, migrated }`, `saveState(state)` → `true | error`.
@@ -338,6 +338,7 @@ sequenceDiagram
 | D24 *(v4)* | El auto-débito corre al abrir la app, al volver a ella y al programar; las ocurrencias que fallaron no se reintentan en la misma sesión | La app es offline y no tiene servidor que corra en segundo plano; evita avisos repetidos |
 | D25 *(v4)* | Eliminar un movimiento creado por una programación marca la ocurrencia como omitida | Si no, el auto-débito la volvería a crear al abrir (REQ-086) |
 | D26 *(v4)* | Eliminar una programación desenlaza (no borra) sus movimientos | REQ-048: sin borrados colaterales |
+| D27 *(v5)* | La primera fecha puede estar hasta un año atrás; las ocurrencias anteriores a hoy se resuelven **al guardar** (registrar con su fecha u omitir), nunca quedan como "pendientes" ni las aplica el auto-débito | Quien empieza a usar la app a mitad de mes ya pagó algunos fijos; así no se duplican ni se pierden (REQ-091) |
 | D15 | Formato de dinero `₡12,500.00` (coma de miles y punto decimal), igual al formato en que el usuario escribe los montos | Coherencia entre lo que se escribe y lo que se ve |
 
 ## 7. Mapeo explícito de requerimientos → diseño
@@ -431,8 +432,9 @@ sequenceDiagram
 | 088 | Proyectado a fin de mes | `AccountBalance`, `AccountCard`, `BalanceBreakdown` | `calc.projectedBalance`, `calc.hasOpenThisMonth`, `calc.balanceSummary` |
 | 089 | Lista de programaciones; cuentas en uso | `SchedulesList` | `calc.schedulesUsingAccount`, `validate.validateArchive`, `validate.validateAccountDelete` |
 | 090 | Migración v2 → v3 | — | `storage.migrate` (`migrateV2`) |
+| 091 *(v5)* | Programación que empezó antes de hoy | `PastOccurrences` (Registrarlos ahora · Ya los registré) | `validate.pastOccurrences`, `validate.validateSchedule` (fondos al registrar), `resolvePast` en `ADD_SCHEDULE` / `UPDATE_SCHEDULE` |
 
-**Cobertura:** 84 de 84 requerimientos vigentes tienen componente y/o función asignados.
+**Cobertura:** 85 de 85 requerimientos vigentes tienen componente y/o función asignados.
 
 ## 8. Diseño visual (CSS)
 
