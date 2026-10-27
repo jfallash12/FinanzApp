@@ -211,8 +211,8 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
   *Aceptación:* Exportar descarga `finanzapp-AAAA-MM-DD.json`; importarlo en una app vacía y confirmar → mismos saldos (Patrimonio ₡606,400); un archivo con texto cualquiera o con una cuenta en negativo → "El archivo no es un respaldo válido de FinanzApp" y nada cambia; Cancelar no cambia nada.
 - [x] **T-50 Buscar por descripción.** REQ-099, D37: `filters.text` en `calc.filterTransactions`; campo de búsqueda en `Filters`.
   *Aceptación:* en octubre, buscar "bus" muestra solo «Bus» (₡4,500); "PAN" encuentra «Panadería» en septiembre; combinado con la cuenta Visa y "cine" muestra «Cine y cena».
-- [ ] **T-51 Comparación con el mes anterior.** REQ-100, D38: `calc.monthComparison`; texto bajo «Gastos del mes».
-  *Aceptación:* octubre (₡438,600) frente a septiembre (₡15,000) → "▲ 2824 % más que septiembre"; septiembre → "Sin gastos en agosto".
+- [x] **T-51 Comparación con el mes anterior.** REQ-100, D38: `calc.monthComparison`; texto bajo «Gastos del mes».
+  *Aceptación:* octubre (₡438,600) frente a septiembre (₡15,000) → "▲ 2824 % más que septiembre 2026"; septiembre → "Sin gastos en agosto 2026".
 - [ ] **T-52 Categorías con más gasto.** REQ-101, D38: `calc.topCategories`, `TopCategories`.
   *Aceptación:* octubre → Vivienda ₡250,000 (57 %), Alimentación ₡99,700 (23 %), Servicios ₡38,900 (9 %); noviembre sin gastos → "Aún no hay gastos en noviembre 2026".
 - [ ] **T-53 Primeros pasos.** REQ-102, D39: `calc.firstSteps`, `FirstSteps` en lugar del mensaje "Bienvenido…" del Resumen.

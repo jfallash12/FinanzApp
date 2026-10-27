@@ -377,6 +377,18 @@
   test('REQ-099 incluye programados', function () { return eq(descs(calc.filterTransactions(DATA, '2026-11', { text: 'salario' }, TODAY)), 'Salario'); });
   test('REQ-099 sin coincidencias → lista vacía', function () { return eq(calc.filterTransactions(DATA, '2026-10', { text: 'zzz' }, TODAY).length, 0); });
 
+  /* ---------- Comparación con el mes anterior (REQ-100) ---------- */
+  test('REQ-100 octubre frente a septiembre', function () {
+    var c = calc.monthComparison(DATA, '2026-10', TODAY);
+    return eq(c.direction + ',' + c.previousMonth + ',' + calc.formatPercent(c.percent), 'up,2026-09,2824 %');
+  });
+  test('REQ-100 mes anterior sin gastos → sin porcentaje', function () { return eq(calc.monthComparison(DATA, '2026-09', TODAY).percent, null); });
+  test('REQ-100 menos gasto → down', function () {
+    var s = clone(DATA); s.transactions.push({ id: 'mov-sep2', type: 'gasto', accountId: 'acc-bac', categoryId: 'cat-salud', amount: 500000, date: '2026-09-30', description: 'Cirugía', createdAt: '2026-09-30T10:00:00.000Z' });
+    s.accounts[1].initialBalance = 650000;
+    var c = calc.monthComparison(s, '2026-10', TODAY); return eq(c.direction + ',' + calc.formatPercent(Math.abs(c.percent)), 'down,15 %');
+  });
+
   /* ---------- Reporte ---------- */
   var passed = results.filter(function (r) { return r.ok; }).length;
   var out = document.getElementById('out');

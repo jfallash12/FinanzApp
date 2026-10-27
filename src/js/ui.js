@@ -423,18 +423,30 @@
     }));
   }
 
+  /** REQ-100: "▲ N % más que <mes anterior>" bajo los gastos del mes. */
+  function MonthComparison() {
+    var c = calc.monthComparison(S, U.month, TODAY);
+    var prev = calc.monthLabel(c.previousMonth).toLowerCase();
+    var text = c.percent === null ? 'Sin gastos en ' + prev
+      : c.direction === 'same' ? 'Igual que ' + prev
+      : (c.direction === 'up' ? '▲ ' : '▼ ') + calc.formatPercent(Math.abs(c.percent)) + (c.direction === 'up' ? ' más' : ' menos') + ' que ' + prev;
+    return el('span', { class: 'stat-sub stat-compare', text: text });
+  }
+
   function SummaryCards() { // REQ-039, REQ-040, REQ-046
     var m = calc.monthSummary(S, U.month, TODAY);
     var neg = m.net < 0;
-    function stat(label, value, cls, sub) {
+    function stat(label, value, cls, sub, extra) {
       return el('div', { class: 'stat ' + (cls || '') },
         el('span', { class: 'stat-label', text: label }),
         el('strong', { class: 'stat-value', text: value }),
-        sub ? el('span', { class: 'stat-sub', text: sub }) : null);
+        sub ? el('span', { class: 'stat-sub', text: sub }) : null,
+        extra || null);
     }
     return el('div', { class: 'stats' },
       stat('Ingresos del mes', money(m.income), 'is-income', m.scheduledIncome > 0 ? 'Incluye ' + money(m.scheduledIncome) + ' programados' : null), // REQ-081
-      stat('Gastos del mes', money(m.expense), 'is-expense', m.scheduledExpense > 0 ? 'Incluye ' + money(m.scheduledExpense) + ' programados' : null),
+      stat('Gastos del mes', money(m.expense), 'is-expense', m.scheduledExpense > 0 ? 'Incluye ' + money(m.scheduledExpense) + ' programados' : null,
+        MonthComparison()),
       stat('Balance neto', money(m.net, { sign: true }), neg ? 'is-negative' : 'is-positive', neg ? 'Déficit: gastó más de lo que ingresó' : 'Superávit'),
       stat('Tasa de ahorro', m.savingsRate === null ? '—' : calc.formatPercent(m.savingsRate), m.savingsRate !== null && m.savingsRate < 0 ? 'is-negative' : '',
         m.savingsRate === null ? 'Sin ingresos este mes' : 'del ingreso del mes'));

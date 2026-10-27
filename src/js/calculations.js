@@ -552,6 +552,19 @@
       scheduledIncome: sum('ingreso', true), scheduledExpense: sum('gasto', true) };
   }
 
+  /** REQ-100 / D38: gastos del mes frente al mes anterior (misma base que monthSummary). */
+  function monthComparison(state, ym, today) {
+    var prevMonth = addMonths(ym, -1);
+    var current = monthSummary(state, ym, today).expense;
+    var previous = monthSummary(state, prevMonth, today).expense;
+    var diff = toCents(current) - toCents(previous);
+    return {
+      current: current, previous: previous, previousMonth: prevMonth,
+      direction: diff > 0 ? 'up' : (diff < 0 ? 'down' : 'same'),
+      percent: previous > 0 ? (fromCents(diff) / previous) * 100 : null
+    };
+  }
+
   function categorySpent(state, categoryId, ym) {
     return sumAmounts(monthItems(state, ym).filter(function (t) { // REQ-081: incluye programados
       return t.type === 'gasto' && t.categoryId === categoryId;
@@ -718,6 +731,7 @@
     schedulesUsingAccount: schedulesUsingAccount,
     projectionAlerts: projectionAlerts,
     monthItems: monthItems,
+    monthComparison: monthComparison,
     remainingDays: remainingDays,
     monthLabel: monthLabel,
     toCents: toCents,
