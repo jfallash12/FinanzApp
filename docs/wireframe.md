@@ -1,14 +1,14 @@
 # Boceto de la UI (Wireframe) — Layout por Componentes
 
 **Aplicación:** FinanzApp — Finanzas personales
-**Entregable:** Avance 1 (Semana 2) — Wireframe Low-Fi · **actualizado a la versión 2**
+**Entregable:** Avance 1 (Semana 2) — Wireframe Low-Fi · **actualizado a la versión 6.2**
 
 > Versión gráfica editable: [`wireframe.excalidraw`](./wireframe.excalidraw) (abrir en excalidraw.com → *Open*).
 > Datos de muestra: `examples[1]` de [`data-contract.json`](./data-contract.json), mes seleccionado **Octubre 2026**, hoy = 26 de octubre.
 
-![Wireframe Low-Fi v2](./wireframe.png)
+![Wireframe Low-Fi v6.2](./wireframe.png)
 
-> La imagen corresponde a la v2. Los cambios de la v3 a la v6 (programaciones, ahorro en el presupuesto y metas) se describen en §2.
+> La imagen y el archivo `.excalidraw` corresponden a la v6.2: programaciones, pendientes, próximos programados por semana, apartado a ahorros en el presupuesto total y metas de ahorro.
 
 ## 1. Layout general
 
@@ -20,25 +20,29 @@
 | 1. RESUMEN                       ◀  Octubre 2026  ▶                              |
 |  💳 El pago de Tarjeta Visa vence en 2 días (28 oct): ₡36,000.00  [Ver tarjeta]  |
 |  Ingresos ₡685,000 | Gastos ₡438,600 | Balance neto +₡246,400 | Ahorro 36 %       |
+|  Pendientes de confirmar (✓ ✎ ⏭)     | Próximos programados (7 días) ◀ 7 días ▶  |
 |  +-- Mis cuentas --------------------+  +-- Presupuesto total de octubre ------+  |
-|  | Disponible ₡392,400 · Ahorros     |  | ₡438,600 de ₡450,000  97 % Precaución|  |
-|  | ₡250,000 · Deudas −₡36,000        |  | [███████████████████▌]                |  |
-|  | 💵 Efectivo          ₡31,300.00   |  | Le quedan ₡11,400 para 6 días         |  |
+|  | Disponible ₡392,400 · Ahorros     |  | ₡488,600 de ₡450,000 109 % Excedido  |  |
+|  | ₡250,000 · Deudas −₡36,000        |  | [█████████████████████▨] gastos+ahorro|  |
+|  | 💵 Efectivo          ₡31,300.00   |  | Gastos ₡438,600 · Ahorros ₡50,000     |  |
 |  | 🏦 Cuenta BAC       ₡361,100.00   |  | ⓘ Las categorías suman ₡495,000       |  |
-|  | 🪙 Ahorros BN       ₡250,000.00   |  | [Ver presupuestos →]                  |  |
+|  | 🪙 Ahorros BN 🎯25% ₡250,000.00   |  | [Ver presupuestos →]                  |  |
 |  | 💳 Tarjeta Visa     −₡36,000.00   |  +---------------------------------------+  |
 |  +-----------------------------------+                                           |
 +----------------------------------------------------------------------------------+
 | 2. GASTOS E INGRESOS                                                             |
 |  Formulario completo (gasto / ingreso / transferencia) + lista del mes por día   |
+|  🗓 Programar: frecuencia · ¿hasta cuándo? · modo · próximas fechas             |
+|  Lista "Pagos e ingresos programados" (✎ 🗑)                                     |
 |  REGISTRO RÁPIDO (ventana desde el botón flotante [+ Registrar]):                |
 |   [↓Gasto][↑Ingreso]  Monto* [2500]  Categoría* [Alimentación▾]                  |
 |   Descripción* [Café]  Fecha* [hoy]  Cuenta* [última usada▾]  [Cancelar][Guardar]|
 +----------------------------------------------------------------------------------+
-| 3. PRESUPUESTOS: total del mes + formulario del total · por categoría con        |
-|    "Le quedan ₡X para N días (₡Y por día)" o "Mes cerrado"                       |
+| 3. PRESUPUESTOS: total del mes (gastos + apartado a ahorros) + formulario ·      |
+|    Metas de ahorro · por categoría con "Le quedan ₡X para N días" o "Mes cerrado"|
 +----------------------------------------------------------------------------------+
 | 4. CUENTAS: tarjetas visuales por tipo (✎ editar · 🗄 archivar · 🗑 eliminar)      |
+|    Ahorros: 🎯 meta y razón, progreso, lo que falta y mes estimado             |
 |    sección Archivadas (↺ reactivar) · Detalle: saldo después de cada movimiento  |
 +----------------------------------------------------------------------------------+
 | 5. CATEGORÍAS: formulario (nombre, tipo, presupuesto mensual) + listas por tipo  |

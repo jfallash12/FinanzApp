@@ -294,3 +294,4 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí examples[1
 | 2026-10-26 | T-44, T-45 | Versión 6: `tests/pruebas.html` 129/129 y recorrido de punta a punta 157/157
 | 2026-10-26 | T-46 | v6.1: `tests/pruebas.html` 131/131 y recorrido de punta a punta 157/157
 | 2026-10-26 | T-47 | v6.2: `tests/pruebas.html` 133/133 y recorrido de punta a punta 161/161
+| 2026-10-26 | Cierre | `docs/wireframe.png` y `wireframe.excalidraw` regenerados a la v6.2; `REFLECTION.md` en borrador con datos verificables (el estudiante revisa los niveles de satisfacción y la pregunta 3)
