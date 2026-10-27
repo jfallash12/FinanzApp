@@ -48,8 +48,6 @@ Lección: cada vez que un requisito dice solo el resultado ("muestre el total", 
 
 ### 3. Rol de Head Chef — ¿Te sientes 100 % dueño y responsable del código fuente generado o existen componentes que consideras "caja negra"?
 
-✏️ *Esta respuesta depende de su revisión del código; complétela después de recorrer el depurador.* Sugerencia de estructura:
-
 - **Lo que domino:** las reglas de negocio y su trazabilidad, porque yo decidí cada cambio y lo vi reflejado primero en `requirements.md` y después en el código. También el flujo `dispatch` (validar → confirmar → reducer → validar contrato → guardar → render) y por qué una operación se rechaza.
 - **Lo que todavía es parcialmente caja negra:** *(revise y elija)* el cálculo de ocurrencias de las programaciones (`calc.scheduleOccurrences`, último día del mes y quincenas), la regla de fondos cronológica (`calc.accountViolations`), las migraciones de datos (`storage.migrate`) y el CSS.
 - **Plan antes de la defensa:** recorrer con el depurador `validations.validateTransaction`, `app.dispatch` y `calc.goalProgress` con el dataset de ejemplo.
@@ -60,7 +58,7 @@ Está más alineado que la visión original, porque la visión creció mientras 
 
 Las brechas que le explicaría al cliente:
 
-- **Datos en un solo navegador:** si se borra el historial o se cambia de computadora, se pierden; no hay exportar/importar ni respaldo.
+- **Datos en un solo navegador:** si se borra el historial o se cambia de computadora, se pierden; importante conservar una copia de sus datos al extraerlos y poder importarlos luego.
 - **Una sola moneda (₡)** y sin conversión.
 - **Frecuencias limitadas** a una vez, mensual y quincenal (15 y último); no hay semanal ni "cada N días".
 - **Una meta por cuenta de ahorros**, y la fecha estimada solo considera transferencias programadas, no aportes ocasionales.
