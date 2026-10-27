@@ -4,8 +4,8 @@
 > Patrón general: `WHEN <disparador>, IF <condición>, THEN the system SHALL <respuesta>`.
 > El comportamiento esperado se expresa con `SHALL` (obligatorio) y el comportamiento que **no debe cambiar** se expresa con `SHALL NOT`.
 >
-> **Versión 6.** Los identificadores REQ son estables: si un requerimiento se elimina conserva su número marcado como *Eliminado*, y los nuevos se agregan al final. Vigentes: 90 (REQ-001..REQ-096, sin REQ-073..REQ-078). La v2 agregó el registro rápido, cuentas de ahorros, cuentas archivadas, fechas de tarjeta, detalle de cuenta, la pestaña Presupuestos y el presupuesto total mensual (§8–§10). La v3 permitió movimientos con fecha futura (§11, reemplazada). La v4 introduce **programaciones** (una vez, mensual o quincenal) con **auto-débito** o confirmación manual y su proyección en cada mes (§12). La v5 permite programaciones que **empezaron antes** de usar la app (REQ-079 modificado, REQ-091). Ajuste v5.1: los **ingresos** programados no piden modo; se registran solos en su fecha (REQ-079). Ajuste v5.2: una programación repetitiva **se repite sin fin por defecto**; la fecha final solo se pide si el usuario elige «Hasta una fecha» (REQ-079). Ajuste v6.2: la tarjeta de próximos programados sigue al mes seleccionado y se corre de 7 en 7 días (REQ-096). Ajuste v6.1: la meta detalla cada aporte programado (REQ-094). La v6 hace que el dinero **apartado a ahorros** consuma el presupuesto total (REQ-070 modificado, REQ-092) y agrega **metas de ahorro** con razón en las cuentas de ahorros (§13, REQ-093..REQ-095).
-> **Contrato de datos:** [`data-contract.json`](./data-contract.json) (schemaVersion 2). **Reglas de negocio:** RN-01..RN-11 en [`design.md`](./design.md).
+> **Contrato de datos:** [`data-contract.json`](./data-contract.json). **Reglas de negocio:** RN-01..RN-13 en [`design.md`](./design.md).
+> 90 requerimientos, de REQ-001 a REQ-096. Los números REQ-073 a REQ-078 no se usan; se conservan los demás porque el código y las pruebas los citan.
 
 **Definiciones usadas en esta especificación**
 
@@ -16,8 +16,8 @@
 - **Movimiento:** registro de dinero de tipo `ingreso`, `gasto` o `transferencia`.
 - **Saldo de una cuenta:** `saldoInicial + Σ ingresos + Σ transferencias entrantes − Σ gastos − Σ transferencias salientes` (RN-01). En crédito el saldo inicial es 0.
 - **Mes seleccionado:** texto `YYYY-MM` que filtra el resumen y la lista de movimientos.
-- **Movimiento programado:** movimiento cuya fecha es posterior a la fecha local de hoy (REQ-073). No es un campo guardado: se deriva de la fecha.
-- **Saldo actual / después de programados:** saldo con los movimientos de fecha ≤ hoy / con todos los movimientos (REQ-074).
+- **Programación:** pago o ingreso fijo que se repite una vez, cada mes o cada quincena (REQ-079).
+- **Ocurrencia:** cada fecha de una programación. Está **abierta** si no se ha aplicado (no tiene movimiento) ni omitido (REQ-080).
 - **Normalizar un texto:** quitar espacios al inicio y al final y comparar sin distinguir mayúsculas.
 - **Redondeo:** ver REQ-045.
 
@@ -61,11 +61,11 @@
 
 * **REQ-016**: the system SHALL NOT permitir eliminar ni cambiar el tipo de las categorías del sistema (`cat-otros-gastos`, `cat-otros-ingresos`). Sí se pueden renombrar y, en el caso de "Otros gastos", asignarles presupuesto.
 
-* **REQ-017**: WHEN el usuario solicita eliminar una categoría con movimientos, THEN the system SHALL mostrar cuántos movimientos tiene y SHALL exigir que elija una categoría **del mismo tipo** a la cual reasignarlos; solo tras confirmar SHALL reasignar los movimientos (y, desde la v4, las programaciones que la usan) y eliminar la categoría.
+* **REQ-017**: WHEN el usuario solicita eliminar una categoría con movimientos, THEN the system SHALL mostrar cuántos movimientos tiene y SHALL exigir que elija una categoría **del mismo tipo** a la cual reasignarlos; solo tras confirmar SHALL reasignar los movimientos (y las programaciones que la usan) y eliminar la categoría.
 
 * **REQ-018**: WHEN el usuario solicita eliminar una categoría sin movimientos, THEN the system SHALL pedir confirmación explícita y, solo tras confirmar, eliminarla.
 
-* **REQ-019**: WHEN el usuario edita una categoría, IF la categoría tiene al menos un movimiento o una programación (v4), THEN the system SHALL NOT permitir cambiar su tipo.
+* **REQ-019**: WHEN el usuario edita una categoría, IF la categoría tiene al menos un movimiento o una programación, THEN the system SHALL NOT permitir cambiar su tipo.
 
 ---
 
@@ -85,7 +85,7 @@
 
 * **REQ-026**: WHEN el usuario registra o edita un movimiento, IF la fecha está vacía o no es una fecha de calendario válida en formato `YYYY-MM-DD` (por ejemplo `2026-02-30`), THEN the system SHALL rechazar la operación y mostrar un mensaje de error en vivo.
 
-* **REQ-027** *(modificado en v4)*: WHEN el usuario registra o edita un movimiento, IF la fecha es posterior a la fecha local de hoy, THEN the system SHALL rechazarlo e indicar que use la opción **🗓 Programar** (REQ-079). *(v1–v2: se rechazaba toda fecha futura; v3: se aceptaba hasta un año como movimiento programado.)*
+* **REQ-027**: WHEN el usuario registra o edita un movimiento, IF la fecha es posterior a la fecha local de hoy, THEN the system SHALL rechazarlo e indicar que use la opción **🗓 Programar** (REQ-079).
 
 * **REQ-028**: WHEN el usuario registra o edita un ingreso o un gasto, IF no eligió categoría o la categoría no es del mismo tipo que el movimiento, THEN the system SHALL rechazar la operación. El selector SHALL mostrar solo las categorías del tipo del movimiento.
 
@@ -139,7 +139,7 @@
 
 * **REQ-049**: the system SHALL NOT permitir editar el saldo de una cuenta directamente: el saldo es siempre un valor derivado de su saldo inicial y sus movimientos.
 
-* **REQ-050** *(modificado en v4)*: the system SHALL NOT crear movimientos automáticamente (intereses, ajustes, sugerencias), **salvo** las ocurrencias de una programación en modo auto-débito que el usuario configuró, en su fecha o después (REQ-082). Todo otro movimiento lo ingresa el usuario.
+* **REQ-050**: the system SHALL NOT crear movimientos automáticamente (intereses, ajustes, sugerencias), **salvo** las ocurrencias de una programación en modo auto-débito que el usuario configuró, en su fecha o después (REQ-082). Todo otro movimiento lo ingresa el usuario.
 
 ---
 
@@ -165,7 +165,7 @@
 
 ---
 
-## 8. Cuentas: ahorros, tarjetas y archivo (v2)
+## 8. Cuentas: ahorros, tarjetas y archivo
 
 * **REQ-058**: WHEN el usuario registra o edita un **gasto**, IF la cuenta es de tipo `ahorros`, THEN the system SHALL rechazarlo e indicar que primero transfiera el dinero a una cuenta de efectivo o débito. Las cuentas de ahorros SHALL aceptar ingresos y transferencias.
 
@@ -173,11 +173,11 @@
 
 * **REQ-060**: WHEN el usuario crea o edita una cuenta de crédito, IF el día de corte o el día de pago está vacío, no es un número entero o está fuera del rango 1–28, THEN the system SHALL rechazar la operación y mostrar un mensaje de error en vivo.
 
-* **REQ-061**: WHEN una cuenta de crédito tiene día de corte y día de pago, THEN the system SHALL mostrar: el **último corte** (la fecha más reciente con ese día estrictamente anterior a hoy), la **fecha de pago** (la primera fecha con el día de pago posterior al último corte) y el **pago del periodo** = `deuda a la fecha del último corte − pagos (transferencias hacia la tarjeta) con fecha posterior al corte y no posterior a hoy`, con mínimo 0. *(v3: los pagos programados no cuentan como pagados.)*
+* **REQ-061**: WHEN una cuenta de crédito tiene día de corte y día de pago, THEN the system SHALL mostrar: el **último corte** (la fecha más reciente con ese día estrictamente anterior a hoy), la **fecha de pago** (la primera fecha con el día de pago posterior al último corte) y el **pago del periodo** = `deuda a la fecha del último corte − pagos (transferencias hacia la tarjeta) con fecha posterior al corte y no posterior a hoy`, con mínimo 0.
 
 * **REQ-062**: WHEN el pago del periodo de una tarjeta es mayor que 0, IF faltan 7 días o menos para la fecha de pago, THEN the system SHALL mostrar en el Resumen el aviso "El pago de <tarjeta> vence en N días: ₡X"; IF la fecha de pago ya pasó, THEN SHALL mostrar "Pago vencido de <tarjeta>: ₡X".
 
-* **REQ-063**: WHEN el usuario solicita archivar una cuenta, IF su saldo no es 0 (líquida) o su deuda no es 0 (crédito), o tiene movimientos programados (v3), THEN the system SHALL rechazar la operación e indicar que primero transfiera o pague el saldo; en caso contrario SHALL pedir confirmación y marcarla como archivada.
+* **REQ-063**: WHEN el usuario solicita archivar una cuenta, IF su saldo no es 0 (líquida) o su deuda no es 0 (crédito), o la usa una programación con ocurrencias futuras o pendientes (REQ-089), THEN the system SHALL rechazar la operación e indicar que primero transfiera o pague el saldo; en caso contrario SHALL pedir confirmación y marcarla como archivada.
 
 * **REQ-064**: WHILE una cuenta está archivada, the system SHALL ocultarla de los selectores de cuenta y de la lista principal de cuentas (se muestra en la sección "Archivadas"), SHALL conservar y mostrar sus movimientos y SHALL rechazar movimientos nuevos o editados que la usen, salvo que el movimiento editado ya la tuviera.
 
@@ -187,7 +187,7 @@
 
 ---
 
-## 9. Registro rápido (v2)
+## 9. Registro rápido
 
 * **REQ-067**: WHILE exista al menos una cuenta activa, the system SHALL mostrar en todas las pestañas un botón "+ Registrar" que abre el **registro rápido** de gastos e ingresos con Monto, Categoría y Descripción, y con Fecha = hoy y Cuenta = la cuenta activa usada en el movimiento creado más recientemente (o la primera activa), ambas editables. El registro rápido SHALL aplicar las mismas validaciones y confirmaciones que el formulario completo (REQ-022..REQ-033, REQ-058) y, al guardar, SHALL cerrarse y mostrar la confirmación.
 
@@ -195,11 +195,11 @@
 
 ---
 
-## 10. Presupuestos (v2)
+## 10. Presupuestos
 
 * **REQ-069**: the system SHALL mostrar los presupuestos en una pestaña propia "Presupuestos", separada de la configuración de categorías. Para cada categoría con presupuesto y saldo restante positivo SHALL mostrar "Le quedan ₡X para N días (₡Y por día)", donde N = días restantes del mes incluyendo hoy (mes actual) o todos los días del mes (mes futuro); en un mes pasado SHALL mostrar "Mes cerrado".
 
-* **REQ-070** *(modificado en v6)*: the system SHALL permitir definir un **presupuesto total mensual** opcional. WHEN se guarda, IF el valor no es numérico, es menor o igual a 0 o tiene más de 2 decimales, THEN the system SHALL rechazarlo; un valor vacío lo elimina. WHEN existe, THEN the system SHALL comparar con ese total lo **consumido del mes = gastos del mes + apartado a ahorros del mes** (REQ-092), usando los mismos estados de REQ-041; SHALL NOT bloquear ningún gasto ni transferencia y SHALL mostrar el aviso de REQ-044 cuando un gasto o una transferencia a ahorros lo lleve a Rojo. *(v2–v5: solo contaban los gastos.)*
+* **REQ-070**: the system SHALL permitir definir un **presupuesto total mensual** opcional. WHEN se guarda, IF el valor no es numérico, es menor o igual a 0 o tiene más de 2 decimales, THEN the system SHALL rechazarlo; un valor vacío lo elimina. WHEN existe, THEN the system SHALL comparar con ese total lo **consumido del mes = gastos del mes + apartado a ahorros del mes** (REQ-092), usando los mismos estados de REQ-041; SHALL NOT bloquear ningún gasto ni transferencia y SHALL mostrar el aviso de REQ-044 cuando un gasto o una transferencia a ahorros lo lleve a Rojo.
 
 * **REQ-071**: WHEN existe presupuesto total mensual, IF la suma de los presupuestos por categoría es mayor que el total, THEN the system SHALL mostrar una advertencia informativa con ambos montos, sin bloquear nada.
 
@@ -207,15 +207,9 @@
 
 ---
 
-## 11. Movimientos programados con fecha futura (v3 — reemplazada en v4)
+## 11. Programaciones: pagos e ingresos fijos
 
-* **REQ-073** a **REQ-078**: *Eliminados en v4.* En la v3 un movimiento con fecha futura quedaba "programado" y apartaba dinero. La v4 los reemplaza por **programaciones** (§12): el usuario marca "🗓 Programar", elige frecuencia y modo, y las ocurrencias se proyectan en cada mes. Los movimientos con fecha futura guardados con la v3 se convierten en programaciones (REQ-090).
-
----
-
-## 12. Programaciones: pagos e ingresos fijos (v4)
-
-* **REQ-079** *(modificado en v5)*: WHEN el usuario marca **🗓 Programar** en el formulario de movimiento o en el registro rápido, THEN the system SHALL pedir, además de los datos del movimiento (tipo, monto, descripción, cuenta, categoría o cuenta destino), la **frecuencia** (`Una vez`, `Cada mes` o `Quincenal`), la **primera fecha**, **¿hasta cuándo?** (no aplica a "Una vez"): `🔁 Sin fin` por defecto —se repite hasta que el usuario la elimine— o `📅 Hasta una fecha`, que entonces pide la fecha del último pago (v5.2) y, solo para **gastos y transferencias**, el **modo** (`Auto-débito` o `Confirmar manualmente`). Un **ingreso** programado SHALL NOT pedir modo: se registra automáticamente en su fecha (v5.1), como un depósito de salario. SHALL aplicar las mismas validaciones de campos que a un movimiento (REQ-022..REQ-026, REQ-028, REQ-029, REQ-032 2.ª parte, REQ-058, REQ-064), y además: IF la primera fecha está más de 365 días antes o después de hoy, o eligió «Hasta una fecha» sin indicarla, o la fecha hasta es anterior a la primera fecha, THEN SHALL rechazar la operación con un error en vivo. *(v4: la primera fecha no podía ser anterior a hoy.)* La regla de fondos (RN-03) no se evalúa al programar, sino al aplicar cada ocurrencia (REQ-082, REQ-083).
+* **REQ-079**: WHEN el usuario marca **🗓 Programar** en el formulario de movimiento o en el registro rápido, THEN the system SHALL pedir, además de los datos del movimiento (tipo, monto, descripción, cuenta, categoría o cuenta destino), la **frecuencia** (`Una vez`, `Cada mes` o `Quincenal`), la **primera fecha**, **¿hasta cuándo?** (no aplica a "Una vez"): `🔁 Sin fin` por defecto —se repite hasta que el usuario la elimine— o `📅 Hasta una fecha`, que entonces pide la fecha del último pago y, solo para **gastos y transferencias**, el **modo** (`Auto-débito` o `Confirmar manualmente`). Un **ingreso** programado SHALL NOT pedir modo: se registra automáticamente en su fecha, como un depósito de salario. SHALL aplicar las mismas validaciones de campos que a un movimiento (REQ-022..REQ-026, REQ-028, REQ-029, REQ-032 2.ª parte, REQ-058, REQ-064), y además: IF la primera fecha está más de 365 días antes o después de hoy, o eligió «Hasta una fecha» sin indicarla, o la fecha hasta es anterior a la primera fecha, THEN SHALL rechazar la operación con un error en vivo. La regla de fondos (RN-03) no se evalúa al programar, sino al aplicar cada ocurrencia (REQ-082, REQ-083).
 
 * **REQ-080**: the system SHALL calcular las **ocurrencias** de cada programación: *Una vez* → la primera fecha; *Cada mes* → el mismo día de cada mes desde la primera fecha (si el mes no tiene ese día, el último día del mes); *Quincenal* → los días **15 y último de cada mes** a partir de la primera fecha. IF hay fecha hasta, THEN SHALL NOT generar ocurrencias posteriores. El formulario SHALL mostrar las próximas 3 fechas y, en quincenal, el equivalente mensual ("≈ ₡80,000 al mes" para ₡40,000 por quincena).
 
@@ -239,21 +233,21 @@
 
 * **REQ-090**: WHEN la aplicación inicia con un estado `schemaVersion 2`, THEN the system SHALL migrarlo a `schemaVersion 3` sin perder datos: cada movimiento con fecha posterior a hoy SHALL convertirse en una programación "Una vez" en modo auto-débito con los mismos datos.
 
-* **REQ-091** *(v5)*: WHEN el usuario crea o edita una programación cuya primera fecha es anterior a hoy, THEN the system SHALL listar las ocurrencias con fecha anterior a hoy que no estén aplicadas ni omitidas y SHALL pedir qué hacer con ellas: **Registrarlas ahora** (crea un movimiento por cada una, con su fecha y enlazado a la programación) o **Ya las registré** (las marca como omitidas). IF registrarlas violaría la regla de fondos (RN-03) en alguna fecha, THEN the system SHALL rechazar la operación indicando la fecha y la cuenta, y SHALL NOT guardar nada. La ocurrencia de hoy y las futuras siguen el modo elegido (REQ-082, REQ-083).
+* **REQ-091**: WHEN el usuario crea o edita una programación cuya primera fecha es anterior a hoy, THEN the system SHALL listar las ocurrencias con fecha anterior a hoy que no estén aplicadas ni omitidas y SHALL pedir qué hacer con ellas: **Registrarlas ahora** (crea un movimiento por cada una, con su fecha y enlazado a la programación) o **Ya las registré** (las marca como omitidas). IF registrarlas violaría la regla de fondos (RN-03) en alguna fecha, THEN the system SHALL rechazar la operación indicando la fecha y la cuenta, y SHALL NOT guardar nada. La ocurrencia de hoy y las futuras siguen el modo elegido (REQ-082, REQ-083).
 
 ---
 
-## 13. Ahorro dentro del presupuesto y metas de ahorro (v6)
+## 12. Ahorro dentro del presupuesto y metas de ahorro
 
-* **REQ-092** *(v6)*: the system SHALL calcular el **apartado a ahorros** de un mes como la suma de las transferencias del mes **hacia** cuentas de tipo ahorros menos las transferencias del mes **desde** cuentas de ahorros hacia cuentas de otro tipo, con un mínimo de ₡0, incluyendo las ocurrencias abiertas de programaciones (REQ-081). La tarjeta del presupuesto total SHALL mostrar por separado los **gastos** y el **apartado a ahorros**, con una barra de dos tramos de distinto color y texto. El apartado SHALL NOT contarse como gasto en el Resumen, la tasa de ahorro ni los presupuestos por categoría.
+* **REQ-092**: the system SHALL calcular el **apartado a ahorros** de un mes como la suma de las transferencias del mes **hacia** cuentas de tipo ahorros menos las transferencias del mes **desde** cuentas de ahorros hacia cuentas de otro tipo, con un mínimo de ₡0, incluyendo las ocurrencias abiertas de programaciones (REQ-081). La tarjeta del presupuesto total SHALL mostrar por separado los **gastos** y el **apartado a ahorros**, con una barra de dos tramos de distinto color y texto. El apartado SHALL NOT contarse como gasto en el Resumen, la tasa de ahorro ni los presupuestos por categoría.
 
-* **REQ-093** *(v6)*: WHEN el usuario crea o edita una cuenta de tipo **ahorros**, THEN the system SHALL permitir indicar una **meta de ahorro** opcional (monto) y una **razón** opcional (texto de hasta 60 caracteres, por ejemplo "Fondo de emergencia"). IF la meta no es numérica, es menor o igual a 0 o tiene más de 2 decimales, THEN the system SHALL rechazarla con un error en vivo. IF se escribe una razón sin meta, THEN the system SHALL pedir el monto de la meta. Las cuentas de otro tipo SHALL NOT tener meta; al cambiar una cuenta a otro tipo, la meta SHALL eliminarse.
+* **REQ-093**: WHEN el usuario crea o edita una cuenta de tipo **ahorros**, THEN the system SHALL permitir indicar una **meta de ahorro** opcional (monto) y una **razón** opcional (texto de hasta 60 caracteres, por ejemplo "Fondo de emergencia"). IF la meta no es numérica, es menor o igual a 0 o tiene más de 2 decimales, THEN the system SHALL rechazarla con un error en vivo. IF se escribe una razón sin meta, THEN the system SHALL pedir el monto de la meta. Las cuentas de otro tipo SHALL NOT tener meta; al cambiar una cuenta a otro tipo, la meta SHALL eliminarse.
 
-* **REQ-094** *(v6)*: WHILE una cuenta de ahorros tiene meta, the system SHALL mostrar en su tarjeta, en su detalle y en la sección **Metas de ahorro** de la pestaña Presupuestos: la razón (o "Meta de ahorro"), el saldo actual frente a la meta con porcentaje y barra, y lo que falta. IF existen programaciones activas que transfieren a esa cuenta, THEN the system SHALL mostrar **cada programación que aporta** con su descripción, monto y frecuencia (una quincenal se muestra como "₡X cada quincena = ₡2X al mes"), el total mensual si hay más de una y el mes estimado en que se alcanza la meta. IF hay dos o más programaciones con la misma descripción, monto y frecuencia, THEN the system SHALL advertir que parecen repetidas (v6.1).
+* **REQ-094**: WHILE una cuenta de ahorros tiene meta, the system SHALL mostrar en su tarjeta, en su detalle y en la sección **Metas de ahorro** de la pestaña Presupuestos: la razón (o "Meta de ahorro"), el saldo actual frente a la meta con porcentaje y barra, y lo que falta. IF existen programaciones activas que transfieren a esa cuenta, THEN the system SHALL mostrar **cada programación que aporta** con su descripción, monto y frecuencia (una quincenal se muestra como "₡X cada quincena = ₡2X al mes"), el total mensual si hay más de una y el mes estimado en que se alcanza la meta. IF hay dos o más programaciones con la misma descripción, monto y frecuencia, THEN the system SHALL advertir que parecen repetidas.
 
-* **REQ-095** *(v6)*: WHEN el saldo de una cuenta de ahorros con meta es mayor o igual a la meta, THEN the system SHALL mostrar "✓ ¡Meta alcanzada!" con la barra completa en verde, sin ocultar la cuenta ni la meta. WHEN una transferencia hace que se alcance la meta, THEN the system SHALL mostrarlo en el mensaje de confirmación.
+* **REQ-095**: WHEN el saldo de una cuenta de ahorros con meta es mayor o igual a la meta, THEN the system SHALL mostrar "✓ ¡Meta alcanzada!" con la barra completa en verde, sin ocultar la cuenta ni la meta. WHEN una transferencia hace que se alcance la meta, THEN the system SHALL mostrarlo en el mensaje de confirmación.
 
-* **REQ-096** *(v6.2)*: WHILE existe al menos una programación, the system SHALL mostrar en el Resumen la tarjeta **Próximos programados** con las ocurrencias abiertas de una ventana de 7 días que depende del **mes seleccionado**: en el mes actual, de mañana a 7 días ("Próximos programados (7 días)"); en un mes futuro, del día 1 al 7 de ese mes ("Programados del 1 nov al 7 nov"); en un mes pasado SHALL NOT mostrarse. WHEN el usuario toca **7 días después** o **7 días antes**, THEN the system SHALL correr la ventana 7 días, sin empezar antes de mañana ni pasar de un año desde hoy. WHEN cambia el mes seleccionado, THEN la ventana SHALL volver a su inicio. IF la ventana no tiene ocurrencias, THEN SHALL decir "No hay pagos ni ingresos programados en estos 7 días".
+* **REQ-096**: WHILE existe al menos una programación, the system SHALL mostrar en el Resumen la tarjeta **Próximos programados** con las ocurrencias abiertas de una ventana de 7 días que depende del **mes seleccionado**: en el mes actual, de mañana a 7 días ("Próximos programados (7 días)"); en un mes futuro, del día 1 al 7 de ese mes ("Programados del 1 nov al 7 nov"); en un mes pasado SHALL NOT mostrarse. WHEN el usuario toca **7 días después** o **7 días antes**, THEN the system SHALL correr la ventana 7 días, sin empezar antes de mañana ni pasar de un año desde hoy. WHEN cambia el mes seleccionado, THEN la ventana SHALL volver a su inicio. IF la ventana no tiene ocurrencias, THEN SHALL decir "No hay pagos ni ingresos programados en estos 7 días".
 
 ---
 

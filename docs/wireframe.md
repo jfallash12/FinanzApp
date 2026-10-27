@@ -1,14 +1,12 @@
 # Boceto de la UI (Wireframe) — Layout por Componentes
 
 **Aplicación:** FinanzApp — Finanzas personales
-**Entregable:** Avance 1 (Semana 2) — Wireframe Low-Fi · **actualizado a la versión 6.2**
+**Entregable:** Wireframe Low-Fi
 
 > Versión gráfica editable: [`wireframe.excalidraw`](./wireframe.excalidraw) (abrir en excalidraw.com → *Open*).
-> Datos de muestra: `examples[1]` de [`data-contract.json`](./data-contract.json), mes seleccionado **Octubre 2026**, hoy = 26 de octubre.
+> Datos de muestra: [`tests/datos-ejemplo.json`](../tests/datos-ejemplo.json), mes seleccionado **Octubre 2026**, hoy = 26 de octubre.
 
-![Wireframe Low-Fi v6.2](./wireframe.png)
-
-> La imagen y el archivo `.excalidraw` corresponden a la v6.2: programaciones, pendientes, próximos programados por semana, apartado a ahorros en el presupuesto total y metas de ahorro.
+![Wireframe Low-Fi](./wireframe.png)
 
 ## 1. Layout general
 
@@ -95,22 +93,17 @@
 - Archivar cuenta → confirmación (REQ-063).
 - Avisos: presupuesto (por categoría o total) superado (REQ-044, REQ-070), datos dañados (REQ-053), fallo al guardar (REQ-054). Los datos de la versión 1 se migran sin aviso (REQ-072).
 
-**Programaciones (v4, reemplaza a la v3)**
-- Casilla **🗓 Programar** en el formulario y en el registro rápido: frecuencia (Una vez · Cada mes · Quincenal = 15 y último), *Hasta* opcional y modo (⚡ Auto-débito · ✋ Confirmar), con la vista previa de las próximas 3 fechas y "≈ ₡X al mes" en quincenal (REQ-079, REQ-080).
+**Programaciones**
+- Casilla **🗓 Programar** en el formulario y en el registro rápido: frecuencia (Una vez · Cada mes · Quincenal = 15 y último), «¿Hasta cuándo?» (🔁 Sin fin · 📅 Hasta una fecha) y, en gastos y transferencias, el modo (⚡ Auto-débito · ✋ Confirmar), con la vista previa de las próximas 3 fechas y "≈ ₡X al mes" en quincenal (REQ-079, REQ-080).
 - Cada mes muestra sus ocurrencias con "🗓 Programado · Auto-débito · en N días" o "⏳ Pendiente de confirmar" (REQ-081); el Resumen agrega *Pendientes de confirmar* (✓ Confirmar · ✎ Ajustar · ⏭ Omitir), *Próximos programados* y avisos de proyección (REQ-083, REQ-087).
 - *Gastos e ingresos* agrega la lista **Pagos e ingresos programados** (REQ-089); las cuentas muestran "Proyectado a fin de mes" (REQ-088).
 
-**Ahorro en el presupuesto y metas (v6)**
+**Ahorro en el presupuesto y metas**
 - La tarjeta **Presupuesto total** muestra una barra de dos tramos: gastos (color de estado) y **🪙 Apartado a ahorros** (rayado dorado), con su leyenda (REQ-070, REQ-092).
 - El formulario de una cuenta de **ahorros** agrega *🎯 Meta de ahorro* y *Razón del ahorro*, ambos opcionales (REQ-093).
 - La tarjeta y el detalle de la cuenta de ahorros muestran "🎯 <razón>", la barra de progreso, "₡X de ₡Y · N %", "Le faltan ₡Z" y, si hay transferencias programadas, "la alcanza en N meses (<mes año>)"; al llegar: "✓ ¡Meta alcanzada!" (REQ-094, REQ-095).
 - La pestaña **Presupuestos** agrega la sección **Metas de ahorro** bajo el presupuesto total.
-- *(v6.2)* La tarjeta **Próximos programados** del Resumen sigue al mes seleccionado (en un mes futuro: "Programados del 1 nov al 7 nov") y tiene **◀ 7 días antes · 7 días después ▶** (REQ-096).
-
-**Movimientos programados (v3, reemplazada)**
-- Un movimiento con fecha futura (hasta un año) se muestra con la etiqueta **"🗓 Programado · en N días"** y fondo rayado (REQ-073).
-- Las cuentas muestran **Saldo actual** y, si aplica, **Después de programados** (REQ-074). El formulario indica cuánto dinero se aparta (REQ-075).
-- El Resumen agrega "Incluye ₡X programados" en Ingresos y Gastos (REQ-076) y la tarjeta **Próximos programados (7 días)** (REQ-077).
+- La tarjeta **Próximos programados** del Resumen sigue al mes seleccionado (en un mes futuro: "Programados del 1 nov al 7 nov") y tiene **◀ 7 días antes · 7 días después ▶** (REQ-096).
 
 **Persistencia**
-- Todo el estado (`schemaVersion`, `accounts`, `categories`, `transactions`, `settings`) se guarda en `localStorage` en cada cambio y se restaura al iniciar (REQ-051, REQ-052). Sin servidores ni internet (REQ-047).
+- Todo el estado (`schemaVersion`, `accounts`, `categories`, `transactions`, `schedules`, `settings`) se guarda en `localStorage` en cada cambio y se restaura al iniciar (REQ-051, REQ-052). Sin servidores ni internet (REQ-047).
