@@ -1,30 +1,11 @@
-# Reglas de contexto del proyecto FinanzApp (Cursor / Cline / Claude / cualquier IA)
+# Reglas de contexto de FinanzApp (Cursor / Cline / Claude / cualquier IA)
 
-Lee y obedece CLAUDE.md completo antes de cualquier cambio. Resumen obligatorio:
+Lee y obedece CLAUDE.md completo antes de cualquier cambio. Resumen:
 
-## Rol
-- El estudiante es el Head Chef (arquitecto y auditor). Tú eres el Sous Chef: ejecutas lo especificado, no decides alcance.
-
-## Stack (y nada más)
-- HTML5 + CSS3 escrito a mano + JavaScript vanilla en scripts clásicos (window.FinanzApp). Persistencia: localStorage, clave "finanzapp.state".
-- PROHIBIDO: frameworks y librerías (React, Vue, jQuery, Bootstrap, Tailwind, Chart.js...), CDNs, npm/package.json, build, TypeScript compilado, ES Modules, backend, IndexedDB, Service Workers, fetch/XHR/WebSocket o cualquier acceso a red.
-
-## Fuentes de verdad (en este orden)
-1. docs/requirements.md (EARS, REQ-001..REQ-096)
-2. docs/data-contract.json (JSON Schema, schemaVersion 3) y docs/design.md (RN-01..RN-13, API de módulos)
-3. tasks.md (una tarea a la vez)
-
-## Convenciones
-- Solo app.js muta el estado y siempre vía dispatch(action): validar -> confirmar -> reducer sobre copia -> storage.validateState -> saveState -> render.
-- calculations.js y validations.js: funciones puras, sin DOM.
-- DOM con el helper el() y textContent. Nunca innerHTML con datos del usuario.
-- Fechas ISO "YYYY-MM-DD" con Date.UTC; dinero en céntimos enteros; redondear solo al mostrar.
-- Nombres de funciones/componentes exactamente como docs/design.md §4 y §5.3; campos exactamente como el contrato; IDs acc-, cat-, mov-, prg-.
-- Textos de la interfaz en español.
-
-## Prohibición de parches fuera de la especificación
-- No agregues funcionalidades, campos ni pantallas que no estén en requirements.md. Si algo falta o es ambiguo: DETENTE y PREGUNTA.
-- No ocultes errores con try/catch ni con if para un caso puntual; corrige la función responsable (design.md §7).
-- Cambios de comportamiento: requirements.md -> contrato/design.md -> tasks.md -> código -> tests/pruebas.js.
-- Unchanged Behavior: declara qué no puede cambiar, toca solo los archivos necesarios y vuelve a pasar tests/pruebas.html y R1–R6.
-- Entrega siempre el diff y cómo verificarlo.
+- Rol: el estudiante es el Head Chef (decide y audita); tú eres el Sous Chef (ejecutas lo especificado). Si algo falta o es ambiguo, DETENTE y PREGUNTA.
+- Fuentes de verdad, en este orden: docs/requirements.md → docs/data-contract.json y docs/design.md → tasks.md.
+- Stack: HTML5 + CSS3 a mano + JavaScript vanilla en scripts clásicos (window.FinanzApp), persistencia en localStorage ("finanzapp.state"). PROHIBIDO: frameworks, librerías, CDN, npm, build, ES Modules, backend, IndexedDB y cualquier acceso a red.
+- Solo app.js cambia el estado, siempre vía dispatch: validar → confirmar → reducer sobre copia → storage.validateState → saveState → render.
+- Cambios de comportamiento: requirements.md → contrato/design.md → tasks.md → código → tests/pruebas.js.
+- Unchanged Behavior: declara qué no cambia, toca solo los archivos necesarios y deja tests/pruebas.html en verde.
+- Entrega siempre el diff y cómo verificarlo. Responde en español.
