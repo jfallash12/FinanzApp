@@ -223,7 +223,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 > Solo cambia la apariencia (`styles.css` y marcado mínimo en `ui.js`). Unchanged Behavior: cálculos, validaciones, persistencia, textos de estado y las 154 pruebas siguen iguales.
 
 - [x] **T-54 Especificación visual.** `design.md` §8 (paleta violeta y 9 componentes), D40–D42.
-- [ ] **T-55 Paleta, encabezado y pestañas.** Variables violeta claro/oscuro, encabezado con degradado, pestaña activa de color, botones y «+ Registrar» violeta, tarjeta de crédito grafito.
+- [x] **T-55 Paleta, encabezado y pestañas.** Variables violeta claro/oscuro, encabezado con degradado, pestaña activa de color, botones y «+ Registrar» violeta, tarjeta de crédito grafito.
   *Aceptación:* contraste de texto ≥ 4.5:1 en claro y oscuro; sin scroll horizontal a 375 px.
 - [ ] **T-56 Tarjetas del Resumen e íconos de título.** Línea de color e ícono en Ingresos, Gastos, Balance y Tasa de ahorro; `CARD_ICONS` en los títulos de tarjeta.
 - [ ] **T-57 Color por categoría.** `catColor` en `ui.js` (D41); punto de color en movimientos, presupuestos y Categorías; barras de «¿En qué se va la plata?» con el color de la categoría.
