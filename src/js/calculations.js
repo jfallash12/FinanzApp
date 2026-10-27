@@ -666,9 +666,11 @@
   /** Aplica los filtros de la lista (REQ-036). Nunca muta el estado. */
   function filterTransactions(state, ym, filters, today) {
     filters = filters || {};
+    var text = normalize(filters.text);
     return monthItems(state, ym, today).filter(function (t) { // REQ-081: reales + ocurrencias abiertas
       if (filters.accountId && t.accountId !== filters.accountId && t.toAccountId !== filters.accountId) { return false; }
       if (filters.categoryId && t.categoryId !== filters.categoryId) { return false; }
+      if (text && normalize(t.description).indexOf(text) === -1) { return false; } // REQ-099
       return true;
     });
   }

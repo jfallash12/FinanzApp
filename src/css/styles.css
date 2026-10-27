@@ -229,11 +229,11 @@ button, input, select { font: inherit; color: inherit; }
 .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; min-width: 0; }
 .field-wide { grid-column: 1 / -1; }
 .field label { font-size: 13px; font-weight: 600; }
-.field input, .field select, .filter select, .dialog select {
+.field input, .field select, .filter select, .filter input, .dialog select {
   width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px;
   background: var(--surface); min-height: 40px;
 }
-.field input:focus, .field select:focus, .filter select:focus, .dialog select:focus {
+.field input:focus, .field select:focus, .filter select:focus, .filter input:focus, .dialog select:focus {
   outline: 2px solid var(--brand); outline-offset: 1px; border-color: transparent;
 }
 .field.has-error input, .field.has-error select { border-color: var(--exceeded); background: var(--exceeded-soft); }
@@ -480,3 +480,7 @@ button, input, select { font: inherit; color: inherit; }
 .file-btn:focus-within { outline: 2px solid var(--brand, currentColor); outline-offset: 2px; }
 .small { font-size: 0.85rem; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- Búsqueda (REQ-099) ---------- */
+.filter-search { flex: 1 1 200px; }
+.filter-search input { width: 100%; }

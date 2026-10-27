@@ -66,7 +66,7 @@
     var u = {
       activeTab: 'resumen',
       month: calc.currentMonth(), // REQ-038
-      filters: { accountId: '', categoryId: '' },
+      filters: { accountId: '', categoryId: '', text: '' }, // REQ-036, REQ-099
       forms: {},
       errors: { transaction: {}, quick: {}, account: {}, category: {}, settings: {}, reassign: {} },
       quickOpen: false,          // REQ-067

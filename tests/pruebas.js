@@ -367,6 +367,16 @@
     return eq(!!storage.parseBackup(new Array(storage.MAX_BACKUP_BYTES + 2).join(' ')).error, true);
   });
 
+  /* ---------- Búsqueda (REQ-099) ---------- */
+  function descs(list) { return list.map(function (t) { return t.description; }).join(','); }
+  test('REQ-099 buscar "bus" en octubre', function () { return eq(descs(calc.filterTransactions(DATA, '2026-10', { text: 'bus' }, TODAY)), 'Bus'); });
+  test('REQ-099 sin distinguir mayúsculas ni espacios', function () { return eq(descs(calc.filterTransactions(DATA, '2026-09', { text: '  PAN ' }, TODAY)), 'Panadería'); });
+  test('REQ-099 combinada con filtro de cuenta', function () {
+    return eq(descs(calc.filterTransactions(DATA, '2026-10', { accountId: 'acc-visa', text: 'cine' }, TODAY)), 'Cine y cena');
+  });
+  test('REQ-099 incluye programados', function () { return eq(descs(calc.filterTransactions(DATA, '2026-11', { text: 'salario' }, TODAY)), 'Salario'); });
+  test('REQ-099 sin coincidencias → lista vacía', function () { return eq(calc.filterTransactions(DATA, '2026-10', { text: 'zzz' }, TODAY).length, 0); });
+
   /* ---------- Reporte ---------- */
   var passed = results.filter(function (r) { return r.ok; }).length;
   var out = document.getElementById('out');
