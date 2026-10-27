@@ -5,7 +5,7 @@
 **Curso:** Programación Intencional con IA Generativa
 **Versión evaluada:** 6.2 (Octubre 2026) · 90 REQ vigentes · contrato `schemaVersion 3`
 
-> 📝 **Borrador:** se redactó a partir del historial real del proyecto (`retrospective.md`, `tasks.md` y los pedidos hechos
+> 📝 **Borrador:** se redactó a partir del historial real del proyecto (`docs/retrospectiva.md`, `tasks.md` y los pedidos hechos
 > durante el desarrollo). Antes de entregarlo, léalo, confirme o cambie los niveles de satisfacción y ajuste las respuestas
 > con sus propias palabras: la rúbrica evalúa **su** análisis autocrítico.
 
@@ -35,11 +35,11 @@ La IA tomó varias decisiones que yo no pedí; quedaron registradas en `docs/des
 - **Fallos que yo detecté usando la app.**
   - En la v1 la regla de fondos solo validaba el saldo final (D9). Hasta que existió el detalle de cuenta no se vio que el dataset dejaba Efectivo en −₡3,700 el 15 de octubre. La IA cumplió la especificación al pie de la letra; el error estaba en lo que yo especifiqué.
   - Una decisión de interfaz dejó el botón Editar sin efecto dentro del detalle de una cuenta.
-- **Una decisión discutible.** En `CLAUDE.md` §10 la IA puso "metas de ahorro" como ejemplo de funcionalidad prohibida. Cuando yo pedí metas, primero se tuvo que escribir REQ-093..095 y después quitar ese ejemplo. La regla funcionó (no se agregó nada sin especificarlo), pero el ejemplo lo había elegido la IA, no yo.
+- **Una decisión discutible.** En `CLAUDE.md` la IA puso "metas de ahorro" como ejemplo de funcionalidad prohibida. Cuando yo pedí metas, primero se tuvo que escribir REQ-093..095 y después quitar ese ejemplo. La regla funcionó (no se agregó nada sin especificarlo), pero el ejemplo lo había elegido la IA, no yo.
 
 ### 2. Calidad de Especificación — Analizando tu `requirements.md` inicial, ¿dónde fuiste ambiguo y causaste "alucinaciones" o parches frágiles por parte de la IA?
 
-La mayoría de las correcciones (ver `retrospective.md`) vinieron de requisitos incompletos más que de errores de código:
+La mayoría de las correcciones (ver `docs/retrospectiva.md`) vinieron de requisitos incompletos más que de errores de código:
 
 - **REQ-027 prohibía fechas futuras y REQ-050 prohibía movimientos automáticos.** Parecían restricciones seguras, pero evitaban el problema en vez de resolverlo: no podía anotar la renta del 31. La v3 permitió fechas futuras y la v4 la reemplazó por programaciones, eliminando REQ-073..078. Fue una versión entera desechada por no pensar el caso desde el principio.
 - **REQ-070 decía "presupuesto total para todos los gastos".** Una transferencia a ahorros no es gasto, así que no bajaba el presupuesto. Yo esperaba que sí ("un ahorro no es para gastar"). La IA no se equivocó; mi especificación no decía lo que yo quería (v6, D30).
