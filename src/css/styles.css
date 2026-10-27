@@ -473,3 +473,10 @@ button, input, select { font: inherit; color: inherit; }
 /* v6.2: ventana de próximos programados (REQ-096) */
 .week-nav { display: flex; justify-content: space-between; gap: 8px; margin: -4px 0 8px; }
 .week-nav .btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+/* ---------- Respaldo de datos (REQ-097, REQ-098) ---------- */
+.backup-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 8px; }
+.file-btn { cursor: pointer; }
+.file-btn:focus-within { outline: 2px solid var(--brand, currentColor); outline-offset: 2px; }
+.small { font-size: 0.85rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

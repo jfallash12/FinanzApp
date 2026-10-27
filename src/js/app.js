@@ -407,6 +407,35 @@
       reduce: function (s, a) { findById(s.schedules, a.scheduleId).skippedDates.push(a.date); },
       after: function () { toast('ok', 'Ocurrencia omitida.'); }
     },
+    IMPORT_STATE: { // REQ-098: reemplaza todos los datos, solo tras confirmar (D35, D36)
+      form: null,
+      validate: function (a) {
+        var r = storage.parseBackup(a.text);
+        return r.error ? { _form: r.error } : {};
+      },
+      confirm: function (a) {
+        var imp = storage.parseBackup(a.text).state;
+        function n(count, one, many) { return count + ' ' + (count === 1 ? one : many); }
+        return {
+          title: 'Importar datos', danger: true, confirmLabel: 'Reemplazar mis datos',
+          text: 'Los datos actuales (' + n(state.accounts.length, 'cuenta', 'cuentas') + ' y ' + n(state.transactions.length, 'movimiento', 'movimientos') +
+            ') se reemplazarán por los del archivo «' + a.fileName + '». Esta acción no se puede deshacer. El archivo trae:',
+          items: [n(imp.accounts.length, 'cuenta', 'cuentas'), n(imp.transactions.length, 'movimiento', 'movimientos'), n(imp.schedules.length, 'programación', 'programaciones')]
+        };
+      },
+      reduce: function (s, a) {
+        var imp = storage.parseBackup(a.text).state;
+        Object.keys(s).forEach(function (k) { delete s[k]; });
+        Object.keys(imp).forEach(function (k) { s[k] = imp[k]; });
+      },
+      after: function () {
+        FORMS.forEach(resetForm);
+        ui.filters = { accountId: '', categoryId: '', text: '' };
+        ui.selectedAccountId = null; ui.quickOpen = false; ui.upcomingFrom = null;
+        toast('ok', 'Datos importados: ' + state.accounts.length + ' cuentas y ' + state.transactions.length + ' movimientos.');
+        processSchedules(); // REQ-082: auto-débitos vencidos del respaldo
+      }
+    },
     PROCESS_SCHEDULES: { // REQ-082: auto-débito de ocurrencias con fecha ≤ hoy
       form: null,
       validate: function () { return {}; },
@@ -488,6 +517,33 @@
     try { dispatch({ type: 'PROCESS_SCHEDULES' }); } finally { processing = false; }
   }
 
+  /** REQ-097 / D34: descarga el estado como archivo .json, sin red ni cambios en el estado. */
+  function exportData() {
+    var name = storage.backupFileName(calc.todayISO());
+    var blob = new global.Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    var url = global.URL.createObjectURL(blob);
+    var link = doc.createElement('a');
+    link.href = url;
+    link.download = name;
+    doc.body.appendChild(link);
+    link.click();
+    doc.body.removeChild(link);
+    global.setTimeout(function () { global.URL.revokeObjectURL(url); }, 1000);
+    toast('ok', 'Se descargó «' + name + '». Guárdelo en un lugar seguro.');
+  }
+
+  /** REQ-098 / D34: lee el archivo elegido y lo envía a IMPORT_STATE (que lo valida). */
+  function importFile(input) {
+    var file = input.files && input.files[0];
+    if (!file) { return; }
+    input.value = ''; // permite volver a elegir el mismo archivo
+    if (file.size > storage.MAX_BACKUP_BYTES) { return dispatch({ type: 'IMPORT_STATE', text: null, fileName: file.name }); }
+    var reader = new global.FileReader();
+    reader.onload = function () { dispatch({ type: 'IMPORT_STATE', text: String(reader.result), fileName: file.name }); };
+    reader.onerror = function () { dispatch({ type: 'IMPORT_STATE', text: null, fileName: file.name }); };
+    reader.readAsText(file);
+  }
+
   /** REQ-044 / REQ-070: aviso si el gasto llevó a su categoría o al presupuesto total al estado Rojo. */
   function budgetToast(prev, d, okText) {
     var msgs = [], good = [];
@@ -522,6 +578,7 @@
     NEXT_MONTH: function () { ui.month = calc.addMonths(ui.month, 1); ui.upcomingFrom = null; },
     SET_UPCOMING: function (a) { ui.upcomingFrom = a.date; }, // REQ-096: correr la ventana 7 días
     SET_FILTER: function (a) { ui.filters[a.field] = a.value; }, // REQ-036: no toca el estado
+    EXPORT_DATA: function () { exportData(); }, // REQ-097: no toca el estado
     INPUT: function (a) {
       var f = ui.forms[a.form];
       f.draft[a.field] = a.value;
@@ -702,6 +759,7 @@
 
     function onField(ev) {
       var t = ev.target;
+      if (t.dataset.import !== undefined) { return; } // el archivo se procesa en 'change'
       if (t.dataset.reassign !== undefined) { return dispatch({ type: 'REASSIGN_INPUT', value: t.value }); }
       if (t.dataset.filter) { return dispatch({ type: 'SET_FILTER', field: t.dataset.filter, value: t.value }); }
       if (!t.dataset.form || !t.dataset.field) { return; }
@@ -712,6 +770,7 @@
     }
     root.addEventListener('input', onField);
     root.addEventListener('change', function (ev) {
+      if (ev.target.dataset.import !== undefined) { return importFile(ev.target); } // REQ-098
       if (ev.target.tagName === 'SELECT' || ev.target.type === 'radio' || ev.target.type === 'checkbox') { onField(ev); }
     });
 

@@ -207,7 +207,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 ## Fase 12 — Respaldo de datos y ayudas del Resumen
 
 - [x] **T-48 Especificación.** REQ-097..REQ-102 y REQ-048 ampliado; D34–D39; componentes y API en `design.md`.
-- [ ] **T-49 Exportar e importar datos.** REQ-097, REQ-098, D34–D36: `storage.parseBackup`, `storage.backupFileName`, `exportData` y `DOMAIN.IMPORT_STATE` en `app.js`, `BackupCard` en Cuentas.
+- [x] **T-49 Exportar e importar datos.** REQ-097, REQ-098, D34–D36: `storage.parseBackup`, `storage.backupFileName`, `exportData` y `DOMAIN.IMPORT_STATE` en `app.js`, `BackupCard` en Cuentas.
   *Aceptación:* Exportar descarga `finanzapp-AAAA-MM-DD.json`; importarlo en una app vacía y confirmar → mismos saldos (Patrimonio ₡606,400); un archivo con texto cualquiera o con una cuenta en negativo → "El archivo no es un respaldo válido de FinanzApp" y nada cambia; Cancelar no cambia nada.
 - [ ] **T-50 Buscar por descripción.** REQ-099, D37: `filters.text` en `calc.filterTransactions`; campo de búsqueda en `Filters`.
   *Aceptación:* en octubre, buscar "bus" muestra solo «Bus» (₡4,500); "PAN" encuentra «Panadería» en septiembre; combinado con la cuenta Visa y "cine" muestra «Cine y cena».

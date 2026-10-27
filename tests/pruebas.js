@@ -348,6 +348,25 @@
   });
   test('Contrato: frecuencia inválida', function () { var s = clone(DATA); s.schedules[0].frequency = 'weekly'; return eq(storage.validateState(s).valid, false); });
 
+  /* ---------- Respaldo (REQ-097, REQ-098) ---------- */
+  test('REQ-097 nombre del respaldo', function () { return eq(storage.backupFileName('2026-10-26'), 'finanzapp-2026-10-26.json'); });
+  test('REQ-098 respaldo válido se acepta igual', function () {
+    var r = storage.parseBackup(JSON.stringify(DATA));
+    return eq(!!r.state && JSON.stringify(r.state) === JSON.stringify(DATA), true);
+  });
+  test('REQ-098 texto que no es JSON se rechaza', function () { return eq(storage.parseBackup('hola').error, 'El archivo no es un respaldo válido de FinanzApp.'); });
+  test('REQ-098 JSON fuera de contrato se rechaza', function () { return eq(!!storage.parseBackup('{"a":1}').error, true); });
+  test('REQ-098 respaldo que viola la regla de fondos se rechaza', function () {
+    var s = clone(DATA); s.accounts[0].initialBalance = 0; return eq(!!storage.parseBackup(JSON.stringify(s)).error, true);
+  });
+  test('REQ-098 respaldo de la versión 2 se migra', function () {
+    var v2 = clone(DATA); v2.schemaVersion = 2; delete v2.schedules;
+    var r = storage.parseBackup(JSON.stringify(v2)); return eq(!!r.state && r.state.schemaVersion, 3);
+  });
+  test('REQ-098 archivo de más de 5 MB se rechaza', function () {
+    return eq(!!storage.parseBackup(new Array(storage.MAX_BACKUP_BYTES + 2).join(' ')).error, true);
+  });
+
   /* ---------- Reporte ---------- */
   var passed = results.filter(function (r) { return r.ok; }).length;
   var out = document.getElementById('out');

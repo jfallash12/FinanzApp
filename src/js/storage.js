@@ -1,8 +1,8 @@
 /*
  * storage.js — FinanzApp.storage
  * Persistencia en LocalStorage (REQ-051, REQ-052, REQ-053, REQ-054) y migración v1 → v2 (REQ-072).
- * validateState() valida a mano docs/data-contract.json y las reglas entre campos de docs/design.md §6 (D8: sin librerías)
- * y agrega las reglas de su $comment que JSON Schema no puede expresar.
+ * validateState() valida a mano docs/data-contract.json y las reglas entre campos de docs/design.md §6 (D8: sin librerías).
+ * parseBackup() valida un respaldo importado con las mismas reglas (REQ-098, D36).
  */
 (function (global) {
   'use strict';
@@ -12,6 +12,7 @@
 
   var STORAGE_KEY = 'finanzapp.state';
   var SCHEMA_VERSION = 3;
+  var MAX_BACKUP_BYTES = 5 * 1024 * 1024; // REQ-098: un respaldo pesa como máximo 5 MB
 
   var RE = {
     accId: /^acc-[a-z0-9-]+$/,
@@ -313,6 +314,29 @@
     }
   }
 
+  /**
+   * REQ-098 / D36: convierte el texto de un respaldo en un estado válido.
+   * Pasa por la misma migración y el mismo validateState que los datos guardados.
+   * Devuelve { state } o { error }. Nunca lanza.
+   */
+  function parseBackup(text) {
+    var invalid = { error: 'El archivo no es un respaldo válido de FinanzApp.' };
+    if (typeof text !== 'string' || text.length > MAX_BACKUP_BYTES) { return invalid; }
+    var parsed;
+    try { parsed = JSON.parse(text); }
+    catch (e) { return invalid; }
+    var candidate = migrate(parsed);
+    var result = validateState(candidate);
+    if (!result.valid) {
+      if (global.console) { global.console.warn('Respaldo fuera de contrato:', result.errors); }
+      return invalid;
+    }
+    return { state: candidate };
+  }
+
+  /** REQ-097: nombre del archivo de respaldo, con la fecha de hoy. */
+  function backupFileName(today) { return 'finanzapp-' + today + '.json'; }
+
   A.storage = {
     STORAGE_KEY: STORAGE_KEY,
     SCHEMA_VERSION: SCHEMA_VERSION,
@@ -320,6 +344,9 @@
     migrate: migrate,
     validateState: validateState,
     loadState: loadState,
-    saveState: saveState
+    saveState: saveState,
+    MAX_BACKUP_BYTES: MAX_BACKUP_BYTES,
+    parseBackup: parseBackup,
+    backupFileName: backupFileName
   };
 })(typeof window !== 'undefined' ? window : globalThis);
