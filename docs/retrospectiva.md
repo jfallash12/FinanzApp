@@ -1,6 +1,6 @@
 # Retrospectiva — FinanzApp
 
-*José Fallas*
+*Jose Fallas*
 
 ## De dónde salió la app
 
@@ -24,7 +24,7 @@ Cuando le pedí a la IA un diseño, lo primero que propuso fue más de lo que ne
 - **ES Modules:** no cargan abriendo el archivo con doble clic (`file://`), así que quedaron scripts clásicos.
 
 Lo que aprendí aquí es que la IA no propone lo más simple, propone lo más "completo". Si no le pongo límites desde el
-principio, el proyecto crece por lado y lado.
+principio, el proyecto crece por lado.
 
 ## Lo que salió mal y lo que aprendí
 
