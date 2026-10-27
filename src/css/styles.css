@@ -23,6 +23,9 @@
   --accent: #a16207;
   --income: #15803d;
   --expense: #c2410c;
+  --expense-soft: #fde9dd;
+  --net: #2563eb;
+  --net-soft: #dbeafe;
   --ok: #15803d;
   --warning: #b7791f;
   --exceeded: #c2283b;
@@ -52,6 +55,9 @@
     --accent: #f5c451;
     --income: #4ade80;
     --expense: #fb923c;
+    --expense-soft: #3b2416;
+    --net: #60a5fa;
+    --net-soft: #172554;
     --ok: #4ade80;
     --warning: #fbbf24;
     --exceeded: #f87171;
@@ -146,7 +152,11 @@ button, input, select { font: inherit; color: inherit; }
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   box-shadow: var(--shadow); padding: 18px; min-width: 0;
 }
-.card-title { font-size: 17px; margin-bottom: 12px; }
+.card-title { display: flex; align-items: center; gap: 10px; font-size: 17px; margin-bottom: 12px; }
+.card-icon { /* design.md §8 (9) */
+  display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 10px;
+  background: var(--brand-soft); font-size: 16px;
+}
 .card + .card { margin-top: 16px; }
 .grid-2, .grid-form { display: grid; gap: 16px; }
 .grid-2 { grid-template-columns: 1fr 1fr; margin-top: 16px; }
@@ -161,15 +171,26 @@ button, input, select { font: inherit; color: inherit; }
 /* ---------- Resumen ---------- */
 
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.stat {
+.stat { /* design.md §8 (3): línea superior e ícono del color de cada tarjeta */
+  --stat-c: var(--brand); --stat-soft: var(--brand-soft);
   display: flex; flex-direction: column; gap: 2px; padding: 14px 16px;
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+  background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--stat-c);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.stat.kind-income { --stat-c: var(--income); --stat-soft: var(--ok-soft); }
+.stat.kind-expense { --stat-c: var(--expense); --stat-soft: var(--expense-soft); }
+.stat.kind-net { --stat-c: var(--net); --stat-soft: var(--net-soft); }
+.stat.kind-rate { --stat-c: var(--accent); --stat-soft: var(--warning-soft); }
+.stat-label { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.stat-icon {
+  display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--stat-soft); font-size: 15px;
 }
 .stat-label, .stat-sub { color: var(--muted); font-size: 13px; }
 .stat-value { font-size: 22px; font-variant-numeric: tabular-nums; }
 .stat.is-income .stat-value, .stat.is-positive .stat-value { color: var(--income); }
 .stat.is-expense .stat-value { color: var(--expense); }
-.stat.is-negative { background: var(--exceeded-soft); border-color: var(--exceeded); }
+.stat.is-negative { --stat-c: var(--exceeded); background: var(--exceeded-soft); border-color: var(--exceeded); }
 .stat.is-negative .stat-value { color: var(--exceeded); }
 
 .list { list-style: none; margin: 0; padding: 0; }

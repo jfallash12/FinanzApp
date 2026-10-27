@@ -225,7 +225,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 - [x] **T-54 Especificación visual.** `design.md` §8 (paleta violeta y 9 componentes), D40–D42.
 - [x] **T-55 Paleta, encabezado y pestañas.** Variables violeta claro/oscuro, encabezado con degradado, pestaña activa de color, botones y «+ Registrar» violeta, tarjeta de crédito grafito.
   *Aceptación:* contraste de texto ≥ 4.5:1 en claro y oscuro; sin scroll horizontal a 375 px.
-- [ ] **T-56 Tarjetas del Resumen e íconos de título.** Línea de color e ícono en Ingresos, Gastos, Balance y Tasa de ahorro; `CARD_ICONS` en los títulos de tarjeta.
+- [x] **T-56 Tarjetas del Resumen e íconos de título.** Línea de color e ícono en Ingresos, Gastos, Balance y Tasa de ahorro; `CARD_ICONS` en los títulos de tarjeta.
 - [ ] **T-57 Color por categoría.** `catColor` en `ui.js` (D41); punto de color en movimientos, presupuestos y Categorías; barras de «¿En qué se va la plata?» con el color de la categoría.
   *Aceptación:* las 7 categorías de gasto predeterminadas tienen colores distintos; ningún color de categoría es verde, ámbar ni rojo.
 - [ ] **T-58 Efectos.** Elevación al pasar el mouse, barras con degradado, encabezados de día y estados vacíos.

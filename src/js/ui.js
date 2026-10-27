@@ -25,6 +25,13 @@
   var TX_ICONS = { gasto: '↓', ingreso: '↑', transferencia: '⇄' };
   var STATUS_TEXT = { ok: 'En orden', warning: 'Precaución', exceeded: 'Excedido' }; // REQ-057
   var WEEKDAYS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+  var STAT_ICONS = { 'kind-income': '📥', 'kind-expense': '📤', 'kind-net': '⚖️', 'kind-rate': '🐷' }; // design.md §8 (3)
+  /* design.md §8 (9): ícono del título según la clase principal de la tarjeta */
+  var CARD_ICONS = {
+    'savings-goals': '🐷', 'pending-list': '⏳', upcoming: '🗓️', 'top-cats': '📊', 'accounts-overview': '🏦',
+    'total-budget': '🎯', 'first-steps': '👋', budgets: '🏷️', 'tx-list': '🧾', schedules: '🔁',
+    'account-list': '💳', 'archived-list': '🗄️', 'detail-list': '📒', backup: '💾', 'cat-list': '🏷️'
+  };
   var MONTHS_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
   var root = null;
@@ -129,8 +136,10 @@
 
   function card(title, cls) {
     var children = Array.prototype.slice.call(arguments, 2);
+    var icon = CARD_ICONS[(cls || '').split(' ')[0]];
     return el('section', { class: 'card ' + (cls || '') },
-      title ? el('h2', { class: 'card-title', text: title }) : null, children);
+      title ? el('h2', { class: 'card-title' }, icon ? el('span', { class: 'card-icon', 'aria-hidden': 'true', text: icon }) : null, title) : null,
+      children);
   }
 
   /* ====================================================================== */
@@ -451,18 +460,19 @@
     var m = calc.monthSummary(S, U.month, TODAY);
     var neg = m.net < 0;
     function stat(label, value, cls, sub, extra) {
-      return el('div', { class: 'stat ' + (cls || '') },
-        el('span', { class: 'stat-label', text: label }),
+      var kind = cls.split(' ')[0]; // kind-income | kind-expense | kind-net | kind-rate (design.md §8)
+      return el('div', { class: 'stat ' + cls },
+        el('span', { class: 'stat-label' }, el('span', { class: 'stat-icon', 'aria-hidden': 'true', text: STAT_ICONS[kind] }), label),
         el('strong', { class: 'stat-value', text: value }),
         sub ? el('span', { class: 'stat-sub', text: sub }) : null,
         extra || null);
     }
     return el('div', { class: 'stats' },
-      stat('Ingresos del mes', money(m.income), 'is-income', m.scheduledIncome > 0 ? 'Incluye ' + money(m.scheduledIncome) + ' programados' : null), // REQ-081
-      stat('Gastos del mes', money(m.expense), 'is-expense', m.scheduledExpense > 0 ? 'Incluye ' + money(m.scheduledExpense) + ' programados' : null,
+      stat('Ingresos del mes', money(m.income), 'kind-income is-income', m.scheduledIncome > 0 ? 'Incluye ' + money(m.scheduledIncome) + ' programados' : null), // REQ-081
+      stat('Gastos del mes', money(m.expense), 'kind-expense is-expense', m.scheduledExpense > 0 ? 'Incluye ' + money(m.scheduledExpense) + ' programados' : null,
         MonthComparison()),
-      stat('Balance neto', money(m.net, { sign: true }), neg ? 'is-negative' : 'is-positive', neg ? 'Déficit: gastó más de lo que ingresó' : 'Superávit'),
-      stat('Tasa de ahorro', m.savingsRate === null ? '—' : calc.formatPercent(m.savingsRate), m.savingsRate !== null && m.savingsRate < 0 ? 'is-negative' : '',
+      stat('Balance neto', money(m.net, { sign: true }), 'kind-net ' + (neg ? 'is-negative' : 'is-positive'), neg ? 'Déficit: gastó más de lo que ingresó' : 'Superávit'),
+      stat('Tasa de ahorro', m.savingsRate === null ? '—' : calc.formatPercent(m.savingsRate), 'kind-rate' + (m.savingsRate !== null && m.savingsRate < 0 ? ' is-negative' : ''),
         m.savingsRate === null ? 'Sin ingresos este mes' : 'del ingreso del mes'));
   }
 
@@ -545,7 +555,7 @@
       { ok: st.budget, text: 'Defina un presupuesto, total o por categoría', tab: 'presupuestos', button: 'Ir a Presupuestos' }
     ];
     var next = steps.filter(function (x) { return !x.ok; })[0];
-    return card('👋 Primeros pasos', 'first-steps',
+    return card('Primeros pasos', 'first-steps',
       el('ol', { class: 'steps' }, steps.map(function (x) {
         return el('li', { class: 'step' + (x.ok ? ' is-done' : '') },
           el('span', { class: 'step-mark', 'aria-hidden': 'true', text: x.ok ? '✓' : '○' }),
@@ -945,7 +955,7 @@
   }
 
   function BackupCard() { // REQ-097, REQ-098
-    return card('💾 Respaldo de datos', 'backup',
+    return card('Respaldo de datos', 'backup',
       el('p', { class: 'muted', text: 'Sus datos viven solo en este navegador. Descargue un respaldo de vez en cuando y guárdelo en un lugar seguro.' }),
       el('div', { class: 'backup-actions' },
         el('button', { type: 'button', class: 'btn btn-primary', 'data-action': 'EXPORT_DATA', text: '⬇ Exportar datos' }),
