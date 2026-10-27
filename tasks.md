@@ -158,7 +158,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 
 ## Fase 7 — Pruebas de regresión
 
-- [x] **T-23 `tests/pruebas.html`.** 133 pruebas de la lógica pura (fechas, dinero, saldos, resumen, presupuestos, programaciones, metas, validaciones y contrato) con los datos de prueba. Se abre con doble clic.
+- [x] **T-23 `tests/pruebas.html`.** 154 pruebas de la lógica pura (fechas, dinero, saldos, resumen, presupuestos, programaciones, metas, validaciones y contrato) con los datos de prueba. Se abre con doble clic.
 
 ## Fase 8 — Verificación contra el negocio
 
@@ -269,4 +269,4 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 | 097 | T-49 | 098 | T-49 | 099 | T-50 |
 | 100 | T-51 | 101 | T-52 | 102 | T-53 |
 
-**Resultado final:** `tests/pruebas.html` 133/133 y recorrido de punta a punta 161/161, consola limpia y 0 peticiones de red.
+**Resultado final:** `tests/pruebas.html` 154/154; recorrido de punta a punta 161/161 más los criterios de aceptación de T-49..T-53 en escritorio y a 375 px; consola limpia y 0 peticiones de red.

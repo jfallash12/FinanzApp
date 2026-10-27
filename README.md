@@ -11,15 +11,15 @@ Proyecto Final del curso **Programación Intencional con IA Generativa** (Greenf
 ├── .cursorrules             # Reglas de contexto para la IA (remite a CLAUDE.md)
 ├── CLAUDE.md                # Rol de la IA, lenguaje ubicuo, invariantes y reglas de código
 ├── docs/
-│   ├── requirements.md      # Requerimientos EARS (REQ-001..REQ-096)
+│   ├── requirements.md      # Requerimientos EARS (REQ-001..REQ-102)
 │   ├── data-contract.json   # Contrato de datos: JSON Schema (PersonalFinanceState)
 │   ├── design.md            # Arquitectura, reglas de negocio, componentes y mapeo REQ → código
-│   ├── decisiones.md        # Decisiones técnicas D1–D33
+│   ├── decisiones.md        # Decisiones técnicas D1–D39
 │   ├── wireframe.md         # Interfaz por componentes
 │   ├── wireframe.excalidraw # Wireframe editable (excalidraw.com)
 │   ├── wireframe.png        # Wireframe exportado
 │   └── retrospectiva.md     # Lo que aprendí
-├── tasks.md                 # Plan de implementación (T-00..T-47) y pruebas de regresión
+├── tasks.md                 # Plan de implementación (T-00..T-53) y pruebas de regresión
 ├── src/                     # Código fuente
 │   ├── index.html           # Punto de entrada (abrir con doble clic)
 │   ├── css/styles.css       # CSS puro
@@ -64,7 +64,11 @@ localStorage.setItem('finanzapp.state', JSON.stringify(<ejemplo>));
 
 Para empezar de cero: `localStorage.removeItem('finanzapp.state')` y F5.
 
-**Pruebas:** abra `tests/pruebas.html` con doble clic → 133 pruebas en verde.
+**Pruebas:** abra `tests/pruebas.html` con doble clic → 154 pruebas en verde.
+
+**Respaldo:** en la pestaña *Cuentas*, **Exportar datos** descarga un archivo `.json` con todo; **Importar datos** lo carga en otro navegador o computadora (pide confirmación porque reemplaza los datos actuales).
+
+**En línea (GitHub Pages):** con *Settings → Pages* activado, la app también se abre en `https://jfallash12.github.io/FinanzApp/src/`. Los datos siguen guardándose solo en el navegador de cada persona.
 
 ## Demostración (auditoría del cliente)
 
@@ -78,6 +82,9 @@ Con los datos de prueba (mes Octubre 2026):
 6. **Tarjeta:** el Resumen avisa "El pago de Tarjeta Visa vence en 2 días: ₡36,000.00" (corte 15, pago 28; con la fecha de hoy los días cambian).
 7. **Cuentas:** abra *Efectivo* → ve el saldo después de cada movimiento. Intente archivarla → se rechaza porque tiene saldo; *Tarjeta vieja* ya está archivada y no aparece al registrar.
 8. **Pagos fijos:** en *Gastos e ingresos* marque **🗓 Programar**: *Hipoteca* ₡450,000 cada mes desde el 31 con auto-débito, y *Gasolina* ₡40,000 quincenal con confirmación ("≈ ₡80,000 al mes"). Pase a **noviembre** con ▶: ya aparecen y cuentan en el resumen y en los presupuestos. El día que vencen, la hipoteca se registra sola al abrir la app y la gasolina queda en *Pendientes de confirmar* (✓ Confirmar · ✎ Ajustar · ⏭ Omitir).
+9. **Búsqueda:** en *Gastos e ingresos* escriba "bus" en **Buscar** → solo aparece *Bus*.
+10. **Ayudas del Resumen:** octubre muestra "▲ 2824 % más que septiembre 2026" bajo los gastos y la tarjeta **¿En qué se va la plata?** (Vivienda 57 %, Alimentación 23 %, Servicios 9 %).
+11. **Respaldo:** *Cuentas → Exportar datos*; luego `localStorage.removeItem('finanzapp.state')` y F5 → aparece **Primeros pasos**; *Cuentas → Importar datos* con el archivo descargado → todo vuelve (Patrimonio ₡606,400).
 
 ## Cumplimiento del Proyecto Final
 
@@ -85,7 +92,7 @@ Con los datos de prueba (mes Octubre 2026):
 |---|---|
 | 2 o más entidades relacionadas | `Account`, `Category`, `Transaction` y `Schedule` (→ `accountId`, `toAccountId`, `categoryId`, `scheduleId`) — [`docs/data-contract.json`](docs/data-contract.json) |
 | Persistencia real | `localStorage` en cada cambio, restauración al iniciar y manejo de datos dañados — `src/js/storage.js` (REQ-051..REQ-054) |
-| 3 o más reglas de negocio complejas en EARS | 90 REQ en [`docs/requirements.md`](docs/requirements.md); por ejemplo REQ-030..REQ-035 (fondos según tipo de cuenta, en orden cronológico), REQ-061/062 (pago del periodo de la tarjeta), REQ-063 (archivar solo con saldo 0), REQ-070/071 (presupuesto total vs. por categoría), REQ-041..REQ-044 (presupuesto que alerta sin bloquear), REQ-033 (duplicados), REQ-017 (reasignar al eliminar categoría) |
+| 3 o más reglas de negocio complejas en EARS | 96 REQ en [`docs/requirements.md`](docs/requirements.md); por ejemplo REQ-030..REQ-035 (fondos según tipo de cuenta, en orden cronológico), REQ-061/062 (pago del periodo de la tarjeta), REQ-063 (archivar solo con saldo 0), REQ-070/071 (presupuesto total vs. por categoría), REQ-041..REQ-044 (presupuesto que alerta sin bloquear), REQ-033 (duplicados), REQ-017 (reasignar al eliminar categoría) |
 | Archivo de reglas de contexto | [`.cursorrules`](.cursorrules) y [`CLAUDE.md`](CLAUDE.md): definen el rol de la IA, restringen el stack, fijan convenciones y prohíben parches fuera de la especificación |
 | Casos de borde con retroalimentación visual | Vacíos, negativos, no numéricos, más de 2 decimales, fechas inválidas o futuras, duplicados, nombres repetidos, fondos insuficientes — errores en vivo y avisos |
 | Unchanged Behavior | Protocolo en [`tasks.md`](tasks.md), pruebas R1–R6 y [`tests/pruebas.html`](tests/pruebas.html) |
@@ -113,6 +120,7 @@ Con los datos de prueba (mes Octubre 2026):
 | Presupuestos (pestaña propia y total mensual) | REQ-069 – REQ-072 |
 | Programaciones: pagos e ingresos fijos | REQ-079 – REQ-091 |
 | Ahorro en el presupuesto, metas y próximos programados | REQ-092 – REQ-096 |
+| Respaldo, búsqueda y ayudas del Resumen | REQ-097 – REQ-102 |
 
 ## Reglas de negocio clave
 
