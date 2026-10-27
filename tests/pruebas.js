@@ -242,6 +242,13 @@
       frequency: 'monthly', startDate: '2026-11-01', mode: 'auto', skippedDates: [], createdAt: '2026-10-26T00:00:00.000Z' }); });
     var g = calc.goalProgress(s, 'acc-ahorros', TODAY); return eq(g.monthly + ',' + g.duplicates, '200000,1');
   });
+  test('REQ-096 ventana de próximos según el mes seleccionado', function () {
+    return eq([calc.upcomingStart('2026-10', TODAY), calc.upcomingStart('2026-11', TODAY), String(calc.upcomingStart('2026-09', TODAY))].join(','), '2026-10-27,2026-11-01,null');
+  });
+  test('REQ-096 noviembre 1–7 no incluye ocurrencias de octubre', function () {
+    var l = calc.openOccurrences(DATA, '2026-11-01', '2026-11-07', TODAY);
+    return eq(l.every(function (t) { return t.date >= '2026-11-01' && t.date <= '2026-11-07'; }) + ':' + l.length, 'true:1');
+  });
   test('REQ-095 meta alcanzada', function () { var s = clone(DATA); s.accounts[2].goalAmount = 250000; return eq(calc.goalProgress(s, 'acc-ahorros', TODAY).reached, true); });
   test('REQ-070 total 0 rechazado', function () { return has(v.validateSettings({ monthlyBudget: '0' }), 'monthlyBudget', 'mayor a 0'); });
   test('REQ-071 suma por categoría ₡495,000', function () { return eq(calc.categoryBudgetsSum(DATA), 495000); });

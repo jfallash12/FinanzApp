@@ -101,6 +101,7 @@
 - El formulario de una cuenta de **ahorros** agrega *🎯 Meta de ahorro* y *Razón del ahorro*, ambos opcionales (REQ-093).
 - La tarjeta y el detalle de la cuenta de ahorros muestran "🎯 <razón>", la barra de progreso, "₡X de ₡Y · N %", "Le faltan ₡Z" y, si hay transferencias programadas, "la alcanza en N meses (<mes año>)"; al llegar: "✓ ¡Meta alcanzada!" (REQ-094, REQ-095).
 - La pestaña **Presupuestos** agrega la sección **Metas de ahorro** bajo el presupuesto total.
+- *(v6.2)* La tarjeta **Próximos programados** del Resumen sigue al mes seleccionado (en un mes futuro: "Programados del 1 nov al 7 nov") y tiene **◀ 7 días antes · 7 días después ▶** (REQ-096).
 
 **Movimientos programados (v3, reemplazada)**
 - Un movimiento con fecha futura (hasta un año) se muestra con la etiqueta **"🗓 Programado · en N días"** y fondo rayado (REQ-073).

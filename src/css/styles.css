@@ -469,3 +469,7 @@ button, input, select { font: inherit; color: inherit; }
 .goal.is-plain.is-reached .bar-fill { background: var(--ok); }
 .goal.is-plain.is-reached .goal-line:nth-of-type(2) { color: var(--ok); font-weight: 600; }
 .goal-row { display: block; padding: 8px 0; }
+
+/* v6.2: ventana de próximos programados (REQ-096) */
+.week-nav { display: flex; justify-content: space-between; gap: 8px; margin: -4px 0 8px; }
+.week-nav .btn[disabled] { opacity: .4; cursor: not-allowed; }

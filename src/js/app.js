@@ -71,6 +71,7 @@
       errors: { transaction: {}, quick: {}, account: {}, category: {}, settings: {}, reassign: {} },
       quickOpen: false,          // REQ-067
       selectedAccountId: null,   // REQ-066: detalle de cuenta
+      upcomingFrom: null,        // REQ-096: inicio de la ventana de próximos programados (null = según el mes)
       dialog: null,
       notice: null,
       toast: null
@@ -517,8 +518,9 @@
 
   var UI_ACTIONS = {
     SET_TAB: function (a) { ui.activeTab = a.tab; ui.selectedAccountId = null; },
-    PREV_MONTH: function () { ui.month = calc.addMonths(ui.month, -1); },
-    NEXT_MONTH: function () { ui.month = calc.addMonths(ui.month, 1); },
+    PREV_MONTH: function () { ui.month = calc.addMonths(ui.month, -1); ui.upcomingFrom = null; }, // REQ-096: la ventana sigue al mes
+    NEXT_MONTH: function () { ui.month = calc.addMonths(ui.month, 1); ui.upcomingFrom = null; },
+    SET_UPCOMING: function (a) { ui.upcomingFrom = a.date; }, // REQ-096: correr la ventana 7 días
     SET_FILTER: function (a) { ui.filters[a.field] = a.value; }, // REQ-036: no toca el estado
     INPUT: function (a) {
       var f = ui.forms[a.form];

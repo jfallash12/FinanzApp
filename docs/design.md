@@ -160,7 +160,7 @@ graph TD
 | `CategoryForm` / `CategoryTable` | Alta y edición; presupuesto solo en gasto; sistema sin 🗑 | `ui.forms.category` | `SUBMIT`, `EDIT_CATEGORY`, `DELETE_CATEGORY` | 012–019 |
 | `Dialog` | Confirmaciones, duplicado, reasignación y archivo | `ui.dialog` | `CONFIRM`, `CANCEL`, `REASSIGN_INPUT` | 011, 017, 018, 033, 035, 063 |
 | `QuickAddButton` / `QuickAdd` | Botón "+ Registrar" en todas las pestañas y ventana de registro rápido (monto, categoría, descripción; fecha y cuenta precargadas) | `ui.quickOpen`, `ui.forms.quick`, `calc.lastUsedAccountId` | `OPEN_QUICK`, `CLOSE_QUICK`, `SUBMIT` | 067, 068 |
-| `UpcomingScheduled` / `PendingOccurrences` / `ProjectionAlerts` *(v4)* | Próximos 7 días; pendientes con ✓ Confirmar · ✎ Ajustar · ⏭ Omitir; aviso de proyección negativa | `calc.upcomingOccurrences`, `calc.dueOccurrences`, `calc.projectionAlerts` | `CONFIRM_OCCURRENCE`, `ADJUST_OCCURRENCE`, `SKIP_OCCURRENCE`, `EDIT_SCHEDULE` | 077, 083, 084, 087 |
+| `UpcomingScheduled` / `PendingOccurrences` / `ProjectionAlerts` *(v4)* | Próximos 7 días según el mes, corribles de 7 en 7 (REQ-096); pendientes con ✓ Confirmar · ✎ Ajustar · ⏭ Omitir; aviso de proyección negativa | `calc.upcomingOccurrences`, `calc.dueOccurrences`, `calc.projectionAlerts` | `CONFIRM_OCCURRENCE`, `ADJUST_OCCURRENCE`, `SKIP_OCCURRENCE`, `EDIT_SCHEDULE` | 083, 084, 087, 096 |
 | `ScheduleFields` / `schedulePreview` / `scheduledBadge` / `occurrenceRow` / `SchedulesList` *(v4)* | Casilla "🗓 Programar" con frecuencia, hasta y modo; vista previa de fechas y equivalente mensual; etiquetas "Programado" / "Pendiente"; lista de programaciones | `ui.forms[form].draft.scheduled`, `calc.scheduleOccurrences`, `calc.nextOccurrence`, `calc.monthlyEquivalent` | `INPUT`, `SUBMIT`, `EDIT_SCHEDULE`, `DELETE_SCHEDULE` | 079–081, 085, 089 |
 | `TransactionFields` | Campos compartidos por el formulario completo y el registro rápido; solo cuentas activas | `ui.forms[form]` | `INPUT` | 020–033, 058, 064 |
 | `PaymentAlerts` | "El pago de <tarjeta> vence en N días" / "Pago vencido" | `calc.paymentAlerts` | `OPEN_ACCOUNT` | 062 |
@@ -344,6 +344,7 @@ sequenceDiagram
 | D30 *(v6)* | El apartado a ahorros consume el presupuesto **total**, no los presupuestos por categoría, y no se cuenta como gasto en el Resumen ni en la tasa de ahorro | Pedido del estudiante: "un ahorro no es para gastar", así que debe bajar lo que queda para gastar en el mes. Pero sigue siendo dinero suyo: contarlo como gasto falsearía la tasa de ahorro y los informes por categoría |
 | D31 *(v6)* | La meta vive en la propia cuenta de ahorros (`goalAmount`, `goalReason` opcionales) y el progreso usa el **saldo actual** de la cuenta, no solo lo transferido este mes | Una meta es "juntar ₡X para Y", sin fecha fija. Se agregan campos opcionales sin subir `schemaVersion`: los datos v3 existentes siguen siendo válidos y no requieren migración |
 | D32 *(v6.1)* | La meta muestra el detalle de cada transferencia programada que la alimenta (descripción, monto, frecuencia y equivalente mensual) y advierte si hay programaciones repetidas | Pedido del estudiante: veía "₡200,000 al mes" con una transferencia de ₡100,000. Un total sin desglose no se puede verificar; el desglose muestra si la causa es una frecuencia quincenal o una programación duplicada |
+| D33 *(v6.2)* | La ventana de 7 días de "Próximos programados" es estado de interfaz (`ui.upcomingFrom`, no se persiste) y su inicio por defecto lo da `calc.upcomingStart(mes, hoy)` | Pedido del estudiante: al pasar a noviembre seguía viendo los pagos del 31 de octubre. La tarjeta no tenía requisito vigente (REQ-077 se eliminó en v4): se especificó REQ-096 antes de cambiarla |
 | D27 *(v5)* | La primera fecha puede estar hasta un año atrás; las ocurrencias anteriores a hoy se resuelven **al guardar** (registrar con su fecha u omitir), nunca quedan como "pendientes" ni las aplica el auto-débito | Quien empieza a usar la app a mitad de mes ya pagó algunos fijos; así no se duplican ni se pierden (REQ-091) |
 | D15 | Formato de dinero `₡12,500.00` (coma de miles y punto decimal), igual al formato en que el usuario escribe los montos | Coherencia entre lo que se escribe y lo que se ve |
 
@@ -443,8 +444,9 @@ sequenceDiagram
 | 093 *(v6)* | Meta y razón en cuentas de ahorros | `AccountForm` | `validate.validateAccount`, `validate.draftToAccount`, `storage.checkAccount` |
 | 094 *(v6, v6.1)* | Progreso, aportes y fecha estimada de la meta | `GoalProgress` en `AccountCard`, `AccountDetail` y `SavingsGoals` (Presupuestos) | `calc.goalProgress`, `calc.monthlyEquivalent` |
 | 095 *(v6)* | Meta alcanzada | `GoalProgress`, `Toast` | `calc.goalProgress`, `goalToast` |
+| 096 *(v6.2)* | Próximos programados por mes y semana | `UpcomingScheduled` (◀ 7 días antes · 7 días después ▶) | `calc.upcomingStart`, `calc.openOccurrences`, `UI_ACTIONS.SET_UPCOMING`, `PREV_MONTH`/`NEXT_MONTH` |
 
-**Cobertura:** 89 de 89 requerimientos vigentes tienen componente y/o función asignados.
+**Cobertura:** 90 de 90 requerimientos vigentes tienen componente y/o función asignados.
 
 ## 8. Diseño visual (CSS)
 

@@ -273,6 +273,17 @@
     return openOccurrences(state, addDays(today, 1), addDays(today, days || 7), today);
   }
 
+  /**
+   * REQ-096 (v6.2): inicio de la ventana de 7 días de "Próximos programados" según el mes seleccionado.
+   * Mes actual → mañana · mes futuro → día 1 de ese mes · mes pasado → null (no se muestra).
+   */
+  function upcomingStart(ym, today) {
+    today = today || todayISO();
+    var cur = monthOf(today);
+    if (ym === cur) { return addDays(today, 1); }
+    return ym > cur ? isoFromMonthDay(ym, 1) : null;
+  }
+
   /** REQ-089: próxima ocurrencia abierta (pendiente o futura) de una programación, o null. */
   function nextOccurrence(state, sch, today) {
     today = today || todayISO();
@@ -695,6 +706,7 @@
     openOccurrences: openOccurrences,
     dueOccurrences: dueOccurrences,
     upcomingOccurrences: upcomingOccurrences,
+    upcomingStart: upcomingStart,
     nextOccurrence: nextOccurrence,
     monthlyEquivalent: monthlyEquivalent,
     endOfMonth: endOfMonth,

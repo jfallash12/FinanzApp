@@ -11,7 +11,7 @@ Proyecto Final del curso **Programación Intencional con IA Generativa** (Greenf
 ├── .cursorrules             # Reglas de contexto para la IA (remite a CLAUDE.md)
 ├── CLAUDE.md                # Memoria semántica: reglas de negocio, lenguaje ubicuo, invariantes y gobierno de la IA
 ├── docs/
-│   ├── requirements.md      # Especificación EARS v6 — 89 requerimientos vigentes (REQ-001..REQ-095)
+│   ├── requirements.md      # Especificación EARS v6 — 90 requerimientos vigentes (REQ-001..REQ-096)
 │   ├── data-contract.json   # Contrato de datos: JSON Schema 2020-12 (PersonalFinanceState, schemaVersion 3)
 │   ├── wireframe.md         # Boceto de interfaz por componentes
 │   ├── wireframe.excalidraw # Wireframe editable (abrir en excalidraw.com)
@@ -59,7 +59,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(<ejemplo>));
 
 Para empezar de cero: `localStorage.removeItem('finanzapp.state')` y F5.
 
-**Pruebas:** abra `tests/pruebas.html` con doble clic → 131 pruebas en verde.
+**Pruebas:** abra `tests/pruebas.html` con doble clic → 133 pruebas en verde.
 
 ## Demostración (auditoría del cliente)
 
@@ -80,7 +80,7 @@ Con los datos de prueba (mes Octubre 2026):
 |---|---|
 | 2 o más entidades relacionadas | `Account`, `Category` y `Transaction` (→ `accountId`, `toAccountId`, `categoryId`) — [`docs/data-contract.json`](docs/data-contract.json) |
 | Persistencia real | `localStorage` en cada cambio, restauración al iniciar y manejo de datos dañados — `src/js/storage.js` (REQ-051..REQ-054) |
-| 3 o más reglas de negocio complejas en EARS | 89 REQ en [`docs/requirements.md`](docs/requirements.md); por ejemplo REQ-030..REQ-035 (fondos según tipo de cuenta, en orden cronológico), REQ-061/062 (pago del periodo de la tarjeta), REQ-063 (archivar solo con saldo 0), REQ-070/071 (presupuesto total vs. por categoría), REQ-041..REQ-044 (presupuesto que alerta sin bloquear), REQ-033 (duplicados), REQ-017 (reasignar al eliminar categoría) |
+| 3 o más reglas de negocio complejas en EARS | 90 REQ en [`docs/requirements.md`](docs/requirements.md); por ejemplo REQ-030..REQ-035 (fondos según tipo de cuenta, en orden cronológico), REQ-061/062 (pago del periodo de la tarjeta), REQ-063 (archivar solo con saldo 0), REQ-070/071 (presupuesto total vs. por categoría), REQ-041..REQ-044 (presupuesto que alerta sin bloquear), REQ-033 (duplicados), REQ-017 (reasignar al eliminar categoría) |
 | Archivo de reglas de contexto | [`.cursorrules`](.cursorrules) y [`CLAUDE.md`](CLAUDE.md) §10: restringen el stack, fijan convenciones y prohíben parches fuera de la especificación |
 | Casos de borde con retroalimentación visual | Vacíos, negativos, no numéricos, más de 2 decimales, fechas inválidas o futuras, duplicados, nombres repetidos, fondos insuficientes — errores en vivo y avisos |
 | Unchanged Behavior | Protocolo en [`tasks.md`](tasks.md), pruebas R1–R6 y [`tests/pruebas.html`](tests/pruebas.html) |
@@ -108,7 +108,7 @@ Con los datos de prueba (mes Octubre 2026):
 | Presupuestos v2 (pestaña propia y total mensual) | REQ-069 – REQ-072 |
 | Movimientos con fecha futura (v3, reemplazados) | REQ-073 – REQ-078 (eliminados en v4) |
 | Programaciones: pagos e ingresos fijos (v4–v5) | REQ-079 – REQ-091 (y REQ-027, REQ-050 modificados) |
-| Ahorro en el presupuesto y metas de ahorro (v6) | REQ-092 – REQ-095 (y REQ-070 modificado) |
+| Ahorro en el presupuesto y metas de ahorro (v6) | REQ-092 – REQ-095 (y REQ-070 modificado); REQ-096 próximos programados por mes |
 
 ## Reglas de negocio clave
 

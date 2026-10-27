@@ -10,7 +10,7 @@ Lee y obedece CLAUDE.md completo antes de cualquier cambio. Resumen obligatorio:
 - PROHIBIDO: frameworks y librerías (React, Vue, jQuery, Bootstrap, Tailwind, Chart.js...), CDNs, npm/package.json, build, TypeScript compilado, ES Modules, backend, IndexedDB, Service Workers, fetch/XHR/WebSocket o cualquier acceso a red.
 
 ## Fuentes de verdad (en este orden)
-1. docs/requirements.md (EARS, REQ-001..REQ-095)
+1. docs/requirements.md (EARS, REQ-001..REQ-096)
 2. docs/data-contract.json (JSON Schema, schemaVersion 3) y docs/design.md (RN-01..RN-13, API de módulos)
 3. tasks.md (una tarea a la vez)
 

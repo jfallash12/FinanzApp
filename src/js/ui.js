@@ -388,10 +388,26 @@
       el('ul', { class: 'list' }, list.map(occurrenceRow)));
   }
 
-  function UpcomingScheduled() { // REQ-077 (v4)
-    var list = calc.upcomingOccurrences(S, TODAY, 7);
-    if (!list.length) { return null; }
-    return card('Próximos programados (7 días)', 'upcoming', el('ul', { class: 'list' }, list.map(occurrenceRow)));
+  /** REQ-096 (v6.2): ventana de 7 días que sigue al mes seleccionado y se corre semana a semana. */
+  function UpcomingScheduled() {
+    var base = calc.upcomingStart(U.month, TODAY);
+    if (!base || !(S.schedules || []).length) { return null; }
+    var from = U.upcomingFrom || base;
+    var to = calc.addDays(from, 6);
+    var list = calc.openOccurrences(S, from, to, TODAY);
+    var first = calc.addDays(TODAY, 1);
+    function short(iso) { var p = iso.split('-'); return (+p[2]) + ' ' + MONTHS_SHORT[+p[1] - 1]; }
+    var title = from === first ? 'Próximos programados (7 días)' : 'Programados del ' + short(from) + ' al ' + short(to);
+    var prev = calc.addDays(from, -7) < first ? first : calc.addDays(from, -7);
+    var next = calc.addDays(from, 7);
+    return card(title, 'upcoming',
+      el('div', { class: 'week-nav' },
+        el('button', { type: 'button', class: 'btn btn-ghost btn-sm', 'data-action': 'SET_UPCOMING', 'data-date': prev, disabled: from <= first,
+          'aria-label': '7 días antes', text: '◀ 7 días antes' }),
+        el('button', { type: 'button', class: 'btn btn-ghost btn-sm', 'data-action': 'SET_UPCOMING', 'data-date': next,
+          disabled: next > calc.addDays(TODAY, validate.MAX_SCHEDULE_DAYS), 'aria-label': '7 días después', text: '7 días después ▶' })),
+      list.length ? el('ul', { class: 'list' }, list.map(occurrenceRow))
+        : el('p', { class: 'empty-inline', text: 'No hay pagos ni ingresos programados en estos 7 días.' }));
   }
 
   function ProjectionAlerts() { // REQ-087
