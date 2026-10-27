@@ -468,7 +468,7 @@
     var list = calc.topCategories(S, U.month, 3, TODAY);
     return card('¿En qué se va la plata?', 'top-cats',
       list.length === 0
-        ? el('p', { class: 'muted', text: 'Aún no hay gastos en ' + calc.monthLabel(U.month).toLowerCase() + '.' })
+        ? el('p', { class: 'empty-inline', text: 'Aún no hay gastos en ' + calc.monthLabel(U.month).toLowerCase() + '.' })
         : el('ol', { class: 'top-list' }, list.map(function (x) {
           return el('li', { class: 'top-row' },
             el('div', { class: 'top-head' },

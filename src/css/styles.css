@@ -222,10 +222,11 @@ button, input, select { font: inherit; color: inherit; }
 .budget-foot { font-size: 13px; font-variant-numeric: tabular-nums; }
 .budget-row.is-exceeded { background: var(--exceeded-soft); margin: 0 -10px; padding: 10px; border-radius: 10px; }
 
-.bar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
-.bar-fill { height: 100%; border-radius: inherit; background: var(--ok); transition: width .4s ease; }
-.bar.is-warning .bar-fill { background: var(--warning); }
-.bar.is-exceeded .bar-fill { background: var(--exceeded); }
+.bar { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+/* design.md §8 (6): degradado leve del color del estado */
+.bar-fill { height: 100%; border-radius: inherit; background: var(--ok); background: linear-gradient(90deg, var(--ok), #4ade80); transition: width .4s ease; }
+.bar.is-warning .bar-fill { background: var(--warning); background: linear-gradient(90deg, var(--warning), #fbbf24); }
+.bar.is-exceeded .bar-fill { background: var(--exceeded); background: linear-gradient(90deg, var(--exceeded), #f87171); }
 
 .badge {
   display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 600;
@@ -245,9 +246,11 @@ button, input, select { font: inherit; color: inherit; }
 .day-group { margin-top: 12px; }
 .day-head {
   display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;
-  padding: 6px 10px; border-radius: 8px; background: var(--surface-2); font-size: 13px; text-transform: capitalize;
+  align-items: center; padding: 6px 10px; border-radius: 10px; background: var(--brand-soft); font-size: 13px;
+  font-weight: 600; text-transform: capitalize;
 }
-.day-net { text-transform: none; font-variant-numeric: tabular-nums; }
+.day-net { text-transform: none; font-variant-numeric: tabular-nums; font-weight: 400; }
+.day-net strong { display: inline-block; margin-left: 4px; padding: 1px 9px; border-radius: 99px; background: var(--surface); }
 .day-net.is-negative strong { color: var(--exceeded); }
 
 .tx-row { display: flex; align-items: center; gap: 10px; padding: 9px 4px; border-bottom: 1px solid var(--border); }
@@ -328,12 +331,13 @@ button, input, select { font: inherit; color: inherit; }
 
 /* ---------- Vacíos y diálogos ---------- */
 
-.empty {
-  text-align: center; padding: 40px 16px; background: var(--surface); border: 1px dashed var(--border);
-  border-radius: var(--radius);
+.empty { /* design.md §8 (8) */
+  text-align: center; padding: 40px 16px; border: 1px dashed var(--brand); border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--brand-soft), var(--surface));
 }
-.empty-icon { font-size: 44px; margin: 0; }
+.empty-icon { font-size: 52px; margin: 0; }
 .empty-inline { color: var(--muted); text-align: center; padding: 20px 0; }
+.empty-inline::before { content: "🍃"; display: block; font-size: 30px; margin-bottom: 4px; }
 
 .overlay {
   position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px;
@@ -542,4 +546,10 @@ button, input, select { font: inherit; color: inherit; }
 
 /* ---------- Color por categoría (design.md §8 punto 4, D41) ---------- */
 .cat-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; background: var(--cat); vertical-align: 0; flex: none; }
-.bar.is-cat .bar-fill { background: var(--cat); }
+.bar.is-cat .bar-fill { background: var(--cat); background: linear-gradient(90deg, var(--cat), color-mix(in srgb, var(--cat) 55%, #ffffff)); }
+
+/* ---------- Elevación al pasar el mouse (design.md §8 punto 5) ---------- */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .view-resumen .card, .stat, .acc-card { transition: transform .15s ease, box-shadow .15s ease; }
+  .view-resumen .card:hover, .stat:hover, .acc-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+}

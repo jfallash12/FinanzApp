@@ -6,7 +6,7 @@
 > [`docs/decisiones.md`](docs/decisiones.md) · [`docs/data-contract.json`](docs/data-contract.json) ·
 > [`docs/wireframe.md`](docs/wireframe.md) · reglas en [`CLAUDE.md`](CLAUDE.md) y [`.cursorrules`](.cursorrules).
 
-**Estado:** Fases 0–12 completadas; Fase 13 en curso · Leyenda: `[ ]` pendiente · `[x]` hecha.
+**Estado:** ✅ todas las tareas completadas · Leyenda: `[ ]` pendiente · `[x]` hecha.
 Los números de tarea se conservan porque los commits los citan.
 
 ---
@@ -228,7 +228,7 @@ localStorage.setItem('finanzapp.state', JSON.stringify(/* pegar aquí el conteni
 - [x] **T-56 Tarjetas del Resumen e íconos de título.** Línea de color e ícono en Ingresos, Gastos, Balance y Tasa de ahorro; `CARD_ICONS` en los títulos de tarjeta.
 - [x] **T-57 Color por categoría.** `catColor` en `ui.js` (D41); punto de color en movimientos, presupuestos y Categorías; barras de «¿En qué se va la plata?» con el color de la categoría.
   *Aceptación:* las 7 categorías de gasto predeterminadas tienen colores distintos; ningún color de categoría es verde, ámbar ni rojo.
-- [ ] **T-58 Efectos.** Elevación al pasar el mouse, barras con degradado, encabezados de día y estados vacíos.
+- [x] **T-58 Efectos.** Elevación al pasar el mouse, barras con degradado, encabezados de día y estados vacíos.
   *Aceptación:* con `prefers-reduced-motion: reduce` no hay transiciones; 154/154 pruebas.
 
 ## Pruebas de regresión (correr después de cada tarea, cuando ya apliquen)
