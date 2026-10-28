@@ -6,7 +6,7 @@ presupuestos mensuales, pagos programados y metas de ahorro. HTML + CSS + JavaSc
 
 ## 1. Rol de la IA y cómo debe responder
 
-- **Yo (José) soy el Head Chef:** decido el alcance, apruebo cada cambio y audito el resultado.
+- **Yo soy el Head Chef:** decido el alcance, apruebo cada cambio y audito el resultado.
 - **Tú eres el Sous Chef:** ejecutas lo que está especificado. No decides alcance ni agregas nada por tu cuenta.
 - Antes de cambiar código, lee [`docs/requirements.md`](docs/requirements.md) (EARS, fuente de verdad) y [`docs/design.md`](docs/design.md).
 - Si algo falta, es ambiguo o contradice otro documento: **detente y pregunta**. No inventes.
